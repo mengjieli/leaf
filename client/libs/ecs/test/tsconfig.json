@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "outFile": "test.js",
+    "experimentalDecorators": true,
+    "downlevelIteration": true,
+    "lib": [
+      "es5",
+      "dom",
+      "es2015"
+    ],
+    "sourceMap": true,
+    "types": [],
+    "watch": true
+  },
+  "include": [
+    "./../../test/test.d.ts",
+    "./../ecs.d.ts",
+    "src",
+  ]
+}

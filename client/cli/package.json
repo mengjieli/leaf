@@ -1,0 +1,24 @@
+{
+  "name": "Eliminate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "tween": "webpack --watch --config build.tween.js",
+    "dev": "webpack --watch --config build.web.js",
+    "dev-wx": "webpack --watch --config build.wxgame.js",
+    "build": "webpack --config build.web.js --watch",
+    "engine": "webpack --config build.engine.js --watch",
+    "build-wx": "sh copy-build-js.sh && webpack --config build.wxgame.js && node tools/bin/main.js",
+    "fast-wx": "sh copy-min-js.sh && webpack --config build.wxgame.js && node tools/bin/main.js",
+    "publish-wx": "sh copy-min-js.sh && cd ../Eliminate && egret publish --target wxgame && cd - && webpack --config publish.wxgame.js && node tools/bin/main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-loader": "^5.3.3",
+    "typescript": "^3.3.4000",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
+  }
+}

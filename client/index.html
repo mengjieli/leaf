@@ -1,0 +1,92 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Egret</title>
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="full-screen" content="true" />
+    <meta name="screen-orientation" content="portrait" />
+    <meta name="x5-fullscreen" content="true" />
+    <meta name="360-fullscreen" content="true" />
+    <style>
+        html,
+        body {
+            -ms-touch-action: none;
+            background: #888888;
+            padding: 0;
+            border: 0;
+            margin: 0;
+            height: 100%;
+        }
+        .div2{
+            background-color: yellow;
+            position: absolute;
+            left: 0px;
+            top: 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id='leaf'></canvas>
+    <script>
+        var loadScript = function (list, callback) {
+            var loaded = 0;
+            var loadNext = function () {
+                loadSingleScript(list[loaded], function () {
+                    loaded++;
+                    if (loaded >= list.length) {
+                        callback();
+                    }
+                    else {
+                        loadNext();
+                    }
+                })
+            };
+            loadNext();
+        };
+
+        var loadSingleScript = function (src, callback) {
+            var s = document.createElement('script');
+            s.async = false;
+            s.src = src;
+            s.addEventListener('load', function () {
+                s.parentNode.removeChild(s);
+                s.removeEventListener('load', arguments.callee, false);
+                callback();
+            }, false);
+            document.body.appendChild(s);
+        };
+
+        let list = [
+            "libs/ecs/ecs.js",
+            "libs/leaf/leaf.js",
+            "dist/main.js",
+        ];
+
+        window["IS_WEB"] = true;
+
+        var canvas = document.getElementById('leaf');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        loadScript(list, function () {
+            new Main();
+        });
+    </script>
+    <script src="http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.2.0"></script>
+    <script>
+        // init vConsole
+        if (navigator.platform.toLocaleLowerCase().indexOf("ipad") != -1 ||
+            navigator.platform.toLocaleLowerCase().indexOf("iphone") != -1 ||
+            navigator.platform.toLocaleLowerCase().indexOf("android") != -1 ||
+            navigator.platform.toLocaleLowerCase().indexOf("linux") != -1) {
+            var vConsole = new VConsole();
+        }
+    </script>
+</body>
+
+</html>
