@@ -34,7 +34,7 @@ namespace ecs {
 
         readonly isAlive: boolean = true;
 
-        readonly transform: Transform = new Transform();
+        readonly transform: Transform = new Transform(this);
 
         tag: string;
         name: string;
@@ -443,7 +443,7 @@ namespace ecs {
             this.removeAll();
             ObjectPools.entities.push(this);
             (this.isAlive as any) = false;
-            this.transform.identity();
+            this.transform.reset();
             Entity.aliveCount--;
         }
 

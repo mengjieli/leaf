@@ -158,6 +158,31 @@ namespace ecs {
             this.ty = ty;
         }
 
+        reconcat(other) {
+            var _this = other;
+            other = this;
+            var a = _this.a * other.a;
+            var b = 0.0;
+            var c = 0.0;
+            var d = _this.d * other.d;
+            var tx = _this.tx * other.a + other.tx;
+            var ty = _this.ty * other.d + other.ty;
+            if (_this.b !== 0.0 || _this.c !== 0.0 || other.b !== 0.0 || other.c !== 0.0) {
+                a += _this.b * other.c;
+                d += _this.c * other.b;
+                b += _this.a * other.b + _this.b * other.d;
+                c += _this.c * other.a + _this.d * other.c;
+                tx += _this.ty * other.c;
+                ty += _this.tx * other.b;
+            }
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            this.d = d;
+            this.tx = tx;
+            this.ty = ty;
+        }
+
         get deformation() {
             if (this.a != 1 || this.b != 0 || this.c != 0 || this.d != 1)
                 return true;

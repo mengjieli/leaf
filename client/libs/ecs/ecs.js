@@ -874,7 +874,7 @@ var ecs;
             //     this._world = val;
             // }
             _this.isAlive = true;
-            _this.transform = new ecs.Transform();
+            _this.transform = new ecs.Transform(_this);
             _this.type = 0;
             _this.parentChangeCount = 0;
             return _this;
@@ -1301,7 +1301,7 @@ var ecs;
             this.removeAll();
             ecs.ObjectPools.entities.push(this);
             this.isAlive = false;
-            this.transform.identity();
+            this.transform.reset();
             Entity.aliveCount--;
         };
         Object.defineProperty(Entity.prototype, "parent", {
@@ -1602,6 +1602,30 @@ var ecs;
                 c += this.c * other.a + this.d * other.c;
                 tx += this.ty * other.c;
                 ty += this.tx * other.b;
+            }
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            this.d = d;
+            this.tx = tx;
+            this.ty = ty;
+        };
+        Matrix.prototype.reconcat = function (other) {
+            var _this = other;
+            other = this;
+            var a = _this.a * other.a;
+            var b = 0.0;
+            var c = 0.0;
+            var d = _this.d * other.d;
+            var tx = _this.tx * other.a + other.tx;
+            var ty = _this.ty * other.d + other.ty;
+            if (_this.b !== 0.0 || _this.c !== 0.0 || other.b !== 0.0 || other.c !== 0.0) {
+                a += _this.b * other.c;
+                d += _this.c * other.b;
+                b += _this.a * other.b + _this.b * other.d;
+                c += _this.c * other.a + _this.d * other.c;
+                tx += _this.ty * other.c;
+                ty += _this.tx * other.b;
             }
             this.a = a;
             this.b = b;
@@ -1971,15 +1995,104 @@ var ecs;
 })(ecs || (ecs = {}));
 var ecs;
 (function (ecs) {
-    var Transform = /** @class */ (function (_super) {
-        __extends(Transform, _super);
-        function Transform() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this._worldMatrix = new ecs.Matrix();
-            _this._scaleX = 1;
-            _this._scaleY = 1;
-            return _this;
+    var Transform = /** @class */ (function () {
+        function Transform(entity) {
+            /**
+             * @internal
+             */
+            this._x = 0;
+            /**
+             * @internal
+             */
+            this._y = 0;
+            /**
+             * @internal
+             */
+            this._scaleX = 1;
+            /**
+             * @internal
+             */
+            this._scaleY = 1;
+            /**
+             * @internal
+             */
+            this._angle = 0;
+            /**
+             * @internal
+             */
+            this._local = new ecs.Matrix();
+            /**
+             * @internal
+             */
+            this.dirty = false;
+            /**
+             * @internal
+             */
+            this._worldMatrix = new ecs.Matrix();
+            this._entity = entity;
         }
+        Object.defineProperty(Transform.prototype, "entity", {
+            get: function () {
+                return this._entity;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Transform.prototype, "x", {
+            get: function () { return this._x; },
+            set: function (val) {
+                if (this._x === val)
+                    return;
+                this.dirty = true;
+                this._x = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Transform.prototype, "y", {
+            get: function () { return this._y; },
+            set: function (val) {
+                if (this._y === val)
+                    return;
+                this.dirty = true;
+                this._y = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Transform.prototype, "scaleX", {
+            get: function () { return this._scaleX; },
+            set: function (val) {
+                if (this._scaleX === val)
+                    return;
+                this.dirty = true;
+                this._scaleX = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Transform.prototype, "scaleY", {
+            get: function () { return this._scaleY; },
+            set: function (val) {
+                if (this._scaleY === val)
+                    return;
+                this.dirty = true;
+                this._scaleY = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Transform.prototype, "angle", {
+            get: function () { return this._angle; },
+            set: function (val) {
+                if (this._angle === val)
+                    return;
+                this.dirty = true;
+                this._angle = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(Transform.prototype, "parent", {
             get: function () {
                 return this.$parent;
@@ -1987,12 +2100,31 @@ var ecs;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Transform.prototype, "local", {
+            get: function () {
+                if (this.dirty) {
+                    this.dirty = false;
+                    this._local.identity();
+                    if (this.angle) {
+                        this._local.rotate(this.angle);
+                    }
+                    if (this.scaleX != 1 || this.scaleY != 1) {
+                        this._local.scale(this.scaleX, this.scaleY);
+                    }
+                    this._local.translate(this.x, this.y);
+                }
+                return this._local;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(Transform.prototype, "worldMatrix", {
             get: function () {
                 var dis = this.$parent;
-                this._worldMatrix.setTo(this.a, this.b, this.c, this.d, this.tx, this.ty);
+                var local = this.local;
+                this._worldMatrix.setTo(local.a, local.b, local.c, local.d, local.tx, local.ty);
                 while (dis) {
-                    this._worldMatrix.concat(dis);
+                    this._worldMatrix.concat(dis.local);
                     dis = dis.$parent;
                 }
                 return this._worldMatrix;
@@ -2000,8 +2132,12 @@ var ecs;
             enumerable: true,
             configurable: true
         });
+        Transform.prototype.reset = function () {
+            this.local.identity();
+            this.dirty = false;
+        };
         return Transform;
-    }(ecs.Matrix));
+    }());
     ecs.Transform = Transform;
 })(ecs || (ecs = {}));
 var ecs;

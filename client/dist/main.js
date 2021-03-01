@@ -200,55 +200,54 @@ var Main = /** @class */ (function () {
         var world = leaf.init();
         var scene = new ecs.Scene();
         world.scene = scene;
-        for (var i = 0; i < 1; i++) {
-            var t_1 = ts[~~(Math.random() * ts.length)];
-            ;
-            var entity_1 = ecs.Entity.create();
-            entity_1.parent = scene;
-            entity_1.addComponent(leaf.Bitmap).texture = t_1;
-            entity_1 = ecs.Entity.create();
-            entity_1.parent = scene;
-            entity_1.addComponent(leaf.Bitmap).texture = t_1;
-            entity_1 = ecs.Entity.create();
-            entity_1.parent = scene;
-            entity_1.addComponent(leaf.Bitmap).texture = t_1;
-        }
+        // for (let i = 0; i < 1; i++) {
+        //     let t = ts[~~(Math.random() * ts.length)];;
+        //     let entity = ecs.Entity.create();
+        //     entity.parent = scene;
+        //     entity.addComponent(leaf.Bitmap).texture = t;
+        //     entity = ecs.Entity.create();
+        //     entity.parent = scene;
+        //     entity.addComponent(leaf.Bitmap).texture = t;
+        //     entity = ecs.Entity.create();
+        //     entity.parent = scene;
+        //     entity.addComponent(leaf.Bitmap).texture = t;
+        // }
         // scene.addComponent(Move);
         var t = ts[~~(Math.random() * ts.length)];
         ;
+        var p = ecs.Entity.create();
+        p.parent = scene;
+        // p.transform.scaleX = 2;
+        p.transform.angle = Math.PI / 2;
+        // p.transform.x = 100;
+        // p.transform.y = 100;
         var entity = ecs.Entity.create();
         // entity.parent = scene;
         // entity.addComponent(leaf.Bitmap).texture = ts[2];
         // entity = ecs.Entity.create();
-        entity.parent = scene;
+        // entity.parent = p;
         var lb = entity.addComponent(leaf.Label);
         // lb.text = "你在想啥？!~";
         window["lb"] = lb;
         lb.fontColor = 0xff0000;
-        entity.transform.tx = 0;
-        entity.transform.ty = 0;
+        entity.transform.x = 100;
+        entity.transform.y = 0;
         leaf.GLCore.scale = leaf.GLCore.width / 640;
-        scene.transform.scale(leaf.GLCore.width / 640, leaf.GLCore.width / 640);
-        window["st"] = function () {
-            // for (let k in leaf.TextAtlas["atlases"]) {
-            //     let ta: leaf.TextAtlas = leaf.TextAtlas["atlases"][k];
-            //     for (let c in ta['chars']) {
-            //     }
-            // }
-            var tt = leaf.TextAtlas["atlases"]["sans-serif1700"].chars["d"];
-            var entity = ecs.Entity.create();
-            entity.parent = scene;
-            entity.addComponent(leaf.Bitmap).texture = tt.texture;
-        };
-        scene.transform.rotate(-0.5);
+        scene.transform.scaleX = leaf.GLCore.width / 640;
+        scene.transform.scaleY = leaf.GLCore.width / 640;
+        var bm = ecs.Entity.create().addComponent(leaf.Bitmap);
+        bm.entity.parent = p;
+        bm.texture = ts[0];
+        bm.entity.transform.x = 100;
+        var bm2 = ecs.Entity.create().addComponent(leaf.Bitmap);
+        // bm2.entity.parent = scene;
+        bm2.texture = ts[1];
+        // bm2.entity.transform.x = 200;
+        // bm2.entity.transform.y = 30;
+        // lb.entity.transform.angle = -Math.PI / 4;
         setInterval(function () {
             lb.text = "fps:" + leaf.runInfo.fps + "\nt:" + leaf.runInfo.fpsTime + "\ndc:" + leaf.runInfo.fpsDrawCall + "\nnum:" + leaf.runInfo.fpsDrawCount;
         }, 1000);
-        // scene.addComponent(leaf.Bitmap).texture = t1;
-        // setInterval(() => {
-        //     scene.transform.identity();
-        //     scene.transform.translate(300 * Math.random(), 300 * Math.random());
-        // })
     };
     return Main;
 }());
@@ -261,8 +260,8 @@ var Move = /** @class */ (function (_super) {
     Move.prototype.update = function () {
         for (var i = 0; i < this.entity.children.length - 1; i++) {
             var child = this.entity.children[i];
-            child.transform.tx = 300 * Math.random();
-            child.transform.ty = 300 * Math.random();
+            child.transform.x = 300 * Math.random();
+            child.transform.y = 300 * Math.random();
         }
     };
     return Move;

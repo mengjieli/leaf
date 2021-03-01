@@ -225,6 +225,7 @@ declare namespace ecs {
         $updateRST(rotation: any, scaleX: any, scaleY: any, tx: any, ty: any): void;
         $transformRectangle(rect: any): void;
         concat(other: any): void;
+        reconcat(other: any): void;
         readonly deformation: boolean;
         save(): void;
         restore(): void;
@@ -359,13 +360,18 @@ declare namespace ecs {
     function syncSystem(mode?: EMSyncSystemMode): <T extends new () => System<any>>(c: T) => T;
 }
 declare namespace ecs {
-    class Transform extends Matrix {
-        private _worldMatrix;
-        $parent: Transform;
-        private _scaleX;
-        private _scaleY;
+    class Transform {
+        constructor(entity: Entity);
+        readonly entity: Entity;
+        x: number;
+        y: number;
+        scaleX: number;
+        scaleY: number;
+        angle: number;
         readonly parent: Transform;
+        readonly local: Matrix;
         readonly worldMatrix: Matrix;
+        reset(): void;
     }
 }
 declare namespace ecs {

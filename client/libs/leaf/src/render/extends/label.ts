@@ -84,7 +84,7 @@ namespace leaf {
             let x = 0;
             let y = 0;
             let m = ecs.Matrix.$matrix;
-            let mt = this.entity.transform.worldMatrix;
+            let w = this.entity.transform.worldMatrix;
             let scale = Label.useScaleFont ? GLCore.scale : 1;
             let rScale = 1 / scale;
             let toSize = Math.ceil(this._fontSize * scale);
@@ -103,13 +103,13 @@ namespace leaf {
                 m.identity();
                 m.scale(rScale, rScale);
                 m.translate(x, y);
-                m.concat(mt);
+                m.concat(w);
                 (this.shader as BitmapShaderTask).addTask(txt.texture, m, this.alpha, this.blendMode);
                 x += txt.width * rScale;
             }
         }
 
-        static useScaleFont = true;
+        static useScaleFont = false;
     }
 
 }
