@@ -102,14 +102,24 @@ namespace ecs {
         get local(): Matrix {
             if (this.dirty) {
                 this.dirty = false;
+                let local = this._local
                 this._local.identity();
-                if (this.angle) {
-                    this._local.rotate(this.angle);
+                let sx = this._scaleX;
+                let sy = this._scaleY;
+                if (sx != 1 || sy != 1) {
+                    local.a *= sx;
+                    local.d *= sy;
                 }
-                if (this.scaleX != 1 || this.scaleY != 1) {
-                    this._local.scale(this.scaleX, this.scaleY);
+                if (this._angle) {
+                    var sin = Math.sin(this._angle);
+                    var cos = Math.cos(this._angle);
+                    local.a = cos * sx;
+                    local.b = sin * sx;
+                    local.c = -sin * sy;
+                    local.d = cos * sy;
                 }
-                this._local.translate(this.x, this.y);
+                local.tx = this._x;
+                local.ty = this._y;
             }
             return this._local;
         }

@@ -55,21 +55,22 @@ export class Main {
         let t = ts[~~(Math.random() * ts.length)];;
         let p = ecs.Entity.create();
         p.parent = scene;
-        // p.transform.scaleX = 2;
-        p.transform.angle = Math.PI / 2;
-        // p.transform.x = 100;
-        // p.transform.y = 100;
+        p.transform.scaleX = 2;
+        p.transform.angle = Math.PI / 4;
+        p.transform.x = 100;
+        p.transform.y = 100;
         let entity = ecs.Entity.create();
         // entity.parent = scene;
         // entity.addComponent(leaf.Bitmap).texture = ts[2];
         // entity = ecs.Entity.create();
-        // entity.parent = p;
+        entity.parent = p;
         let lb = entity.addComponent(leaf.Label);
         // lb.text = "你在想啥？!~";
         window["lb"] = lb;
         lb.fontColor = 0xff0000;
-        entity.transform.x = 100;
-        entity.transform.y = 0;
+        // entity.transform.angle = Math.PI / 4;
+        // entity.transform.x = 100;
+        // entity.transform.y = 0;
 
         leaf.GLCore.scale = leaf.GLCore.width / 640;
 
@@ -79,7 +80,9 @@ export class Main {
         let bm = ecs.Entity.create().addComponent(leaf.Bitmap);
         bm.entity.parent = p;
         bm.texture = ts[0];
-        bm.entity.transform.x = 100;
+        // bm.entity.transform.scaleX = 2;
+        // bm.entity.transform.angle = Math.PI / 4;
+        // bm.entity.transform.x = 100;
 
 
 

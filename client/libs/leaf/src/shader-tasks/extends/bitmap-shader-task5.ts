@@ -187,7 +187,7 @@ namespace leaf {
             var width = texture.sourceWidth;
             var height = texture.sourceHeight;
 
-            positionData[index] = matrix.b * height + matrix.tx;
+            positionData[index] = matrix.c * height + matrix.tx;
             positionData[1 + index] = matrix.d * height + matrix.ty;
             positionData[2 + index] = texture.startX;
             positionData[3 + index] = texture.endY;
@@ -201,15 +201,15 @@ namespace leaf {
             positionData[10 + index] = alpha;
             positionData[11 + index] = txtureIndex;
 
-            positionData[12 + index] = matrix.a * width + matrix.b * height + matrix.tx;
-            positionData[13 + index] = matrix.c * width + matrix.d * height + matrix.ty;
+            positionData[12 + index] = matrix.a * width + matrix.c * height + matrix.tx;
+            positionData[13 + index] = matrix.b * width + matrix.d * height + matrix.ty;
             positionData[14 + index] = texture.endX;
             positionData[15 + index] = texture.endY;
             positionData[16 + index] = alpha;
             positionData[17 + index] = txtureIndex;
 
             positionData[18 + index] = matrix.a * width + matrix.tx;
-            positionData[19 + index] = matrix.c * width + matrix.ty;
+            positionData[19 + index] = matrix.b * width + matrix.ty;
             positionData[20 + index] = texture.endX;
             positionData[21 + index] = texture.startY;
             positionData[22 + index] = alpha;
