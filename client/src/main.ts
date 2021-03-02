@@ -28,12 +28,15 @@ export class Main {
         //     console.error(resources);
         // })
         await leaf.Res.loadResources();
-        let res = leaf.Res.getRes("bg_png");
+        let res = leaf.Res.getRes<leaf.Texture>("button_back");
         console.error(res)
         res.addCount();
         res.load().then(() => {
             // console.error(res.data)
-            leaf
+            let world = leaf.init();
+            let scene = new ecs.Scene();
+            world.scene = scene;
+            scene.addComponent(leaf.Bitmap).texture = res.data;
         });
     }
 

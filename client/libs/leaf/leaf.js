@@ -887,7 +887,7 @@ var leaf;
                             txt.src = '';
                             return;
                         }
-                        res.data = new leaf.Texture(leaf.GLCore.createTexture(txt), txt.width, txt.hasLoaded, 0, 0, txt.width, txt.height);
+                        res.data = new leaf.Texture(leaf.GLCore.createTexture(txt), txt.width, txt.height, 0, 0, txt.width, txt.height);
                         res.resource = txt;
                         res.hasLoaded = true;
                         leaf.debug && _this.weakSet.add(res.data);

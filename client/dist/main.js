@@ -182,12 +182,15 @@ var Main = /** @class */ (function () {
                         //     console.error(resources);
                         // })
                         _a.sent();
-                        res = leaf.Res.getRes("bg_png");
+                        res = leaf.Res.getRes("button_back");
                         console.error(res);
                         res.addCount();
                         res.load().then(function () {
                             // console.error(res.data)
-                            leaf;
+                            var world = leaf.init();
+                            var scene = new ecs.Scene();
+                            world.scene = scene;
+                            scene.addComponent(leaf.Bitmap).texture = res.data;
                         });
                         return [2 /*return*/];
                 }

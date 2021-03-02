@@ -1,6 +1,53 @@
 {
   "files": [
     {
+      "name": "common_json",
+      "path": "common.json",
+      "type": 2,
+      "frames": [
+        "black",
+        "button_achieve",
+        "button_back",
+        "button_back1",
+        "button_icon1",
+        "button_icon2",
+        "button_plus",
+        "button_ranking",
+        "button_setting",
+        "button_tab1",
+        "button_tab2",
+        "button_yellow",
+        "common_img1",
+        "common_img2",
+        "common_img3",
+        "common_img4",
+        "common_img5",
+        "icon_track1",
+        "icon_track1_00",
+        "icon_track1_01",
+        "icon_track1_02",
+        "icon_track1_03",
+        "icon_track1_04",
+        "icon_track1_05",
+        "icon_track2",
+        "level_button0",
+        "level_button1",
+        "level_button2",
+        "level_star",
+        "levelui_button1",
+        "levelui_button2",
+        "levelui_button3",
+        "levelui_button4",
+        "levelui_button5",
+        "star_tips"
+      ]
+    },
+    {
+      "name": "default_res_json",
+      "path": "default.res.json",
+      "type": 5
+    },
+    {
       "name": "1024x1024_1_png",
       "path": "1024x1024_1.png",
       "type": 1

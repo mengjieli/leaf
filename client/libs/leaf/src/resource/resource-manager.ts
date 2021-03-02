@@ -218,7 +218,7 @@ namespace leaf {
               txt.src = '';
               return;
             }
-            res.data = new Texture(GLCore.createTexture(txt), txt.width, txt.hasLoaded, 0, 0, txt.width, txt.height);
+            res.data = new Texture(GLCore.createTexture(txt), txt.width, txt.height, 0, 0, txt.width, txt.height);
             res.resource = txt;
             res.hasLoaded = true;
             debug && this.weakSet.add(res.data);
