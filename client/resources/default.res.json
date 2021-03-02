@@ -1,0 +1,119 @@
+{
+  "files": [
+    {
+      "name": "1024x1024_1_png",
+      "path": "1024x1024_1.png",
+      "type": 1
+    },
+    {
+      "name": "1024x1024_2_png",
+      "path": "1024x1024_2.png",
+      "type": 1
+    },
+    {
+      "name": "128x128_1_png",
+      "path": "128x128_1.png",
+      "type": 1
+    },
+    {
+      "name": "128x128_2_png",
+      "path": "128x128_2.png",
+      "type": 1
+    },
+    {
+      "name": "256x256_1_png",
+      "path": "256x256_1.png",
+      "type": 1
+    },
+    {
+      "name": "256x256_2_png",
+      "path": "256x256_2.png",
+      "type": 1
+    },
+    {
+      "name": "512x512_1_png",
+      "path": "512x512_1.png",
+      "type": 1
+    },
+    {
+      "name": "512x512_2_png",
+      "path": "512x512_2.png",
+      "type": 1
+    },
+    {
+      "name": "64x64_1_png",
+      "path": "64x64_1.png",
+      "type": 1
+    },
+    {
+      "name": "64x64_2_png",
+      "path": "64x64_2.png",
+      "type": 1
+    },
+    {
+      "name": "DT2601_png",
+      "path": "DT2601.png",
+      "type": 1
+    },
+    {
+      "name": "bg_png",
+      "path": "bg.png",
+      "type": 1
+    },
+    {
+      "name": "bg副本_png",
+      "path": "bg副本.png",
+      "type": 1
+    },
+    {
+      "name": "ctbg_jpg",
+      "path": "ctbg.jpg",
+      "type": 1
+    },
+    {
+      "name": "flower_png",
+      "path": "flower.png",
+      "type": 1
+    },
+    {
+      "name": "hit_jpg",
+      "path": "hit.jpg",
+      "type": 1
+    },
+    {
+      "name": "house_png",
+      "path": "house.png",
+      "type": 1
+    },
+    {
+      "name": "icon_png",
+      "path": "icon.png",
+      "type": 1
+    },
+    {
+      "name": "m218_png",
+      "path": "m218.png",
+      "type": 1
+    },
+    {
+      "name": "mm_jpg",
+      "path": "mm.jpg",
+      "type": 1
+    },
+    {
+      "name": "roler_png",
+      "path": "roler.png",
+      "type": 1
+    },
+    {
+      "name": "tool_png",
+      "path": "tool.png",
+      "type": 1
+    },
+    {
+      "name": "tool2_png",
+      "path": "tool2.png",
+      "type": 1
+    }
+  ]
+}

@@ -21,8 +21,44 @@ var __values = (this && this.__values) || function (o) {
         }
     };
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 var leaf;
 (function (leaf) {
+    leaf.debug = false;
     var world;
     leaf.runInfo = {
         frame: 0,
@@ -400,6 +436,700 @@ var leaf;
         return Label;
     }(leaf.Render));
     leaf.Label = Label;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var Loader = /** @class */ (function () {
+        function Loader() {
+            this.resources = {};
+        }
+        Loader.prototype.add = function (name, url, itemType) {
+            var r = this.resources[name] = new LoaderResource();
+            r.name = name;
+            r.url = url;
+            r.itemType = itemType;
+            if (!this.firstName) {
+                this.firstName = name;
+            }
+            else {
+                this.resources[this.lastName].next = r.name;
+            }
+            this.lastName = name;
+            return this;
+        };
+        Loader.prototype.load = function (onComplete) {
+            if (this.curResource)
+                return;
+            this.onComplete = onComplete;
+            this.curResource = this.firstName;
+            this.loadCurrent();
+        };
+        Loader.prototype.loadCurrent = function () {
+            var r = this.resources[this.curResource];
+            r.load();
+            r.onComplete.on(this.loadCurrentComplete);
+        };
+        Loader.prototype.loadCurrentComplete = function () {
+            var r = this.resources[this.curResource];
+            var next = this.resources[r.next];
+            if (next) {
+                this.curResource = next.name;
+                this.loadCurrent();
+            }
+            else {
+                this.onComplete && this.onComplete(this.resources);
+            }
+        };
+        return Loader;
+    }());
+    leaf.Loader = Loader;
+    var LoaderResource = /** @class */ (function () {
+        function LoaderResource() {
+            this.onComplete = new ecs.Broadcast();
+        }
+        LoaderResource.prototype.load = function () {
+            if (this.itemType.loadType === LoaderType.TEXT) {
+            }
+        };
+        return LoaderResource;
+    }());
+    leaf.LoaderResource = LoaderResource;
+    var LoaderType;
+    (function (LoaderType) {
+        LoaderType[LoaderType["TEXT"] = 1] = "TEXT";
+        LoaderType[LoaderType["IMAGE"] = 2] = "IMAGE";
+    })(LoaderType = leaf.LoaderType || (leaf.LoaderType = {}));
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var Res = /** @class */ (function () {
+        function Res() {
+        }
+        Res.getRes = function (name) {
+            return this.resources[name];
+        };
+        Res.clearUnsedTextures = function () {
+            var e_2, _a, e_3, _b, e_4, _c, e_5, _d, e_6, _e;
+            var c = 0;
+            var list = [];
+            try {
+                for (var _f = __values(this.singleTexutres), _g = _f.next(); !_g.done; _g = _f.next()) {
+                    var txt = _g.value;
+                    if (txt.count !== 0) {
+                        c++;
+                        leaf.debug && list.push(txt.name);
+                        continue;
+                    }
+                    if (txt.resource)
+                        txt.resource.src = '';
+                    if (txt.data) {
+                        PIXI.BaseTexture.removeFromCache(txt.texture_id);
+                        PIXI.BaseTexture.removeFromCache(txt.texture_url);
+                        PIXI.Texture.removeFromCache(txt.texture_url);
+                        PIXI.Texture.removeFromCache(txt.texture_id);
+                        txt.data.destroy();
+                    }
+                    txt.data = null;
+                    txt.hasLoaded = false;
+                    txt.isLoading = false;
+                    leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
+                }
+            }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            finally {
+                try {
+                    if (_g && !_g.done && (_a = _f.return)) _a.call(_f);
+                }
+                finally { if (e_2) throw e_2.error; }
+            }
+            try {
+                for (var _h = __values(this.spriteSheets), _j = _h.next(); !_j.done; _j = _h.next()) {
+                    var txt = _j.value;
+                    if (txt.count !== 0) {
+                        c++;
+                        leaf.debug && list.push(txt.name);
+                        continue;
+                    }
+                    if (txt.resource)
+                        txt.resource.src = '';
+                    txt.resource = null;
+                    try {
+                        for (var _k = __values(txt.list), _l = _k.next(); !_l.done; _l = _k.next()) {
+                            var frame = _l.value;
+                            if (frame.data) {
+                                frame.data.destroy();
+                                frame.data = null;
+                            }
+                        }
+                    }
+                    catch (e_4_1) { e_4 = { error: e_4_1 }; }
+                    finally {
+                        try {
+                            if (_l && !_l.done && (_c = _k.return)) _c.call(_k);
+                        }
+                        finally { if (e_4) throw e_4.error; }
+                    }
+                    if (txt.data) {
+                        PIXI.BaseTexture.removeFromCache(txt.texture_url);
+                        PIXI.BaseTexture.removeFromCache(txt.texture_id);
+                        PIXI.Texture.removeFromCache(txt.texture_url);
+                        PIXI.Texture.removeFromCache(txt.texture_id);
+                        txt.data.destroy();
+                    }
+                    txt.data = null;
+                    txt.hasLoaded = false;
+                    txt.isLoading = false;
+                    leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
+                }
+            }
+            catch (e_3_1) { e_3 = { error: e_3_1 }; }
+            finally {
+                try {
+                    if (_j && !_j.done && (_b = _h.return)) _b.call(_h);
+                }
+                finally { if (e_3) throw e_3.error; }
+            }
+            try {
+                for (var _m = __values(this.texts), _o = _m.next(); !_o.done; _o = _m.next()) {
+                    var txt = _o.value;
+                    if (txt.count !== 0) {
+                        c++;
+                        leaf.debug && list.push(txt.name);
+                        continue;
+                    }
+                    txt.data = null;
+                    txt.hasLoaded = false;
+                    txt.isLoading = false;
+                    leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
+                }
+            }
+            catch (e_5_1) { e_5 = { error: e_5_1 }; }
+            finally {
+                try {
+                    if (_o && !_o.done && (_d = _m.return)) _d.call(_m);
+                }
+                finally { if (e_5) throw e_5.error; }
+            }
+            try {
+                for (var _p = __values(this.jsons), _q = _p.next(); !_q.done; _q = _p.next()) {
+                    var txt = _q.value;
+                    if (txt.count !== 0) {
+                        c++;
+                        leaf.debug && list.push(txt.name);
+                        continue;
+                    }
+                    txt.data = null;
+                    txt.hasLoaded = false;
+                    txt.isLoading = false;
+                    leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
+                }
+            }
+            catch (e_6_1) { e_6 = { error: e_6_1 }; }
+            finally {
+                try {
+                    if (_q && !_q.done && (_e = _p.return)) _e.call(_p);
+                }
+                finally { if (e_6) throw e_6.error; }
+            }
+            leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90\uFF0C\u8FD8\u5269 " + c + " \u4E2A\u8D44\u6E90: " + list);
+        };
+        Res.getAliveResources = function () {
+            var e_7, _a, e_8, _b, e_9, _c, e_10, _d;
+            var list = [];
+            try {
+                for (var _e = __values(this.singleTexutres), _f = _e.next(); !_f.done; _f = _e.next()) {
+                    var txt = _f.value;
+                    if (txt.hasLoaded) {
+                        leaf.debug && list.push(txt.name);
+                    }
+                }
+            }
+            catch (e_7_1) { e_7 = { error: e_7_1 }; }
+            finally {
+                try {
+                    if (_f && !_f.done && (_a = _e.return)) _a.call(_e);
+                }
+                finally { if (e_7) throw e_7.error; }
+            }
+            try {
+                for (var _g = __values(this.spriteSheets), _h = _g.next(); !_h.done; _h = _g.next()) {
+                    var txt = _h.value;
+                    if (txt.hasLoaded) {
+                        leaf.debug && list.push(txt.name);
+                    }
+                }
+            }
+            catch (e_8_1) { e_8 = { error: e_8_1 }; }
+            finally {
+                try {
+                    if (_h && !_h.done && (_b = _g.return)) _b.call(_g);
+                }
+                finally { if (e_8) throw e_8.error; }
+            }
+            try {
+                for (var _j = __values(this.texts), _k = _j.next(); !_k.done; _k = _j.next()) {
+                    var txt = _k.value;
+                    if (txt.hasLoaded) {
+                        leaf.debug && list.push(txt.name);
+                    }
+                }
+            }
+            catch (e_9_1) { e_9 = { error: e_9_1 }; }
+            finally {
+                try {
+                    if (_k && !_k.done && (_c = _j.return)) _c.call(_j);
+                }
+                finally { if (e_9) throw e_9.error; }
+            }
+            try {
+                for (var _l = __values(this.jsons), _m = _l.next(); !_m.done; _m = _l.next()) {
+                    var txt = _m.value;
+                    if (txt.hasLoaded) {
+                        leaf.debug && list.push(txt.name);
+                    }
+                }
+            }
+            catch (e_10_1) { e_10 = { error: e_10_1 }; }
+            finally {
+                try {
+                    if (_m && !_m.done && (_d = _l.return)) _d.call(_l);
+                }
+                finally { if (e_10) throw e_10.error; }
+            }
+            return list;
+        };
+        Res.addRes = function (type, name, url) {
+            if (type === EMResourceType.TEXTURE) {
+                var fileName = "texture_" + name;
+                var res = this.resources[name] = ecs.ObjectPools.createRecyableObject(Resource);
+                this.singleTexutres.push(res);
+                res.isLoading = false;
+                res.hasLoaded = false;
+                res.resource = null;
+                res.count = 0;
+                res.name = name;
+                res.url = url;
+                res.texture_url = url;
+                res.texture_id = fileName;
+                res.onLoadCompleteCalls = [];
+                res.type = EMResourceType.TEXTURE;
+                return res;
+            }
+            if (type === EMResourceType.SPRITE_SHEET) {
+                var fileName = "spriteSheet_" + name;
+                var res = this.resources[name] = ecs.ObjectPools.createRecyableObject(SpriteSheetResource);
+                res.onLoadCompleteCalls = [];
+                res.isLoading = false;
+                res.hasLoaded = false;
+                res.resource = null;
+                res.count = 0;
+                res.list = [];
+                res.name = name;
+                res.url = url;
+                this.spriteSheets.push(res);
+                res.type = EMResourceType.SPRITE_SHEET;
+                res.texture_id = fileName;
+                return res;
+            }
+            if (type === EMResourceType.SPRITE_SHEET_FRAME) {
+                var res = this.resources[url];
+                if (!res) {
+                    console.error('没有找到对应的 SpriteSheet');
+                    return;
+                }
+                var spriteSheetFrame = ecs.ObjectPools.createRecyableObject(SpriteSheetFrameResource);
+                spriteSheetFrame.type = EMResourceType.SPRITE_SHEET_FRAME;
+                spriteSheetFrame.onLoadCompleteCalls = [];
+                spriteSheetFrame.spriteSheet = res;
+                spriteSheetFrame.name = name;
+                spriteSheetFrame.isLoading = false;
+                spriteSheetFrame.hasLoaded = false;
+                this.resources[name] = spriteSheetFrame;
+                res.list.push(spriteSheetFrame);
+                return res;
+            }
+            if (type === EMResourceType.TEXT) {
+                var res = this.resources[name] = ecs.ObjectPools.createRecyableObject(Resource);
+                res.isLoading = false;
+                res.hasLoaded = false;
+                res.resource = null;
+                res.count = 0;
+                res.name = name;
+                res.url = url;
+                res.type = EMResourceType.TEXT;
+                this.texts.push(res);
+                res.onLoadCompleteCalls = [];
+                return res;
+            }
+            if (type === EMResourceType.JSON) {
+                var res = this.resources[name] = ecs.ObjectPools.createRecyableObject(Resource);
+                res.isLoading = false;
+                res.hasLoaded = false;
+                res.resource = null;
+                res.count = 0;
+                res.name = name;
+                res.url = url;
+                res.onLoadCompleteCalls = [];
+                res.type = EMResourceType.JSON;
+                this.jsons.push(res);
+                return res;
+            }
+        };
+        Res.loadTexture = function (name, url) {
+            var _this = this;
+            if (!hasStart)
+                startClearResource();
+            var res = this.resources[name];
+            if (res && res.hasLoaded)
+                return this.resources[name];
+            var fileName = "texture_" + name;
+            if (!res) {
+                res = this.addRes(EMResourceType.TEXTURE, name, url);
+            }
+            return new Promise(function (resolve) {
+                res.onLoadCompleteCalls.push(resolve);
+                if (!res.isLoading) {
+                    res.isLoading = true;
+                    _this.loading++;
+                    (ecs.ObjectPools.createRecyableObject(leaf.Loader)).add(fileName, url, {
+                        loadType: 2
+                    }).load(function (loader, resources) {
+                        _this.loading--;
+                        var txt = resources[fileName].data;
+                        leaf.debug && _this.weakSet.add(txt);
+                        if (!_this.loading) {
+                            leaf.debug && _this.weakSet.add(loader.resources);
+                            loader.resources = {};
+                        }
+                        ecs.ObjectPools.releaseRecyableObject(loader);
+                        if (!res.isLoading || res.data) {
+                            txt.src = '';
+                            return;
+                        }
+                        res.data = PIXI.Texture.from(txt);
+                        res.resource = txt;
+                        res.hasLoaded = true;
+                        leaf.debug && _this.weakSet.add(res.data);
+                        leaf.debug && console.log("[Res] \u52A0\u8F7D\u8D44\u6E90: " + res.name + "\uFF0C\u5F53\u524D\u8D44\u6E90\u4E2A\u6570: " + _this.getAliveResources().length + "\uFF0C\u8D44\u6E90\u5217\u8868: " + _this.getAliveResources());
+                        while (res.onLoadCompleteCalls.length) {
+                            res.onLoadCompleteCalls.pop()(res);
+                        }
+                    });
+                }
+            });
+        };
+        Res.loadJSON = function (name, url) {
+            var _this = this;
+            var res = this.resources[name];
+            if (!res) {
+                res = this.addRes(EMResourceType.JSON, name, url);
+            }
+            if (res.hasLoaded)
+                return res.data;
+            return new Promise(function (resolve) {
+                res.onLoadCompleteCalls.push(resolve);
+                if (res.isLoading)
+                    return;
+                var fileName = name;
+                (ecs.ObjectPools.createRecyableObject(leaf.Loader))
+                    .add(fileName, url, {
+                    loadType: 1,
+                    xhrType: 'text'
+                }).load(function (loader, resources) {
+                    leaf.debug && _this.weakSet.add(loader.resources);
+                    res.hasLoaded = true;
+                    res.isLoading = false;
+                    res.data = JSON.parse(resources[fileName].data);
+                    loader.resources = {};
+                    while (res.onLoadCompleteCalls.length) {
+                        res.onLoadCompleteCalls.shift()(res);
+                    }
+                    leaf.debug && _this.weakSet.add(res.data);
+                    leaf.debug && console.log("[Res] \u52A0\u8F7D\u8D44\u6E90: " + res.name + "\uFF0C\u5F53\u524D\u8D44\u6E90\u4E2A\u6570: " + _this.getAliveResources().length + "\uFF0C\u8D44\u6E90\u5217\u8868: " + _this.getAliveResources());
+                });
+            });
+        };
+        Res.loadText = function (name, url) {
+            var _this = this;
+            var res = this.resources[name];
+            if (!res) {
+                res = this.addRes(EMResourceType.TEXT, name, url);
+            }
+            if (res.hasLoaded)
+                return res.data;
+            return new Promise(function (resolve) {
+                res.onLoadCompleteCalls.push(resolve);
+                if (res.isLoading)
+                    return;
+                var fileName = name;
+                (ecs.ObjectPools.createRecyableObject(leaf.Loader))
+                    .add(fileName, url, {
+                    loadType: 1,
+                    xhrType: 'text'
+                }).load(function (loader, resources) {
+                    res.data = resources[fileName].data;
+                    res.hasLoaded = true;
+                    res.isLoading = false;
+                    leaf.debug && _this.weakSet.add(loader.resources);
+                    loader.resources = {};
+                    leaf.debug && _this.weakSet.add(res.data);
+                    leaf.debug && console.log("[Res] \u52A0\u8F7D\u8D44\u6E90: " + res.name + "\uFF0C\u5F53\u524D\u8D44\u6E90\u4E2A\u6570: " + _this.getAliveResources().length + "\uFF0C\u8D44\u6E90\u5217\u8868: " + _this.getAliveResources());
+                    while (res.onLoadCompleteCalls.length) {
+                        res.onLoadCompleteCalls.shift()(res);
+                    }
+                });
+            });
+        };
+        Res.loadResources = function (url, resourceRoot) {
+            if (url === void 0) { url = "default.res.json"; }
+            if (resourceRoot === void 0) { resourceRoot = "resources/"; }
+            return new Promise(function (resolve) {
+                url = resourceRoot + url;
+                var fileName = url.split("/")[url.split("/").length - 1];
+                (ecs.ObjectPools.createRecyableObject(leaf.Loader))
+                    .add(fileName, url, {
+                    loadType: 1,
+                    xhrType: 'text'
+                }).load(function (loader, resources) {
+                    var e_11, _a, e_12, _b;
+                    var cfg = JSON.parse(resources[fileName].data);
+                    loader.resources = {};
+                    ecs.ObjectPools.releaseRecyableObject(loader);
+                    try {
+                        for (var _c = __values(cfg.files), _d = _c.next(); !_d.done; _d = _c.next()) {
+                            var file = _d.value;
+                            if (file.type === EMResourceType.TEXTURE) {
+                                Res.addRes(EMResourceType.TEXTURE, file.name, resourceRoot + file.path);
+                            }
+                            else if (file.type === EMResourceType.SPRITE_SHEET) {
+                                Res.addRes(EMResourceType.SPRITE_SHEET, file.name, resourceRoot + file.path);
+                                try {
+                                    for (var _e = __values(file.frames), _f = _e.next(); !_f.done; _f = _e.next()) {
+                                        var frame = _f.value;
+                                        Res.addRes(EMResourceType.SPRITE_SHEET_FRAME, frame, file.name);
+                                    }
+                                }
+                                catch (e_12_1) { e_12 = { error: e_12_1 }; }
+                                finally {
+                                    try {
+                                        if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                                    }
+                                    finally { if (e_12) throw e_12.error; }
+                                }
+                            }
+                            else if (file.type === EMResourceType.TEXT) {
+                                Res.addRes(EMResourceType.TEXT, file.name, resourceRoot + file.path);
+                            }
+                            else if (file.type === EMResourceType.JSON) {
+                                Res.addRes(EMResourceType.JSON, file.name, resourceRoot + file.path);
+                            }
+                        }
+                    }
+                    catch (e_11_1) { e_11 = { error: e_11_1 }; }
+                    finally {
+                        try {
+                            if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                        }
+                        finally { if (e_11) throw e_11.error; }
+                    }
+                    resolve();
+                });
+            });
+        };
+        Res.loadSpriteSheet = function (name, url) {
+            var _this = this;
+            if (!hasStart)
+                startClearResource();
+            var res = this.resources[name];
+            if (res && res.hasLoaded)
+                return res;
+            var fileName = "spriteSheet_" + name;
+            if (!res) {
+                res = this.addRes(EMResourceType.SPRITE_SHEET, name, url);
+            }
+            var end = url.split("/")[url.split("/").length - 1];
+            return new Promise(function (resolve) {
+                res.onLoadCompleteCalls.push(resolve);
+                if (res.isLoading) {
+                    return;
+                }
+                res.isLoading = true;
+                var jsonName = name + "_json";
+                _this.loading++;
+                (ecs.ObjectPools.createRecyableObject(leaf.Loader)).add(jsonName, url, {
+                    loadType: 1,
+                    xhrType: 'text'
+                }).load(function (loader, resources) {
+                    var cfg = JSON.parse(resources[jsonName].data);
+                    if (!res.texture_url) {
+                        res.texture_url = url.slice(0, url.length - end.length) + cfg.file;
+                    }
+                    leaf.debug && _this.weakSet.add(loader.resources);
+                    loader.resources = {};
+                    ecs.ObjectPools.releaseRecyableObject(loader);
+                    (ecs.ObjectPools.createRecyableObject(leaf.Loader)).add(fileName, res.texture_url, {
+                        loadType: 2
+                    }).load(function (loader, resources) {
+                        leaf.debug && _this.weakSet.add(loader.resources);
+                        _this.loading--;
+                        var txt = resources[fileName].data;
+                        leaf.debug && _this.weakSet.add(txt);
+                        if (!_this.loading) {
+                            loader.resources = {};
+                        }
+                        ecs.ObjectPools.releaseRecyableObject(loader);
+                        if (!res.isLoading || res.data) {
+                            txt.src = '';
+                            return;
+                        }
+                        res.resource = txt;
+                        res.data = new PIXI.BaseTexture(txt);
+                        for (var k in cfg.frames) {
+                            var frame = cfg.frames[k];
+                            var spriteSheetFrame = void 0;
+                            if (!_this.resources[k]) {
+                                spriteSheetFrame = ecs.ObjectPools.createRecyableObject(SpriteSheetFrameResource);
+                                spriteSheetFrame.type = EMResourceType.SPRITE_SHEET_FRAME;
+                                spriteSheetFrame.spriteSheet = res;
+                                spriteSheetFrame.name = k;
+                                spriteSheetFrame.isLoading = false;
+                                spriteSheetFrame.hasLoaded = true;
+                                _this.resources[k] = spriteSheetFrame;
+                                res.list.push(spriteSheetFrame);
+                            }
+                            else {
+                                spriteSheetFrame = _this.resources[k];
+                            }
+                            spriteSheetFrame.data = new PIXI["Texture"](res.data, new PIXI.Rectangle(frame.x + frame.offX, frame.y + frame.offY, frame.w, frame.h));
+                            leaf.debug && _this.weakSet.add(spriteSheetFrame.data);
+                        }
+                        res.isLoading = false;
+                        res.hasLoaded = true;
+                        leaf.debug && _this.weakSet.add(res.data);
+                        leaf.debug && console.log("[Res] \u52A0\u8F7D\u8D44\u6E90: " + res.name + "\uFF0C\u5F53\u524D\u8D44\u6E90\u4E2A\u6570: " + _this.getAliveResources().length + "\uFF0C\u8D44\u6E90\u5217\u8868: " + _this.getAliveResources());
+                        while (res.onLoadCompleteCalls.length) {
+                            res.onLoadCompleteCalls.pop()(res);
+                        }
+                    });
+                });
+            });
+        };
+        Res.resources = {};
+        Res.singleTexutres = [];
+        Res.texts = [];
+        Res.jsons = [];
+        Res.spriteSheets = [];
+        Res.loading = 0;
+        Res.weakSet = new WeakSet();
+        return Res;
+    }());
+    leaf.Res = Res;
+    var hasStart = false;
+    var clearList = [];
+    function startClearResource() {
+        if (hasStart)
+            return;
+        hasStart = false;
+        var f = function () {
+            requestAnimationFrame(f);
+            while (clearList.length) {
+                clearList.pop().src = '';
+            }
+        };
+        requestAnimationFrame(f);
+    }
+    var EMResourceType;
+    (function (EMResourceType) {
+        EMResourceType[EMResourceType["TEXTURE"] = 1] = "TEXTURE";
+        EMResourceType[EMResourceType["SPRITE_SHEET"] = 2] = "SPRITE_SHEET";
+        EMResourceType[EMResourceType["SPRITE_SHEET_FRAME"] = 3] = "SPRITE_SHEET_FRAME";
+        EMResourceType[EMResourceType["TEXT"] = 4] = "TEXT";
+        EMResourceType[EMResourceType["JSON"] = 5] = "JSON";
+    })(EMResourceType = leaf.EMResourceType || (leaf.EMResourceType = {}));
+    var Resource = /** @class */ (function () {
+        function Resource() {
+            this.count = 0;
+            this.usedCount = 0; //使用过的次数
+            this.hasLoaded = false;
+            this.isLoading = false;
+        }
+        Resource.prototype.addCount = function () {
+            this.count++;
+            this.usedCount++;
+            if (this.resource) {
+                clearList.push(this.resource);
+                this.resource = null;
+            }
+        };
+        Resource.prototype.removeCount = function () {
+            this.count--;
+        };
+        Resource.prototype.load = function () {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (!(this.type === EMResourceType.TEXTURE)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, Res.loadTexture(this.name, this.url)];
+                        case 1:
+                            _a.sent();
+                            return [3 /*break*/, 8];
+                        case 2:
+                            if (!(this.type === EMResourceType.SPRITE_SHEET_FRAME)) return [3 /*break*/, 4];
+                            return [4 /*yield*/, Res.loadSpriteSheet(this.spriteSheet.name, this.spriteSheet.url)];
+                        case 3:
+                            _a.sent();
+                            return [3 /*break*/, 8];
+                        case 4:
+                            if (!(this.type === EMResourceType.TEXT)) return [3 /*break*/, 6];
+                            return [4 /*yield*/, Res.loadText(this.name, this.url)];
+                        case 5:
+                            _a.sent();
+                            return [3 /*break*/, 8];
+                        case 6:
+                            if (!(this.type === EMResourceType.JSON)) return [3 /*break*/, 8];
+                            return [4 /*yield*/, Res.loadJSON(this.name, this.url)];
+                        case 7:
+                            _a.sent();
+                            _a.label = 8;
+                        case 8: return [2 /*return*/, this];
+                    }
+                });
+            });
+        };
+        return Resource;
+    }());
+    leaf.Resource = Resource;
+    var SpriteSheetFrameResource = /** @class */ (function (_super) {
+        __extends(SpriteSheetFrameResource, _super);
+        function SpriteSheetFrameResource() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        SpriteSheetFrameResource.prototype.addCount = function () {
+            this.count++;
+            this.usedCount++;
+            this.spriteSheet.count++;
+            (this.spriteSheet.usedCount)++;
+            if (this.spriteSheet.resource) {
+                clearList.push(this.spriteSheet.resource);
+                this.spriteSheet.resource = null;
+            }
+        };
+        SpriteSheetFrameResource.prototype.removeCount = function () {
+            this.count--;
+            this.spriteSheet.count--;
+        };
+        return SpriteSheetFrameResource;
+    }(Resource));
+    leaf.SpriteSheetFrameResource = SpriteSheetFrameResource;
+    var SpriteSheetResource = /** @class */ (function (_super) {
+        __extends(SpriteSheetResource, _super);
+        function SpriteSheetResource() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return SpriteSheetResource;
+    }(Resource));
+    leaf.SpriteSheetResource = SpriteSheetResource;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {

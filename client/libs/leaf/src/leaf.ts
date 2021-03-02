@@ -1,5 +1,7 @@
 namespace leaf {
 
+    export var debug = false;
+
     var world: ecs.World;
     export var runInfo: {
         frame: number,
