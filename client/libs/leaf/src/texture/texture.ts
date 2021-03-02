@@ -114,8 +114,9 @@ namespace leaf {
             return this._endY;
         }
 
-        public dispose():void {
+        public destroy():void {
             // Stage.$webgl.deleteTexture(this._texture);
+            GLCore.gl.deleteTexture(this._texture);
             this._texture = null;
         }
     }

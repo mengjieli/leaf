@@ -15,12 +15,26 @@ export class Main {
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-        let ts = ["resources/64x64_1.png", "resources/64x64_2.png"];//, "resources/128x128_1.png", "resources/128x128_2.png", "resources/256x256_1.png", "resources/256x256_2.png", "resources/flower.png"];
-        new ImageLoader(ts, this.loadImageComplete, this);
+        // let ts = ["resources/64x64_1.png", "resources/64x64_2.png"];//, "resources/128x128_1.png", "resources/128x128_2.png", "resources/256x256_1.png", "resources/256x256_2.png", "resources/flower.png"];
+        // new ImageLoader(ts, this.loadImageComplete, this);
+        this.init();
     }
 
-    private loadImageComplete(images: HTMLImageElement[]): void {
-
+    async init() {
+        // let loader = new leaf.Loader();
+        // loader.add("default", "resources/default.res.json", {
+        //     loadType: leaf.LoaderType.TEXT
+        // }).load((loader, resources) => {
+        //     console.error(resources);
+        // })
+        await leaf.Res.loadResources();
+        let res = leaf.Res.getRes("bg_png");
+        console.error(res)
+        res.addCount();
+        res.load().then(() => {
+            // console.error(res.data)
+            leaf
+        });
     }
 
 }

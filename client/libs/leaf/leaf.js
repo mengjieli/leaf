@@ -443,6 +443,11 @@ var leaf;
         function Loader() {
             this.resources = {};
         }
+        Loader.prototype.init = function () {
+            this.resources = {};
+            this.onComplete = null;
+            this.curResource = this.firstName = this.lastName = "";
+        };
         Loader.prototype.add = function (name, url, itemType) {
             var r = this.resources[name] = new LoaderResource();
             r.name = name;
@@ -467,7 +472,7 @@ var leaf;
         Loader.prototype.loadCurrent = function () {
             var r = this.resources[this.curResource];
             r.load();
-            r.onComplete.on(this.loadCurrentComplete);
+            r.onComplete.on(this.loadCurrentComplete, this);
         };
         Loader.prototype.loadCurrentComplete = function () {
             var r = this.resources[this.curResource];
@@ -477,7 +482,9 @@ var leaf;
                 this.loadCurrent();
             }
             else {
-                this.onComplete && this.onComplete(this.resources);
+                var c = this.onComplete;
+                this.onComplete = null;
+                c && c(this, this.resources);
             }
         };
         return Loader;
@@ -485,10 +492,84 @@ var leaf;
     leaf.Loader = Loader;
     var LoaderResource = /** @class */ (function () {
         function LoaderResource() {
+            var _this = this;
             this.onComplete = new ecs.Broadcast();
+            this.loadImageComplete = function () {
+                _this.onComplete.dispatch();
+            };
+            this.onReadyStateChange = function () {
+                var _this = this;
+                var xhr = this._xhr;
+                if (xhr.readyState == 4) {
+                    var ioError_1 = (xhr.status >= 400 || xhr.status == 0);
+                    var url_1 = this._url;
+                    var self_1 = this;
+                    window.setTimeout(function () {
+                        if (ioError_1) {
+                            // if (true && !self_1.hasEventListener(egret.IOErrorEvent.IO_ERROR)) {
+                            //     egret.$error(1011, url_1);
+                            // }
+                            // self_1.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
+                        }
+                        else {
+                            _this.onComplete.dispatch();
+                        }
+                    }, 0);
+                }
+            };
         }
         LoaderResource.prototype.load = function () {
             if (this.itemType.loadType === LoaderType.TEXT) {
+                var xhr = this._xhr = this.getXHR();
+                xhr.onreadystatechange = this.onReadyStateChange.bind(this);
+                xhr.onprogress = this.updateProgress.bind(this);
+                xhr.open(this.itemType.method || "GET", this.url, true);
+                xhr.send(this.itemType.sendData);
+            }
+            else if (this.itemType.loadType === LoaderType.IMAGE) {
+                var img = new Image();
+                img.src = this.url;
+                img.crossOrigin = '*';
+                this._data = img;
+                img.onload = this.loadImageComplete;
+            }
+        };
+        Object.defineProperty(LoaderResource.prototype, "data", {
+            get: function () {
+                if (this.itemType.loadType === LoaderType.TEXT) {
+                    if (!this._xhr) {
+                        return null;
+                    }
+                    if (this._xhr.response != undefined) {
+                        return this._xhr.response;
+                    }
+                    if (!this.itemType.xhrType || this.itemType.xhrType == "text") {
+                        return this._xhr.responseText;
+                    }
+                    // if (this.itemType.xhrType == "arraybuffer" && /msie 9.0/i.test(navigator.userAgent)) {
+                    //     var w = window;
+                    //     return w.convertResponseBodyToText(this._xhr["responseBody"]);
+                    // }
+                    if (this.itemType.xhrType == "document") {
+                        return this._xhr.responseXML;
+                    }
+                }
+                if (this.itemType.loadType === LoaderType.IMAGE) {
+                    return this._data;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        LoaderResource.prototype.updateProgress = function (event) {
+            //event.loaded / event.total
+        };
+        LoaderResource.prototype.getXHR = function () {
+            if (window["XMLHttpRequest"]) {
+                return new window["XMLHttpRequest"]();
+            }
+            else {
+                return new window["ActiveXObject"]("MSXML2.XMLHTTP");
             }
         };
         return LoaderResource;
@@ -523,10 +604,10 @@ var leaf;
                     if (txt.resource)
                         txt.resource.src = '';
                     if (txt.data) {
-                        PIXI.BaseTexture.removeFromCache(txt.texture_id);
-                        PIXI.BaseTexture.removeFromCache(txt.texture_url);
-                        PIXI.Texture.removeFromCache(txt.texture_url);
-                        PIXI.Texture.removeFromCache(txt.texture_id);
+                        // PIXI.BaseTexture.removeFromCache(txt.texture_id);
+                        // PIXI.BaseTexture.removeFromCache(txt.texture_url);
+                        // PIXI.Texture.removeFromCache(txt.texture_url);
+                        // PIXI.Texture.removeFromCache(txt.texture_id);
                         txt.data.destroy();
                     }
                     txt.data = null;
@@ -570,11 +651,11 @@ var leaf;
                         finally { if (e_4) throw e_4.error; }
                     }
                     if (txt.data) {
-                        PIXI.BaseTexture.removeFromCache(txt.texture_url);
-                        PIXI.BaseTexture.removeFromCache(txt.texture_id);
-                        PIXI.Texture.removeFromCache(txt.texture_url);
-                        PIXI.Texture.removeFromCache(txt.texture_id);
-                        txt.data.destroy();
+                        // PIXI.BaseTexture.removeFromCache(txt.texture_url);
+                        // PIXI.BaseTexture.removeFromCache(txt.texture_id);
+                        // PIXI.Texture.removeFromCache(txt.texture_url);
+                        // PIXI.Texture.removeFromCache(txt.texture_id);
+                        leaf.GLCore.gl.deleteTexture(txt.data);
                     }
                     txt.data = null;
                     txt.hasLoaded = false;
@@ -792,7 +873,7 @@ var leaf;
                     res.isLoading = true;
                     _this.loading++;
                     (ecs.ObjectPools.createRecyableObject(leaf.Loader)).add(fileName, url, {
-                        loadType: 2
+                        loadType: leaf.LoaderType.IMAGE
                     }).load(function (loader, resources) {
                         _this.loading--;
                         var txt = resources[fileName].data;
@@ -806,7 +887,7 @@ var leaf;
                             txt.src = '';
                             return;
                         }
-                        res.data = PIXI.Texture.from(txt);
+                        res.data = new leaf.Texture(leaf.GLCore.createTexture(txt), txt.width, txt.hasLoaded, 0, 0, txt.width, txt.height);
                         res.resource = txt;
                         res.hasLoaded = true;
                         leaf.debug && _this.weakSet.add(res.data);
@@ -983,7 +1064,7 @@ var leaf;
                             return;
                         }
                         res.resource = txt;
-                        res.data = new PIXI.BaseTexture(txt);
+                        res.data = leaf.GLCore.createTexture(txt);
                         for (var k in cfg.frames) {
                             var frame = cfg.frames[k];
                             var spriteSheetFrame = void 0;
@@ -1000,7 +1081,7 @@ var leaf;
                             else {
                                 spriteSheetFrame = _this.resources[k];
                             }
-                            spriteSheetFrame.data = new PIXI["Texture"](res.data, new PIXI.Rectangle(frame.x + frame.offX, frame.y + frame.offY, frame.w, frame.h));
+                            spriteSheetFrame.data = new leaf.Texture(res.data, txt.width, txt.height, frame.x + frame.offX, frame.y + frame.offY, frame.w, frame.h);
                             leaf.debug && _this.weakSet.add(spriteSheetFrame.data);
                         }
                         res.isLoading = false;
@@ -2353,8 +2434,9 @@ var leaf;
             enumerable: true,
             configurable: true
         });
-        Texture.prototype.dispose = function () {
+        Texture.prototype.destroy = function () {
             // Stage.$webgl.deleteTexture(this._texture);
+            leaf.GLCore.gl.deleteTexture(this._texture);
             this._texture = null;
         };
         Texture.id = 0;

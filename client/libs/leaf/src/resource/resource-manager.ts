@@ -25,10 +25,10 @@ namespace leaf {
         }
         if (txt.resource) txt.resource.src = '';
         if (txt.data) {
-          PIXI.BaseTexture.removeFromCache(txt.texture_id);
-          PIXI.BaseTexture.removeFromCache(txt.texture_url);
-          PIXI.Texture.removeFromCache(txt.texture_url);
-          PIXI.Texture.removeFromCache(txt.texture_id);
+          // PIXI.BaseTexture.removeFromCache(txt.texture_id);
+          // PIXI.BaseTexture.removeFromCache(txt.texture_url);
+          // PIXI.Texture.removeFromCache(txt.texture_url);
+          // PIXI.Texture.removeFromCache(txt.texture_id);
           txt.data.destroy();
         }
         txt.data = null;
@@ -51,11 +51,11 @@ namespace leaf {
           }
         }
         if (txt.data) {
-          PIXI.BaseTexture.removeFromCache(txt.texture_url);
-          PIXI.BaseTexture.removeFromCache(txt.texture_id);
-          PIXI.Texture.removeFromCache(txt.texture_url);
-          PIXI.Texture.removeFromCache(txt.texture_id);
-          txt.data.destroy();
+          // PIXI.BaseTexture.removeFromCache(txt.texture_url);
+          // PIXI.BaseTexture.removeFromCache(txt.texture_id);
+          // PIXI.Texture.removeFromCache(txt.texture_url);
+          // PIXI.Texture.removeFromCache(txt.texture_id);
+          GLCore.gl.deleteTexture(txt.data);
         }
         txt.data = null;
         txt.hasLoaded = false;
@@ -204,7 +204,7 @@ namespace leaf {
           res.isLoading = true;
           this.loading++;
           ((ecs.ObjectPools.createRecyableObject(Loader as any)) as Loader).add(fileName, url, {
-            loadType: 2
+            loadType: LoaderType.IMAGE
           }).load((loader, resources) => {
             this.loading--;
             let txt = resources[fileName].data;
@@ -218,7 +218,7 @@ namespace leaf {
               txt.src = '';
               return;
             }
-            res.data = PIXI.Texture.from(txt);
+            res.data = new Texture(GLCore.createTexture(txt), txt.width, txt.hasLoaded, 0, 0, txt.width, txt.height);
             res.resource = txt;
             res.hasLoaded = true;
             debug && this.weakSet.add(res.data);
@@ -366,7 +366,7 @@ namespace leaf {
               return;
             }
             res.resource = txt;
-            res.data = new PIXI.BaseTexture(txt) as any;
+            res.data = GLCore.createTexture(txt);
             for (let k in cfg.frames) {
               let frame = cfg.frames[k];
               let spriteSheetFrame: SpriteSheetFrameResource;
@@ -382,11 +382,11 @@ namespace leaf {
               } else {
                 spriteSheetFrame = this.resources[k] as any;
               }
-              spriteSheetFrame.data = new PIXI["Texture"](res.data, new PIXI.Rectangle(
+              spriteSheetFrame.data = new Texture(res.data, txt.width, txt.height,
                 frame.x + frame.offX,
                 frame.y + frame.offY,
                 frame.w,
-                frame.h));
+                frame.h);
               debug && this.weakSet.add(spriteSheetFrame.data);
             }
             res.isLoading = false;
@@ -493,7 +493,7 @@ namespace leaf {
 
   }
 
-  export class SpriteSheetResource extends Resource<PIXI.BaseTexture> {
+  export class SpriteSheetResource extends Resource<WebGLTexture> {
 
     public list: SpriteSheetFrameResource[];
 

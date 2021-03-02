@@ -1,4 +1,5 @@
 declare namespace leaf {
+    var debug: boolean;
     var runInfo: {
         frame: number;
         runTime: number;
@@ -80,6 +81,103 @@ declare namespace leaf {
         lineSpacing: number;
         preRender(): void;
         static useScaleFont: boolean;
+    }
+}
+declare namespace leaf {
+    class Loader {
+        resources: {
+            [index: string]: LoaderResource;
+        };
+        private curResource;
+        private firstName;
+        private lastName;
+        private onComplete;
+        init(): void;
+        add(name: string, url: string, itemType: LoaderItemType): this;
+        load(onComplete?: (loader: Loader, resources: {
+            [index: string]: LoaderResource;
+        }) => any): void;
+        private loadCurrent;
+        private loadCurrentComplete;
+    }
+    class LoaderResource {
+        name: string;
+        url: string;
+        itemType: LoaderItemType;
+        private _data;
+        next: string;
+        private _xhr;
+        onComplete: ecs.Broadcast<void>;
+        load(): void;
+        readonly data: any;
+        updateProgress(event: any): void;
+        loadImageComplete: () => void;
+        onReadyStateChange: () => void;
+        getXHR(): any;
+    }
+    enum LoaderType {
+        TEXT = 1,
+        IMAGE = 2
+    }
+    interface LoaderItemType {
+        loadType: LoaderType;
+        xhrType?: string;
+        method?: string;
+        sendData?: any;
+    }
+}
+declare namespace leaf {
+    class Res {
+        private static resources;
+        private static singleTexutres;
+        private static texts;
+        private static jsons;
+        private static spriteSheets;
+        private static loading;
+        private static weakSet;
+        static getRes<T>(name: string): Resource<T>;
+        static clearUnsedTextures(): void;
+        static getAliveResources(): any[];
+        static addRes(type: EMResourceType, name: string, url: string): any;
+        static loadTexture(name: string, url: string): Promise<Resource<Texture>>;
+        static loadJSON(name: string, url: string): Promise<any>;
+        static loadText(name: string, url: string): Promise<any>;
+        static loadResources(url?: string, resourceRoot?: string): Promise<any>;
+        static loadSpriteSheet(name: string, url: string): Promise<SpriteSheetResource>;
+    }
+    enum EMResourceType {
+        TEXTURE = 1,
+        SPRITE_SHEET = 2,
+        SPRITE_SHEET_FRAME = 3,
+        TEXT = 4,
+        JSON = 5
+    }
+    class Resource<T> {
+        type: EMResourceType;
+        name: string;
+        url: string;
+        id: number;
+        data: T;
+        texture_id: string;
+        texture_url: string;
+        readonly count: number;
+        usedCount: number;
+        hasLoaded: boolean;
+        isLoading: boolean;
+        onLoadCompleteCalls: ((res: Resource<T>) => any)[];
+        resource: any;
+        addCount(): void;
+        removeCount(): void;
+        load(): Promise<this>;
+    }
+    class SpriteSheetFrameResource extends Resource<Texture> {
+        id: number;
+        spriteSheet: SpriteSheetResource;
+        addCount(): void;
+        removeCount(): void;
+    }
+    class SpriteSheetResource extends Resource<WebGLTexture> {
+        list: SpriteSheetFrameResource[];
     }
 }
 declare namespace leaf {
@@ -426,6 +524,6 @@ declare namespace leaf {
         readonly endX: number;
         private _endY;
         readonly endY: number;
-        dispose(): void;
+        destroy(): void;
     }
 }

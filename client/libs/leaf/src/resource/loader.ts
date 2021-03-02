@@ -8,7 +8,13 @@ namespace leaf {
         private firstName: string;
         private lastName: string;
 
-        private onComplete: Function;
+        private onComplete: (loader: Loader, resources: { [index: string]: LoaderResource }) => any;
+
+        init() {
+            this.resources = {};
+            this.onComplete = null;
+            this.curResource = this.firstName = this.lastName = "";
+        }
 
         add(name: string, url: string, itemType: LoaderItemType) {
             let r = this.resources[name] = new LoaderResource();
@@ -24,7 +30,7 @@ namespace leaf {
             return this;
         }
 
-        load(onComplete?: Function) {
+        load(onComplete?: (loader: Loader, resources: { [index: string]: LoaderResource }) => any) {
             if (this.curResource) return;
             this.onComplete = onComplete;
             this.curResource = this.firstName;
@@ -34,7 +40,7 @@ namespace leaf {
         private loadCurrent() {
             let r = this.resources[this.curResource];
             r.load();
-            r.onComplete.on(this.loadCurrentComplete);
+            r.onComplete.on(this.loadCurrentComplete, this);
         }
 
         private loadCurrentComplete() {
@@ -44,7 +50,9 @@ namespace leaf {
                 this.curResource = next.name;
                 this.loadCurrent();
             } else {
-                this.onComplete && this.onComplete(this.resources);
+                let c = this.onComplete;
+                this.onComplete = null;
+                c && c(this, this.resources);
             }
         }
 
@@ -55,14 +63,87 @@ namespace leaf {
         name: string;
         url: string;
         itemType: LoaderItemType;
-        data: any;
+        private _data: any;
         next: string;
+
+        private _xhr: any;
 
         onComplete: ecs.Broadcast<void> = new ecs.Broadcast<void>();
 
         load() {
             if (this.itemType.loadType === LoaderType.TEXT) {
+                let xhr = this._xhr = this.getXHR();
+                xhr.onreadystatechange = this.onReadyStateChange.bind(this);
+                xhr.onprogress = this.updateProgress.bind(this);
+                xhr.open(this.itemType.method || "GET", this.url, true);
+                xhr.send(this.itemType.sendData);
+            } else if (this.itemType.loadType === LoaderType.IMAGE) {
+                var img = new Image();
+                img.src = this.url;
+                img.crossOrigin = '*';
+                this._data = img;
+                img.onload = this.loadImageComplete;
+            }
+        }
 
+        get data() {
+            if (this.itemType.loadType === LoaderType.TEXT) {
+                if (!this._xhr) {
+                    return null;
+                }
+                if (this._xhr.response != undefined) {
+                    return this._xhr.response;
+                }
+                if (!this.itemType.xhrType || this.itemType.xhrType == "text") {
+                    return this._xhr.responseText;
+                }
+                // if (this.itemType.xhrType == "arraybuffer" && /msie 9.0/i.test(navigator.userAgent)) {
+                //     var w = window;
+                //     return w.convertResponseBodyToText(this._xhr["responseBody"]);
+                // }
+                if (this.itemType.xhrType == "document") {
+                    return this._xhr.responseXML;
+                }
+            }
+            if (this.itemType.loadType === LoaderType.IMAGE) {
+                return this._data;
+            }
+        }
+
+        updateProgress(event) {
+            //event.loaded / event.total
+        }
+
+        loadImageComplete = () => {
+            this.onComplete.dispatch();
+        }
+
+        onReadyStateChange = function () {
+            var xhr = this._xhr;
+            if (xhr.readyState == 4) {
+                var ioError_1 = (xhr.status >= 400 || xhr.status == 0);
+                var url_1 = this._url;
+                var self_1 = this;
+                window.setTimeout(() => {
+                    if (ioError_1) {
+                        // if (true && !self_1.hasEventListener(egret.IOErrorEvent.IO_ERROR)) {
+                        //     egret.$error(1011, url_1);
+                        // }
+                        // self_1.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
+                    }
+                    else {
+                        this.onComplete.dispatch();
+                    }
+                }, 0);
+            }
+        }
+
+        getXHR() {
+            if (window["XMLHttpRequest"]) {
+                return new window["XMLHttpRequest"]();
+            }
+            else {
+                return new window["ActiveXObject"]("MSXML2.XMLHTTP");
             }
         }
     }
@@ -74,7 +155,9 @@ namespace leaf {
 
     export interface LoaderItemType {
         loadType: LoaderType,
-        xhrType: string
+        xhrType?: string,
+        method?: string,
+        sendData?: any
     }
 
 }
