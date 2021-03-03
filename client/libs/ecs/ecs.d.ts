@@ -368,9 +368,11 @@ declare namespace ecs {
         scaleX: number;
         scaleY: number;
         angle: number;
+        alpha: number;
         readonly parent: Transform;
         readonly local: Matrix;
         readonly worldMatrix: Matrix;
+        readonly worldAlpha: number;
         reset(): void;
     }
 }

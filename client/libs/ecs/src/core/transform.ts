@@ -34,6 +34,11 @@ namespace ecs {
         /**
          * @internal
          */
+        private _alpha: number = 1;
+
+        /**
+         * @internal
+         */
         private _local: Matrix = new Matrix();
 
         /**
@@ -83,6 +88,11 @@ namespace ecs {
             if (this._angle === val) return;
             this.dirty = true;
             this._angle = val;
+        }
+
+        get alpha() { return this._alpha; }
+        set alpha(val: number) {
+            this._alpha = val;
         }
 
         /**
@@ -135,9 +145,21 @@ namespace ecs {
             return this._worldMatrix;
         }
 
+        get worldAlpha() {
+            let dis = this.$parent;
+            let alpha = this._alpha;
+            while (dis) {
+                alpha *= dis._alpha;
+                dis = dis.$parent;
+            }
+            return alpha;
+        }
+
         reset() {
             this.local.identity();
             this.dirty = false;
+            this._x = this._y = this._angle = 0;
+            this._scaleX = this._scaleY = this._alpha = 1;
         }
 
     }

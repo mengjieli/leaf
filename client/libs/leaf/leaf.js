@@ -270,12 +270,10 @@ var leaf;
         __extends(Render, _super);
         function Render() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.alpha = 1;
             _this.blendMode = leaf.BlendMode.NONE;
             return _this;
         }
         Render.prototype.onDestroy = function () {
-            this.alpha = 1;
         };
         Render.allowMultiply = false;
         return Render;
@@ -289,6 +287,7 @@ var leaf;
         function Bitmap() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.shader = Bitmap.shader;
+            _this._tint = 0xffffff;
             return _this;
         }
         Object.defineProperty(Bitmap.prototype, "texture", {
@@ -301,8 +300,60 @@ var leaf;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Bitmap.prototype, "resource", {
+            get: function () {
+                return this._resource;
+            },
+            set: function (val) {
+                var _this = this;
+                if (this._resource === val)
+                    return;
+                if (this._res)
+                    this._res.removeCount();
+                this._resource = val;
+                var res = this._res = leaf.Res.getRes(val);
+                if (!res) {
+                    this.texture = null;
+                    return;
+                }
+                if (res.data) {
+                    this.texture = res.data;
+                    res.addCount();
+                }
+                else {
+                    res.addCount();
+                    res.load().then(function () {
+                        if (_this._res !== res)
+                            return;
+                        _this.texture = res.data;
+                    });
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Bitmap.prototype, "tint", {
+            get: function () {
+                return this._tint;
+            },
+            set: function (val) {
+                this._tint = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Bitmap.prototype.preRender = function () {
-            this.shader.addTask(this.texture, this.entity.transform.worldMatrix, this.alpha, this.blendMode);
+            if (!this._texture)
+                return;
+            this.shader.addTask(this.texture, this.entity.transform.worldMatrix, this.entity.transform.worldAlpha, this.blendMode, this._tint);
+        };
+        Bitmap.prototype.onDestroy = function () {
+            this.texture = null;
+            if (this._res)
+                this._res.removeCount();
+            this._resource = this._res = null;
+            this._tint = 0xffffff;
+            _super.prototype.onDestroy.call(this);
         };
         Object.defineProperty(Bitmap, "shader", {
             get: function () {
@@ -428,9 +479,18 @@ var leaf;
                 m.scale(rScale, rScale);
                 m.translate(x, y);
                 m.concat(w);
-                this.shader.addTask(txt.texture, m, this.alpha, this.blendMode);
+                this.shader.addTask(txt.texture, m, this.entity.transform.worldAlpha, this.blendMode, 0xffffff);
                 x += txt.width * rScale;
             }
+        };
+        Label.prototype.onDestroy = function () {
+            this._text = "";
+            this._fontColor = 0xffffff;
+            this._fontFamily = "sans-serif";
+            this._fontSize = 30;
+            this._bold = false;
+            this._italic = false;
+            this._lineSpacing = 5;
         };
         Label.useScaleFont = false;
         return Label;
@@ -1354,7 +1414,8 @@ var leaf;
                 this.u_Samplers[i] = gl.getUniformLocation(program, "u_Sampler" + i);
             }
         };
-        BitmapShaderTask.prototype.addTask = function (texture, matrix, alpha, blendMode) {
+        BitmapShaderTask.prototype.addTask = function (texture, matrix, alpha, blendMode, tint) {
+            if (tint === void 0) { tint = 0xffffff; }
             var txtureIndex = this.textures.length ? this.textures[this.textures.length - 1].indexOf(texture.texture) : -1;
             if (!this.textures.length ||
                 txtureIndex === -1 &&
@@ -1465,6 +1526,7 @@ var leaf;
             _this_1.positionData = [];
             _this_1.blendMode = [];
             _this_1.indiceData = [];
+            _this_1.tints = [];
             //初始化作色器、program
             _this_1.initProgram();
             //初始化作色器固定变量 和 获取作色器中得变量
@@ -1481,7 +1543,7 @@ var leaf;
         BitmapShaderTask5.prototype.initProgram = function () {
             var gl = leaf.GLCore.gl;
             var vertexSource = "\n             attribute vec2 a_TexCoord;\n             attribute vec4 a_Position;\n             attribute float a_Alpha;\n             attribute float a_Sampler;\n             uniform mat4 u_PMatrix;\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n             varying float v_Sampler;\n             void main(void)\n             {\n                gl_Position = u_PMatrix*a_Position;\n                v_TexCoord = a_TexCoord;\n                v_Alpha = a_Alpha;\n                v_Sampler = a_Sampler;\n             }\n             ";
-            var fragmentSource = "\n             precision mediump float;\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n             varying float v_Sampler;\n             uniform sampler2D u_Sampler0;\n             uniform sampler2D u_Sampler1;\n             uniform sampler2D u_Sampler2;\n             uniform sampler2D u_Sampler3;\n             uniform sampler2D u_Sampler4;\n             uniform sampler2D u_Sampler5;\n             uniform sampler2D u_Sampler6;\n             uniform sampler2D u_Sampler7;\n             void main(void)\n             {\n                if(v_Sampler == 0.0) {\n                    gl_FragColor = texture2D(u_Sampler0,v_TexCoord)*v_Alpha;\n                } else if(v_Sampler == 1.0) {\n                    gl_FragColor = texture2D(u_Sampler1,v_TexCoord)*v_Alpha;\n                } else if(v_Sampler == 2.0) {\n                    gl_FragColor = texture2D(u_Sampler2,v_TexCoord)*v_Alpha;\n                } else if(v_Sampler == 3.0) {\n                    gl_FragColor = texture2D(u_Sampler3,v_TexCoord)*v_Alpha;\n                } else if(v_Sampler == 4.0) {\n                    gl_FragColor = texture2D(u_Sampler4,v_TexCoord)*v_Alpha;\n                } else if(v_Sampler == 5.0) {\n                    gl_FragColor = texture2D(u_Sampler5,v_TexCoord)*v_Alpha;\n                } else if(v_Sampler == 6.0) {\n                    gl_FragColor = texture2D(u_Sampler6,v_TexCoord)*v_Alpha;\n                } else if(v_Sampler == 7.0) {\n                    gl_FragColor = texture2D(u_Sampler7,v_TexCoord)*v_Alpha;\n                }\n             }\n             ";
+            var fragmentSource = "\n             precision mediump float;\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n             varying float v_Sampler;\n             uniform vec4 u_Color;\n             uniform sampler2D u_Sampler0;\n             uniform sampler2D u_Sampler1;\n             uniform sampler2D u_Sampler2;\n             uniform sampler2D u_Sampler3;\n             uniform sampler2D u_Sampler4;\n             uniform sampler2D u_Sampler5;\n             uniform sampler2D u_Sampler6;\n             uniform sampler2D u_Sampler7;\n             vec4 getTextureColor(vec2 coord);\n             void main(void)\n             {\n                gl_FragColor = getTextureColor(v_TexCoord)*u_Color*v_Alpha;\n             }\n             vec4 getTextureColor(vec2 coord) {\n                if(v_Sampler == 0.0) {\n                    return texture2D(u_Sampler0,v_TexCoord);\n                } else if(v_Sampler == 1.0) {\n                    return texture2D(u_Sampler1,v_TexCoord);\n                } else if(v_Sampler == 2.0) {\n                    return texture2D(u_Sampler2,v_TexCoord);\n                } else if(v_Sampler == 3.0) {\n                    return texture2D(u_Sampler3,v_TexCoord);\n                } else if(v_Sampler == 4.0) {\n                    return texture2D(u_Sampler4,v_TexCoord);\n                } else if(v_Sampler == 5.0) {\n                    return texture2D(u_Sampler5,v_TexCoord);\n                } else if(v_Sampler == 6.0) {\n                    return texture2D(u_Sampler6,v_TexCoord);\n                } else if(v_Sampler == 7.0) {\n                    return texture2D(u_Sampler7,v_TexCoord);\n                }\n             }\n             ";
             var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
             var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
             this.program = this.createWebGLProgram(vertexShader, fragmentShader);
@@ -1535,23 +1597,27 @@ var leaf;
             gl.vertexAttribPointer(this.a_Sampler, 1, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 5);
             this.u_PMatrix = gl.getUniformLocation(program, "u_PMatrix");
             gl.uniformMatrix4fv(this.u_PMatrix, false, projectionMatrix);
+            this.u_Color = gl.getUniformLocation(program, "u_Color");
+            gl.uniform4f(this.u_Color, 1, 1, 1, 1);
             this.u_Samplers = [];
             for (var i = 0; i < 8; i++) {
                 this.u_Samplers[i] = gl.getUniformLocation(program, "u_Sampler" + i);
             }
         };
-        BitmapShaderTask5.prototype.addTask = function (texture, matrix, alpha, blendMode) {
+        BitmapShaderTask5.prototype.addTask = function (texture, matrix, alpha, blendMode, tint) {
             var txtureIndex = this.textures.length ? this.textures[this.textures.length - 1].indexOf(texture.texture) : -1;
             if (!this.textures.length ||
                 txtureIndex === -1 &&
                     this.textures[this.textures.length - 1].length >= 8 ||
                 this.count.length && this.count[this.count.length - 1] > 512 ||
-                this.blendMode[this.blendMode.length - 1] != blendMode) {
+                this.blendMode[this.blendMode.length - 1] != blendMode ||
+                this.tints[this.tints.length - 1] != tint) {
                 this.textures.push([texture.texture]);
                 txtureIndex = 0;
                 this.positionData.push([]);
                 this.count.push(0);
                 this.blendMode.push(blendMode);
+                this.tints.push(tint);
             }
             else {
                 if (txtureIndex === -1) {
@@ -1606,6 +1672,7 @@ var leaf;
             for (var i = 0, len = _this.textures.length; i < len; i++) {
                 //切换混合模式
                 leaf.BlendModeFunc.changeBlendMode(this.blendMode[i]);
+                gl.uniform4f(this.u_Color, (this.tints[i] >> 16) / 255.0, ((this.tints[i] >> 8) & 0xFF) / 255.0, (this.tints[i] & 0xFF) / 255.0, 1);
                 //绑定当前需要渲染的纹理
                 for (var t = 0; t < _this.textures[i].length; t++) {
                     gl.uniform1i(this.u_Samplers[t], t);
@@ -1628,6 +1695,7 @@ var leaf;
             _this.count = [];
             _this.positionData = [];
             _this.blendMode = [];
+            _this.tints = [];
         };
         return BitmapShaderTask5;
     }(leaf.Shader));

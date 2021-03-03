@@ -6,12 +6,9 @@ namespace leaf {
 
         static allowMultiply = false;
 
-        alpha: number = 1;
-
         blendMode: BlendMode = BlendMode.NONE;
 
         onDestroy() {
-            this.alpha = 1;
         }
 
         abstract preRender();

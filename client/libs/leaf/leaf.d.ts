@@ -47,7 +47,6 @@ declare namespace leaf {
     abstract class Render extends ecs.Component {
         readonly shader: Shader;
         static allowMultiply: boolean;
-        alpha: number;
         blendMode: BlendMode;
         onDestroy(): void;
         abstract preRender(): any;
@@ -56,8 +55,14 @@ declare namespace leaf {
 declare namespace leaf {
     class Bitmap extends Render {
         shader: BitmapShaderTask;
+        private _resource;
+        private _res;
         texture: Texture;
+        resource: string;
+        private _tint;
+        tint: number;
         preRender(): void;
+        onDestroy(): void;
         private static _shader;
         static readonly shader: BitmapShaderTask;
     }
@@ -80,6 +85,7 @@ declare namespace leaf {
         private _lineSpacing;
         lineSpacing: number;
         preRender(): void;
+        onDestroy(): void;
         static useScaleFont: boolean;
     }
 }
@@ -254,7 +260,7 @@ declare namespace leaf {
         private count;
         private positionData;
         private blendMode;
-        addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode): void;
+        addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode, tint?: number): void;
         /**
          * 渲染
          */
@@ -271,6 +277,7 @@ declare namespace leaf {
         private a_Sampler;
         private u_PMatrix;
         private u_Samplers;
+        private u_Color;
         constructor();
         /**
          * 初始化作色器、program
@@ -295,7 +302,8 @@ declare namespace leaf {
         private positionData;
         private blendMode;
         private indiceData;
-        addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode): void;
+        private tints;
+        addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode, tint: number): void;
         /**
          * 渲染
          */

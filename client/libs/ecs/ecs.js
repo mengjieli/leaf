@@ -2020,6 +2020,10 @@ var ecs;
             /**
              * @internal
              */
+            this._alpha = 1;
+            /**
+             * @internal
+             */
             this._local = new ecs.Matrix();
             /**
              * @internal
@@ -2093,6 +2097,14 @@ var ecs;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Transform.prototype, "alpha", {
+            get: function () { return this._alpha; },
+            set: function (val) {
+                this._alpha = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(Transform.prototype, "parent", {
             get: function () {
                 return this.$parent;
@@ -2142,9 +2154,24 @@ var ecs;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Transform.prototype, "worldAlpha", {
+            get: function () {
+                var dis = this.$parent;
+                var alpha = this._alpha;
+                while (dis) {
+                    alpha *= dis._alpha;
+                    dis = dis.$parent;
+                }
+                return alpha;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Transform.prototype.reset = function () {
             this.local.identity();
             this.dirty = false;
+            this._x = this._y = this._angle = 0;
+            this._scaleX = this._scaleY = this._alpha = 1;
         };
         return Transform;
     }());

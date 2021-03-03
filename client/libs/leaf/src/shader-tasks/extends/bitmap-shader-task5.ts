@@ -10,6 +10,7 @@ namespace leaf {
         private a_Sampler: any;
         private u_PMatrix: any;
         private u_Samplers: any[];
+        private u_Color: any;
 
         constructor() {
             super();
@@ -52,6 +53,7 @@ namespace leaf {
              varying vec2 v_TexCoord;
              varying float v_Alpha;
              varying float v_Sampler;
+             uniform vec4 u_Color;
              uniform sampler2D u_Sampler0;
              uniform sampler2D u_Sampler1;
              uniform sampler2D u_Sampler2;
@@ -60,24 +62,28 @@ namespace leaf {
              uniform sampler2D u_Sampler5;
              uniform sampler2D u_Sampler6;
              uniform sampler2D u_Sampler7;
+             vec4 getTextureColor(vec2 coord);
              void main(void)
              {
+                gl_FragColor = getTextureColor(v_TexCoord)*u_Color*v_Alpha;
+             }
+             vec4 getTextureColor(vec2 coord) {
                 if(v_Sampler == 0.0) {
-                    gl_FragColor = texture2D(u_Sampler0,v_TexCoord)*v_Alpha;
+                    return texture2D(u_Sampler0,v_TexCoord);
                 } else if(v_Sampler == 1.0) {
-                    gl_FragColor = texture2D(u_Sampler1,v_TexCoord)*v_Alpha;
+                    return texture2D(u_Sampler1,v_TexCoord);
                 } else if(v_Sampler == 2.0) {
-                    gl_FragColor = texture2D(u_Sampler2,v_TexCoord)*v_Alpha;
+                    return texture2D(u_Sampler2,v_TexCoord);
                 } else if(v_Sampler == 3.0) {
-                    gl_FragColor = texture2D(u_Sampler3,v_TexCoord)*v_Alpha;
+                    return texture2D(u_Sampler3,v_TexCoord);
                 } else if(v_Sampler == 4.0) {
-                    gl_FragColor = texture2D(u_Sampler4,v_TexCoord)*v_Alpha;
+                    return texture2D(u_Sampler4,v_TexCoord);
                 } else if(v_Sampler == 5.0) {
-                    gl_FragColor = texture2D(u_Sampler5,v_TexCoord)*v_Alpha;
+                    return texture2D(u_Sampler5,v_TexCoord);
                 } else if(v_Sampler == 6.0) {
-                    gl_FragColor = texture2D(u_Sampler6,v_TexCoord)*v_Alpha;
+                    return texture2D(u_Sampler6,v_TexCoord);
                 } else if(v_Sampler == 7.0) {
-                    gl_FragColor = texture2D(u_Sampler7,v_TexCoord)*v_Alpha;
+                    return texture2D(u_Sampler7,v_TexCoord);
                 }
              }
              `;
@@ -151,6 +157,9 @@ namespace leaf {
             this.u_PMatrix = gl.getUniformLocation(program, "u_PMatrix");
             gl.uniformMatrix4fv(this.u_PMatrix, false, projectionMatrix);
 
+            this.u_Color = gl.getUniformLocation(program, "u_Color");
+            gl.uniform4f(this.u_Color, 1, 1, 1, 1);
+
             this.u_Samplers = [];
             for (let i = 0; i < 8; i++) {
                 this.u_Samplers[i] = gl.getUniformLocation(program, "u_Sampler" + i);
@@ -162,19 +171,22 @@ namespace leaf {
         private positionData = [];
         private blendMode = [];
         private indiceData = [];
+        private tints = [];
 
-        addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode) {
+        addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode, tint: number) {
             var txtureIndex = this.textures.length ? this.textures[this.textures.length - 1].indexOf(texture.texture) : -1;
             if (!this.textures.length ||
                 txtureIndex === -1 &&
                 this.textures[this.textures.length - 1].length >= 8 ||
                 this.count.length && this.count[this.count.length - 1] > 512 ||
-                this.blendMode[this.blendMode.length - 1] != blendMode) {
+                this.blendMode[this.blendMode.length - 1] != blendMode ||
+                this.tints[this.tints.length - 1] != tint) {
                 this.textures.push([texture.texture]);
                 txtureIndex = 0;
                 this.positionData.push([]);
                 this.count.push(0);
                 this.blendMode.push(blendMode);
+                this.tints.push(tint);
             } else {
                 if (txtureIndex === -1) {
                     txtureIndex = this.textures[this.textures.length - 1].length;
@@ -235,6 +247,7 @@ namespace leaf {
             for (var i = 0, len = _this.textures.length; i < len; i++) {
                 //切换混合模式
                 BlendModeFunc.changeBlendMode(this.blendMode[i]);
+                gl.uniform4f(this.u_Color, (this.tints[i] >> 16) / 255.0, ((this.tints[i] >> 8) & 0xFF) / 255.0, (this.tints[i] & 0xFF) / 255.0, 1);
                 //绑定当前需要渲染的纹理
                 for (let t = 0; t < _this.textures[i].length; t++) {
                     gl.uniform1i(this.u_Samplers[t], t);
@@ -259,6 +272,7 @@ namespace leaf {
             _this.count = [];
             _this.positionData = [];
             _this.blendMode = [];
+            _this.tints = [];
         }
 
 

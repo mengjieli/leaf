@@ -104,9 +104,19 @@ namespace leaf {
                 m.scale(rScale, rScale);
                 m.translate(x, y);
                 m.concat(w);
-                (this.shader as BitmapShaderTask).addTask(txt.texture, m, this.alpha, this.blendMode);
+                (this.shader as BitmapShaderTask).addTask(txt.texture, m, this.entity.transform.worldAlpha, this.blendMode, 0xffffff);
                 x += txt.width * rScale;
             }
+        }
+
+        onDestroy() {
+            this._text = "";
+            this._fontColor = 0xffffff;
+            this._fontFamily = "sans-serif";
+            this._fontSize = 30;
+            this._bold = false;
+            this._italic = false;
+            this._lineSpacing = 5;
         }
 
         static useScaleFont = false;

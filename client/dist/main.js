@@ -163,7 +163,7 @@ var Main = /** @class */ (function () {
     }
     Main.prototype.init = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var res;
+            var world, scene, bm;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: 
@@ -182,16 +182,11 @@ var Main = /** @class */ (function () {
                         //     console.error(resources);
                         // })
                         _a.sent();
-                        res = leaf.Res.getRes("button_back");
-                        console.error(res);
-                        res.addCount();
-                        res.load().then(function () {
-                            // console.error(res.data)
-                            var world = leaf.init();
-                            var scene = new ecs.Scene();
-                            world.scene = scene;
-                            scene.addComponent(leaf.Bitmap).texture = res.data;
-                        });
+                        world = leaf.init();
+                        scene = new ecs.Scene();
+                        world.scene = scene;
+                        bm = scene.addComponent(leaf.Bitmap);
+                        bm.resource = "common_img1";
                         return [2 /*return*/];
                 }
             });
