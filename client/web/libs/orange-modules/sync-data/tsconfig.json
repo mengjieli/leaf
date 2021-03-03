@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "outFile": "sync-data.js",
+        "experimentalDecorators": true,
+        "sourceMap": true,
+        "lib": [
+            "es5",
+            "dom",
+            "es2015"
+        ],
+        "declaration": true,
+        "downlevelIteration": true,
+        "types": [],
+        "watch": true,
+        "pretty": true,
+        "stripInternal":true
+    },
+    "include": [
+        "./../modules",
+        "src"
+    ],
+    "files": [
+        "./../../pako/pako.d.ts",
+        "./../../orange/orange.d.ts",
+        "./../../msgpack/msgpack.d.ts"
+    ]
+}

@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "outFile": "lock-step-engine.js",
+    "target": "es5",
+    "experimentalDecorators": true,
+    "downlevelIteration": true,
+    "lib": [
+      "es5",
+      "dom",
+      "es2015"
+    ],
+    "sourceMap": true,
+    "types": [],
+    "watch": true,
+    "pretty": true,
+    "declaration": true,
+    "stripInternal":true
+  },
+  "include": [
+    "src"
+  ]
+}

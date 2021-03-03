@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "outFile": "orange.js",
+        "experimentalDecorators": true,
+        "sourceMap": true,
+        "lib": [
+            "es5",
+            "dom",
+            "es2015"
+        ],
+        "declaration": true,
+        "downlevelIteration": true,
+        "types": [],
+        "watch": true,
+        "pretty": true,
+        "stripInternal":true
+    },
+    "include": [
+        "../../egret/libs/modules",
+        "src"
+    ],
+    "files": [
+        "./../mobx/mobx.d.ts"
+    ]
+}

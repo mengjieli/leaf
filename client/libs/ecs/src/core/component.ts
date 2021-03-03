@@ -146,6 +146,10 @@ namespace ecs {
             return this.entity ? this.entity.getComponentsInChildren(componentClass) : null;
         }
 
+        get transform(): Transform {
+            return this.entity && this.entity.transform;
+        }
+
         get world(): World {
             return this.entity && this.entity.world;
         }

@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "outFile": "tween.js",
+    "target": "es5",
+    "experimentalDecorators": true,
+    "downlevelIteration": true,
+    "lib": [
+      "es5",
+      "dom",
+      "es2015"
+    ],
+    "sourceMap": true,
+    "types": [],
+    "watch": true,
+    "pretty": true,
+    "declaration": true,
+    "stripInternal":true
+  },
+  "include": [
+    "src"
+  ],
+  "files": [
+      "./../ecs/ecs.d.ts",
+  ]
+}

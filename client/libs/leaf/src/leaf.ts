@@ -25,6 +25,7 @@ namespace leaf {
 
     export function init(): ecs.World {
         if (world) return;
+        GLCore.init();
         world = world || new ecs.World();
         world.addSystem(RenderSystem, [Render as any]);
         var t = 0;

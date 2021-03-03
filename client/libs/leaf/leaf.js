@@ -73,6 +73,7 @@ var leaf;
     function init() {
         if (world)
             return;
+        leaf.GLCore.init();
         world = world || new ecs.World();
         world.addSystem(leaf.RenderSystem, [leaf.Render]);
         var t = 0;
@@ -161,10 +162,15 @@ var leaf;
             for (var i = 0; i < names.length; i++) {
                 try {
                     gl = canvas.getContext(names[i], options);
+                    gl.colorMask(true, true, true, true);
+                    gl.viewport(0, 0, GLCore.width, GLCore.height);
                     gl.disable(gl.DEPTH_TEST);
                     gl.disable(gl.CULL_FACE);
                     gl.enable(gl.BLEND);
-                    gl.colorMask(true, true, true, true);
+                    gl.enable(gl.STENCIL_TEST);
+                    gl.blendColor(1.0, 1.0, 1.0, 1.0);
+                    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+                    gl.clearColor(0.0, 0.0, 0.0, 1.0);
                 }
                 catch (e) {
                 }

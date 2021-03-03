@@ -145,48 +145,40 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var elimination_scene_1 = __webpack_require__(/*! ./modules/elimination/elimination-scene */ "../src/modules/elimination/elimination-scene.ts");
 var Main = /** @class */ (function () {
     function Main() {
-        leaf.GLCore.init();
-        var gl = leaf.GLCore.gl;
-        gl.viewport(0, 0, leaf.GLCore.width, leaf.GLCore.height);
-        gl.enable(gl.BLEND);
-        gl.enable(gl.STENCIL_TEST);
-        gl.blendColor(1.0, 1.0, 1.0, 1.0);
-        //gl.enable(gl.CULL_FACE);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        // let ts = ["resources/64x64_1.png", "resources/64x64_2.png"];//, "resources/128x128_1.png", "resources/128x128_2.png", "resources/256x256_1.png", "resources/256x256_2.png", "resources/flower.png"];
-        // new ImageLoader(ts, this.loadImageComplete, this);
         this.init();
     }
     Main.prototype.init = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var world, scene, bm;
+            var k, world;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: 
-                    // let loader = new leaf.Loader();
-                    // loader.add("default", "resources/default.res.json", {
-                    //     loadType: leaf.LoaderType.TEXT
-                    // }).load((loader, resources) => {
-                    //     console.error(resources);
-                    // })
-                    return [4 /*yield*/, leaf.Res.loadResources()];
+                    case 0:
+                        if (!window["IS_WEB"]) return [3 /*break*/, 2];
+                        try {
+                            window["require"] = eval("__webpack_require__");
+                            for (k in window["require"].c) {
+                                window["require"].c["../client" + k.slice(2, k.length)] = window["require"].c[k];
+                            }
+                        }
+                        catch (e) {
+                        }
+                        return [4 /*yield*/, orange.startup({
+                                native: {
+                                    ip: "localhost",
+                                    autoCompile: true
+                                }
+                            })];
                     case 1:
-                        // let loader = new leaf.Loader();
-                        // loader.add("default", "resources/default.res.json", {
-                        //     loadType: leaf.LoaderType.TEXT
-                        // }).load((loader, resources) => {
-                        //     console.error(resources);
-                        // })
+                        _a.sent();
+                        _a.label = 2;
+                    case 2: return [4 /*yield*/, leaf.Res.loadResources()];
+                    case 3:
                         _a.sent();
                         world = leaf.init();
-                        scene = new ecs.Scene();
-                        world.scene = scene;
-                        bm = scene.addComponent(leaf.Bitmap);
-                        bm.resource = "common_img1";
+                        new elimination_scene_1.EliminationScene(world);
                         return [2 /*return*/];
                 }
             });
@@ -210,6 +202,49 @@ var Move = /** @class */ (function (_super) {
     return Move;
 }(ecs.Component));
 window["Main"] = Main;
+
+
+/***/ }),
+
+/***/ "../src/modules/elimination/elimination-scene.ts":
+/*!*******************************************************!*\
+  !*** ../src/modules/elimination/elimination-scene.ts ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var EliminationScene = /** @class */ (function () {
+    function EliminationScene(world) {
+        this.world = world;
+        world.scene = this.scene = new ecs.Scene();
+        tiny2d.addToWorld(world);
+        var bm = ecs.Entity.create().addComponent(leaf.Bitmap);
+        bm.resource = "pure-element-1-0";
+        // rect.property.x = 100;
+        // rect.property.y = 100;
+        bm.addComponent(tiny2d.Box);
+        bm.entity.parent = this.scene;
+        var f = bm.addComponent(tiny2d.Force, 0, 100);
+    }
+    EliminationScene.prototype.close = function () {
+        this.scene.destroy();
+        tiny2d.removeFromWorld(this.world);
+    };
+    EliminationScene = __decorate([
+        orange.autoload("EliminationScene")
+    ], EliminationScene);
+    return EliminationScene;
+}());
+exports.EliminationScene = EliminationScene;
 
 
 /***/ })

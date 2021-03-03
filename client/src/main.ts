@@ -1,45 +1,37 @@
 import { ImageLoader } from "./ImageLoader";
+import { EliminationScene } from "./modules/elimination/elimination-scene";
 
 export class Main {
 
 
     constructor() {
-        leaf.GLCore.init();
-        let gl = leaf.GLCore.gl;
-        gl.viewport(0, 0, leaf.GLCore.width, leaf.GLCore.height);
-        gl.enable(gl.BLEND);
-        gl.enable(gl.STENCIL_TEST);
-        gl.blendColor(1.0, 1.0, 1.0, 1.0);
-        //gl.enable(gl.CULL_FACE);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
-
-        // let ts = ["resources/64x64_1.png", "resources/64x64_2.png"];//, "resources/128x128_1.png", "resources/128x128_2.png", "resources/256x256_1.png", "resources/256x256_2.png", "resources/flower.png"];
-        // new ImageLoader(ts, this.loadImageComplete, this);
         this.init();
     }
 
     async init() {
-        // let loader = new leaf.Loader();
-        // loader.add("default", "resources/default.res.json", {
-        //     loadType: leaf.LoaderType.TEXT
-        // }).load((loader, resources) => {
-        //     console.error(resources);
-        // })
+        if (window["IS_WEB"]) {
+            try {
+                window["require"] = eval("__webpack_require__");
+                for (let k in window["require"].c) {
+                    window["require"].c["../client" + k.slice(2, k.length)] = window["require"].c[k];
+                }
+            } catch (e) {
+
+            }
+            await orange.startup({
+                native: {
+                    ip: "localhost",//"192.168.0.100",//(new orange.URLUtil(window.location.href)).params["serverIp"] || "localhost",
+                    autoCompile: true
+                }
+            });
+        }
         await leaf.Res.loadResources();
-        // let res = leaf.Res.getRes<leaf.Texture>("button_back");
-        // console.error(res)
-        // res.addCount();
-        // res.load().then(() => {
-        //     // console.error(res.data)
-        // });
         let world = leaf.init();
-        let scene = new ecs.Scene();
-        world.scene = scene;
-        let bm = scene.addComponent(leaf.Bitmap);
-        bm.resource = "common_img1";
-        // bm.tint = 0xff5655;
+        new EliminationScene(world);
+        // let scene = new ecs.Scene();
+        // world.scene = scene;
+        // let bm = scene.addComponent(leaf.Bitmap);
+        // bm.resource = "chicken-1";
     }
 
 }

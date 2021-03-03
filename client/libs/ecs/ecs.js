@@ -460,6 +460,13 @@ var ecs;
         Component.prototype.getComponentsInChildren = function (componentClass) {
             return this.entity ? this.entity.getComponentsInChildren(componentClass) : null;
         };
+        Object.defineProperty(Component.prototype, "transform", {
+            get: function () {
+                return this.entity && this.entity.transform;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(Component.prototype, "world", {
             get: function () {
                 return this.entity && this.entity.world;

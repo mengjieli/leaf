@@ -89,6 +89,7 @@ declare namespace ecs {
         getComponents<T extends Component>(componentClass: IComponentClass<T>): T[];
         getComponentsInParent<T extends Component>(componentClass: IComponentClass<T>): T[];
         getComponentsInChildren<T extends Component>(componentClass: IComponentClass<T>): T[];
+        readonly transform: Transform;
         readonly world: World;
         /**
          *
