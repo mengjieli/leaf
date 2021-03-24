@@ -226,18 +226,9 @@ var EliminationScene = /** @class */ (function () {
     function EliminationScene(world) {
         this.world = world;
         world.scene = this.scene = new ecs.Scene();
-        tiny2d.addToWorld(world);
-        var bm = ecs.Entity.create().addComponent(leaf.Bitmap);
-        bm.resource = "pure-element-1-0";
-        // rect.property.x = 100;
-        // rect.property.y = 100;
-        bm.addComponent(tiny2d.Box);
-        bm.entity.parent = this.scene;
-        var f = bm.addComponent(tiny2d.Force, 0, 100);
     }
     EliminationScene.prototype.close = function () {
         this.scene.destroy();
-        tiny2d.removeFromWorld(this.world);
     };
     EliminationScene = __decorate([
         orange.autoload("EliminationScene")

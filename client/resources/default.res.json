@@ -827,6 +827,11 @@
       "name": "skill_json",
       "path": "assets/seed/skill.json",
       "type": 5
+    },
+    {
+      "name": "default_res_json",
+      "path": "default.res.json",
+      "type": 5
     }
   ]
 }
