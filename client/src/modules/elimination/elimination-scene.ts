@@ -9,6 +9,8 @@ export class EliminationScene {
         this.world = world;
         world.scene = this.scene = new ecs.Scene();
 
+        console.error("hello!!!!");
+
         // let bp =ecs.Entity.create();
         // bp.parent = world.scene;
         // bp.transform.anchorOffsetX = 30;
@@ -48,6 +50,8 @@ export class EliminationScene {
             exml.playTweenGroup(exml.animation, 0);
             window["te"] = exml;
         })();
+
+        console.error("??11")
 
     }
 

@@ -18,7 +18,7 @@ namespace leaf {
         static $shareContext2D: any;
 
         static init() {
-            var canvas = document.getElementById('leaf') as HTMLCanvasElement;
+            var canvas = (window["canvas"] || document.getElementById('leaf')) as HTMLCanvasElement;
             this.width = canvas.width;
             this.height = canvas.height;
             var names = ["experimental-webgl", "webgl"];
@@ -89,3 +89,5 @@ namespace leaf {
     }
 
 }
+
+window["leaf"] = leaf;

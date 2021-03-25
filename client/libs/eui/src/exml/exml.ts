@@ -63,3 +63,5 @@ namespace eui {
     }
 
 }
+
+window["eui"] = eui;

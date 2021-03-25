@@ -72,11 +72,19 @@ namespace leaf {
 
         load() {
             if (this.itemType.loadType === LoaderType.TEXT) {
-                let xhr = this._xhr = this.getXHR();
-                xhr.onreadystatechange = this.onReadyStateChange.bind(this);
-                xhr.onprogress = this.updateProgress.bind(this);
-                xhr.open(this.itemType.method || "GET", this.url, true);
-                xhr.send(this.itemType.sendData);
+                if (window["wxloadText"] && (this.url.slice(0, "http://".length) != "http://" ||
+                    this.url.slice(0, "https://".length) != "https://")) {
+                    window["wxloadText"](this.url, (data) => {
+                        this._data = data;
+                        this.onComplete.dispatch();
+                    })
+                } else {
+                    let xhr = this._xhr = this.getXHR();
+                    xhr.onreadystatechange = this.onReadyStateChange.bind(this);
+                    xhr.onprogress = this.updateProgress.bind(this);
+                    xhr.open(this.itemType.method || "GET", this.url, true);
+                    xhr.send(this.itemType.sendData);
+                }
             } else if (this.itemType.loadType === LoaderType.IMAGE) {
                 var img = new Image();
                 img.src = this.url;
@@ -89,7 +97,7 @@ namespace leaf {
         get data() {
             if (this.itemType.loadType === LoaderType.TEXT) {
                 if (!this._xhr) {
-                    return null;
+                    return this._data;
                 }
                 if (this._xhr.response != undefined) {
                     return this._xhr.response;

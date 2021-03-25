@@ -10,6 +10,7 @@
     "build": "webpack --config build.web.js --watch",
     "engine": "webpack --config build.engine.js --watch",
     "build-wx": "sh copy-build-js.sh && webpack --config build.wxgame.js && node tools/bin/main.js",
+    "wxlib": "sh copy-wx-js.sh",
     "fast-wx": "sh copy-min-js.sh && webpack --config build.wxgame.js && node tools/bin/main.js",
     "publish-wx": "sh copy-min-js.sh && cd ../Eliminate && egret publish --target wxgame && cd - && webpack --config publish.wxgame.js && node tools/bin/main.js"
   },
