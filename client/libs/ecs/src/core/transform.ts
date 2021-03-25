@@ -19,6 +19,16 @@ namespace ecs {
         /**
          * @internal
          */
+        private _anchorOffsetX: number = 0;
+
+        /**
+         * @internal
+         */
+        private _anchorOffsetY: number = 0;
+
+        /**
+         * @internal
+         */
         private _scaleX: number = 1;
 
         /**
@@ -67,6 +77,20 @@ namespace ecs {
             if (this._y === val) return;
             this.dirty = true;
             this._y = val;
+        }
+
+        get anchorOffsetX() { return this._anchorOffsetX; }
+        set anchorOffsetX(val: number) {
+            if (this._anchorOffsetX === val) return;
+            this.dirty = true;
+            this._anchorOffsetX = val;
+        }
+
+        get anchorOffsetY() { return this._anchorOffsetY; }
+        set anchorOffsetY(val: number) {
+            if (this._anchorOffsetY === val) return;
+            this.dirty = true;
+            this._anchorOffsetY = val;
         }
 
         get scaleX() { return this._scaleX; }
@@ -128,8 +152,12 @@ namespace ecs {
                     local.c = -sin * sy;
                     local.d = cos * sy;
                 }
-                local.tx = this._x;
-                local.ty = this._y;
+                let tx = -this._anchorOffsetX * local.a + this._x;
+                let ty = -this._anchorOffsetY * local.d + this._y;
+                tx += -this._anchorOffsetY * local.c;
+                ty += -this._anchorOffsetX * local.b;
+                local.tx = tx;
+                local.ty = ty;
             }
             return this._local;
         }
@@ -158,7 +186,7 @@ namespace ecs {
         reset() {
             this.local.identity();
             this.dirty = false;
-            this._x = this._y = this._angle = 0;
+            this._anchorOffsetX = this._anchorOffsetY = this._x = this._y = this._angle = 0;
             this._scaleX = this._scaleY = this._alpha = 1;
         }
 

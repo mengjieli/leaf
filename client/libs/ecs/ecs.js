@@ -474,6 +474,18 @@ var ecs;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Component.prototype, "parent", {
+            get: function () {
+                return this.entity && this.entity.parent;
+            },
+            set: function (val) {
+                if (this.entity) {
+                    this.entity.parent = val;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
         Component.prototype.dispatch = function (type) {
             var args = [];
             for (var _i = 1; _i < arguments.length; _i++) {
@@ -2015,6 +2027,14 @@ var ecs;
             /**
              * @internal
              */
+            this._anchorOffsetX = 0;
+            /**
+             * @internal
+             */
+            this._anchorOffsetY = 0;
+            /**
+             * @internal
+             */
             this._scaleX = 1;
             /**
              * @internal
@@ -2067,6 +2087,28 @@ var ecs;
                     return;
                 this.dirty = true;
                 this._y = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Transform.prototype, "anchorOffsetX", {
+            get: function () { return this._anchorOffsetX; },
+            set: function (val) {
+                if (this._anchorOffsetX === val)
+                    return;
+                this.dirty = true;
+                this._anchorOffsetX = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Transform.prototype, "anchorOffsetY", {
+            get: function () { return this._anchorOffsetY; },
+            set: function (val) {
+                if (this._anchorOffsetY === val)
+                    return;
+                this.dirty = true;
+                this._anchorOffsetY = val;
             },
             enumerable: true,
             configurable: true
@@ -2139,8 +2181,12 @@ var ecs;
                         local.c = -sin * sy;
                         local.d = cos * sy;
                     }
-                    local.tx = this._x;
-                    local.ty = this._y;
+                    var tx = -this._anchorOffsetX * local.a + this._x;
+                    var ty = -this._anchorOffsetY * local.d + this._y;
+                    tx += -this._anchorOffsetY * local.c;
+                    ty += -this._anchorOffsetX * local.b;
+                    local.tx = tx;
+                    local.ty = ty;
                 }
                 return this._local;
             },
@@ -2177,7 +2223,7 @@ var ecs;
         Transform.prototype.reset = function () {
             this.local.identity();
             this.dirty = false;
-            this._x = this._y = this._angle = 0;
+            this._anchorOffsetX = this._anchorOffsetY = this._x = this._y = this._angle = 0;
             this._scaleX = this._scaleY = this._alpha = 1;
         };
         return Transform;

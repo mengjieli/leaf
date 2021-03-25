@@ -153,6 +153,17 @@ namespace ecs {
         get world(): World {
             return this.entity && this.entity.world;
         }
+
+        get parent(): Entity {
+            return this.entity && this.entity.parent;
+        }
+
+        set parent(val: Entity) {
+            if (this.entity) {
+                this.entity.parent = val;
+            }
+        }
+
         /**
          * 
          * @param type 接受 entity 内的广播

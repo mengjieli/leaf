@@ -91,6 +91,7 @@ declare namespace ecs {
         getComponentsInChildren<T extends Component>(componentClass: IComponentClass<T>): T[];
         readonly transform: Transform;
         readonly world: World;
+        parent: Entity;
         /**
          *
          * @param type 接受 entity 内的广播
@@ -366,6 +367,8 @@ declare namespace ecs {
         readonly entity: Entity;
         x: number;
         y: number;
+        anchorOffsetX: number;
+        anchorOffsetY: number;
         scaleX: number;
         scaleY: number;
         angle: number;
