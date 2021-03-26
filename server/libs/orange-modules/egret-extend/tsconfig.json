@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "outFile": "egret-extend.js",
+        "experimentalDecorators": true,
+        "sourceMap": true,
+        "lib": [
+            "es5",
+            "dom",
+            "es2015"
+        ],
+        "declaration": true,
+        "downlevelIteration": true,
+        "types": [],
+        "watch": true,
+        "pretty": true,
+        "stripInternal": true
+    },
+    "include": [
+        "./../../modules",
+        "src"
+    ],
+    "files": [
+        "./../../orange/orange.d.ts",
+        "./../native/native.d.ts"
+    ]
+}

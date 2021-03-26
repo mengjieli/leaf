@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+      "target": "es5",
+      "outDir": "bin",
+      "experimentalDecorators": true,
+      "sourceMap": true,
+      "declaration": true,
+      "lib": [
+        "es5",
+        "dom",
+        "es2015"
+      ],
+      "downlevelIteration": true,
+      "types": [],
+      "watch": true,
+      "pretty": true
+    },
+    "include": [
+      "src"
+    ]
+  }

@@ -1,0 +1,1 @@
+node bin/main.js
