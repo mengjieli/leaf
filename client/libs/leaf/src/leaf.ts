@@ -2,7 +2,8 @@ namespace leaf {
 
     export var debug = false;
 
-    var world: ecs.World;
+    export var world: ecs.World;
+
     export var runInfo: {
         frame: number,
         runTime: number,
@@ -23,17 +24,57 @@ namespace leaf {
         fpsDrawCount: 0,
     };
 
+    var runFlag = true;
+
+    /**
+     * 暂停
+     */
+    export function pause() {
+        runFlag = false;
+    }
+
+    /**
+     * 继续播放
+     */
+    export function play() {
+        runFlag = true;
+    }
+
+    /**
+     * @internal
+     */
+    export var loaderEntity: ecs.Entity;
+
+    var onTick: Function;
+
+    /**
+     * 初始化
+     * @returns 
+     */
     export function init(): ecs.World {
         if (world) return;
         GLCore.init();
         world = world || new ecs.World();
+        loaderEntity = ecs.Entity.create();
+        loaderEntity.parent = world.root;
+        let rs: RecordSystem;
+        world.addSystem(RecordSystem, [RecordComponent]);
+        rs = world.getSystem(RecordSystem);
         world.addSystem(RenderSystem, [Render as any]);
         var t = 0;
         var lastTime = Date.now();
         var lastFrame = 0;
         var lastDraCall = 0;
         var lastDrawCount = 0;
-        function onTick(): void {
+        onTick = function (): void {
+            if (rs.checkReplayReady() === false) {
+                requestAnimationFrame.call(window, onTick);
+                return;
+            }
+            if (!runFlag) {
+                requestAnimationFrame.call(window, onTick);
+                return;
+            }
             let now = Date.now();
             world.update();
             requestAnimationFrame.call(window, onTick);

@@ -222,6 +222,30 @@ namespace ecs {
             }
         }
 
+        getSystem<T extends IdObject, S extends System<T>>(system: S | { new(): S }): S {
+            let systemClass: { new(): S };
+            let singleSystem: S;
+            if (system instanceof System) {
+                systemClass = system.constructor as any;
+                singleSystem = system;
+            } else {
+                systemClass = system;
+            }
+            let data = System.syncSystemClasses[systemClass.name];
+            if (data && !this.subWorld) {
+                this.syncDeleteSystems.push(systemClass.name);
+                if (data.mode === EMSyncSystemMode.SUB_WORLD_ONLY) return;
+            }
+            for (let i = 0; i < this.systems.length; i++) {
+                let sys = this.systems[i];
+                if (sys instanceof systemClass) {
+                    if (!singleSystem || singleSystem && singleSystem === sys) {
+                        return sys;
+                    }
+                }
+            }
+        }
+
         encodeSyncWorld(): SyncWorld {
             let components = this.syncComponents;
             let entities = {};

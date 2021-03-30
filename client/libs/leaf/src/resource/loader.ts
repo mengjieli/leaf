@@ -17,7 +17,7 @@ namespace leaf {
         }
 
         add(name: string, url: string, itemType: LoaderItemType) {
-            let r = this.resources[name] = new LoaderResource();
+            let r: LoaderResource = this.resources[name] = loaderEntity ? loaderEntity.addComponent(LoaderResource) : new LoaderResource();
             r.name = name;
             r.url = url;
             r.itemType = itemType;
@@ -55,10 +55,9 @@ namespace leaf {
                 c && c(this, this.resources);
             }
         }
-
     }
 
-    export class LoaderResource {
+    export class LoaderResource extends RecordComponent {
 
         name: string;
         url: string;
@@ -70,13 +69,15 @@ namespace leaf {
 
         onComplete: ecs.Broadcast<void> = new ecs.Broadcast<void>();
 
+        isComplete: boolean = false;
+
         load() {
             if (this.itemType.loadType === LoaderType.TEXT) {
                 if (window["wxloadText"] && (this.url.slice(0, "http://".length) != "http://" ||
                     this.url.slice(0, "https://".length) != "https://")) {
                     window["wxloadText"](this.url, (data) => {
                         this._data = data;
-                        this.onComplete.dispatch();
+                        this.loadComplete();
                     })
                 } else {
                     let xhr = this._xhr = this.getXHR();
@@ -90,7 +91,7 @@ namespace leaf {
                 img.src = this.url;
                 img.crossOrigin = '*';
                 this._data = img;
-                img.onload = this.loadImageComplete;
+                img.onload = this.loadComplete;
             }
         }
 
@@ -122,8 +123,18 @@ namespace leaf {
             //event.loaded / event.total
         }
 
-        loadImageComplete = () => {
-            this.onComplete.dispatch();
+        loadComplete = () => {
+            this.recordReady(() => {
+                this.isComplete = true;
+            });
+        }
+
+        checkRecord() {
+            if (this.isComplete) {
+                this.track();
+                this.destroy();
+                this.onComplete.dispatch();
+            }
         }
 
         onReadyStateChange = function () {
@@ -140,7 +151,10 @@ namespace leaf {
                         // self_1.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
                     }
                     else {
-                        this.onComplete.dispatch();
+                        // this.loadComplete();
+                        setTimeout(()=>{
+                            this.loadComplete();
+                        },1000*Math.random());
                     }
                 }, 0);
             }

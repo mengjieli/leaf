@@ -263,7 +263,7 @@ namespace ecs {
         static realNewCount: number = 0;
         static allowMultiply: boolean = true;
         static requireComponents: IComponentClass<any>[] = [];
-        static recycleEnable: boolean = true;
+        static recycleEnable: boolean = false;
         static virtualComponent: boolean = false;
 
         static syncComponents: { [index: string]: IComponentClass<any> } = {};

@@ -439,6 +439,9 @@ declare namespace ecs {
         removeSystem<T extends IdObject>(system: System<T> | {
             new (): System<T>;
         }): void;
+        getSystem<T extends IdObject, S extends System<T>>(system: S | {
+            new (): S;
+        }): S;
         encodeSyncWorld(): SyncWorld;
         decodeSyncComponents(syncWorld: SyncWorld): void;
         scene: Scene;

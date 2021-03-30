@@ -14,7 +14,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -596,7 +596,7 @@ var ecs;
         Component.realNewCount = 0;
         Component.allowMultiply = true;
         Component.requireComponents = [];
-        Component.recycleEnable = true;
+        Component.recycleEnable = false;
         Component.virtualComponent = false;
         Component.syncComponents = {};
         return Component;
@@ -1901,7 +1901,7 @@ var ecs;
         };
         EntityQuery.prototype.onRemoveComponent = function (entity, component) {
             // if (!this.has(entity) || this.componentClassMap[component.classType.id] === undefined) return;
-            if (this.has(entity))
+            if (!this.has(entity))
                 return;
             var list = this.componentClassList;
             for (var i = 0; i < list.length; i++) {
@@ -2503,6 +2503,31 @@ var ecs;
                             ecs.ObjectPools.releaseId(sys.id);
                         }
                         i--;
+                    }
+                }
+            }
+        };
+        World.prototype.getSystem = function (system) {
+            var systemClass;
+            var singleSystem;
+            if (system instanceof ecs.System) {
+                systemClass = system.constructor;
+                singleSystem = system;
+            }
+            else {
+                systemClass = system;
+            }
+            var data = ecs.System.syncSystemClasses[systemClass.name];
+            if (data && !this.subWorld) {
+                this.syncDeleteSystems.push(systemClass.name);
+                if (data.mode === ecs.EMSyncSystemMode.SUB_WORLD_ONLY)
+                    return;
+            }
+            for (var i = 0; i < this.systems.length; i++) {
+                var sys = this.systems[i];
+                if (sys instanceof systemClass) {
+                    if (!singleSystem || singleSystem && singleSystem === sys) {
+                        return sys;
                     }
                 }
             }

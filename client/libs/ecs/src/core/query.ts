@@ -51,7 +51,7 @@ namespace ecs {
 
         onAddComponent(entity: Entity, component: Component): void {
             // if (this.has(entity) || this.componentClassMap[component.classType.id] === undefined) return;
-            if (this.has(entity) ) return;
+            if (this.has(entity)) return;
             let list = this.componentClassList;
             for (let i = 0; i < list.length; i++) {
                 if (!entity.componentEnableCount[list[i].classType.id]) {
@@ -63,7 +63,7 @@ namespace ecs {
 
         onRemoveComponent(entity: Entity, component: Component): void {
             // if (!this.has(entity) || this.componentClassMap[component.classType.id] === undefined) return;
-            if (this.has(entity) ) return;
+            if (!this.has(entity)) return;
             let list = this.componentClassList;
             for (let i = 0; i < list.length; i++) {
                 let id = list[i].classType.id;

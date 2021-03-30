@@ -1,5 +1,6 @@
 declare namespace leaf {
     var debug: boolean;
+    var world: ecs.World;
     var runInfo: {
         frame: number;
         runTime: number;
@@ -10,6 +11,18 @@ declare namespace leaf {
         fpsDrawCall: number;
         fpsDrawCount: number;
     };
+    /**
+     * 暂停
+     */
+    function pause(): void;
+    /**
+     * 继续播放
+     */
+    function play(): void;
+    /**
+     * 初始化
+     * @returns
+     */
     function init(): ecs.World;
 }
 declare namespace leaf {
@@ -90,6 +103,40 @@ declare namespace leaf {
     }
 }
 declare namespace leaf {
+    class RecordComponent extends ecs.Component {
+        recordId: number;
+        init(): void;
+        checkRecord(): void;
+        track(data?: any): void;
+        recordReady(call: Function): void;
+        isReady(): boolean;
+    }
+}
+declare namespace leaf {
+    class RecordSystem extends ecs.EntitySystem {
+        frame: number;
+        private _newId;
+        readonly newId: number;
+        private isRecording;
+        private records;
+        private replayRecords;
+        private isReplaying;
+        private calls;
+        startRecord(): void;
+        startReplay(replayRecords: any): void;
+        update(): void;
+        track(id: number, data?: any): void;
+        recordReady(id: number): number;
+        addCallAt(call: Function, frame: number): void;
+        getRecord(id: number): Record;
+    }
+    interface Record {
+        id: number;
+        frame: number;
+        data: any;
+    }
+}
+declare namespace leaf {
     class Loader {
         resources: {
             [index: string]: LoaderResource;
@@ -106,7 +153,7 @@ declare namespace leaf {
         private loadCurrent;
         private loadCurrentComplete;
     }
-    class LoaderResource {
+    class LoaderResource extends RecordComponent {
         name: string;
         url: string;
         itemType: LoaderItemType;
@@ -114,10 +161,12 @@ declare namespace leaf {
         next: string;
         private _xhr;
         onComplete: ecs.Broadcast<void>;
+        isComplete: boolean;
         load(): void;
         readonly data: any;
         updateProgress(event: any): void;
-        loadImageComplete: () => void;
+        loadComplete: () => void;
+        checkRecord(): void;
         onReadyStateChange: () => void;
         getXHR(): any;
     }
@@ -145,11 +194,11 @@ declare namespace leaf {
         static clearUnsedTextures(): void;
         static getAliveResources(): any[];
         static addRes(type: EMResourceType, name: string, url: string): any;
-        static loadTexture(name: string, url: string): Promise<Resource<Texture>>;
-        static loadJSON(name: string, url: string): Promise<any>;
-        static loadText(name: string, url: string): Promise<any>;
-        static loadResources(url?: string, resourceRoot?: string): Promise<any>;
-        static loadSpriteSheet(name: string, url: string): Promise<SpriteSheetResource>;
+        static loadTexture(name: string, url: string): XPromise<Resource<Texture>>;
+        static loadJSON(name: string, url: string): XPromise<any>;
+        static loadText(name: string, url: string): XPromise<any>;
+        static loadResources(url?: string, resourceRoot?: string): XPromise<{}>;
+        static loadSpriteSheet(name: string, url: string): XPromise<SpriteSheetResource>;
     }
     enum EMResourceType {
         TEXTURE = 1,
@@ -174,7 +223,7 @@ declare namespace leaf {
         resource: any;
         addCount(): void;
         removeCount(): void;
-        load(): Promise<this>;
+        load(): XPromise<Resource<T>>;
     }
     class SpriteSheetFrameResource extends Resource<Texture> {
         id: number;
@@ -533,5 +582,16 @@ declare namespace leaf {
         private _endY;
         readonly endY: number;
         destroy(): void;
+    }
+}
+declare namespace leaf {
+    class XPromise<T> {
+        private resolve;
+        private reject;
+        private state;
+        private args;
+        init(call: (resolve: any, reject?: any) => any): void;
+        then(resolve: (t?: T) => any): this;
+        catch(reject: (r?: any) => any): this;
     }
 }

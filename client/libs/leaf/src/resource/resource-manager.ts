@@ -190,15 +190,19 @@ namespace leaf {
       }
     }
 
-    public static loadTexture(name: string, url: string): Promise<Resource<Texture>> {
-      if (!hasStart) startClearResource();
-      let res: Resource<Texture> = this.resources[name];
-      if (res && res.hasLoaded) return this.resources[name] as any;
-      let fileName = "texture_" + name;
-      if (!res) {
-        res = this.addRes(EMResourceType.TEXTURE, name, url);
-      }
-      return new Promise(resolve => {
+    public static loadTexture(name: string, url: string): XPromise<Resource<Texture>> {
+      return ecs.ObjectPools.createRecyableObject(XPromise, (resolve => {
+        if (!hasStart) startClearResource();
+        let res: Resource<Texture> = this.resources[name];
+        if (res && res.hasLoaded) {
+          resolve(this.resources[name] as any);
+          return;
+        }
+        let fileName = "texture_" + name;
+        if (!res) {
+          res = this.addRes(EMResourceType.TEXTURE, name, url);
+        }
+
         res.onLoadCompleteCalls.push(resolve as any);
         if (!res.isLoading) {
           res.isLoading = true;
@@ -228,16 +232,19 @@ namespace leaf {
             }
           });
         }
-      })
+      })) as any;
     }
 
-    public static loadJSON(name: string, url: string): Promise<any> {
-      let res = this.resources[name];
-      if (!res) {
-        res = this.addRes(EMResourceType.JSON, name, url);
-      }
-      if (res.hasLoaded) return res.data;
-      return new Promise<any>(resolve => {
+    public static loadJSON(name: string, url: string): XPromise<any> {
+      return ecs.ObjectPools.createRecyableObject(XPromise, (resolve => {
+        let res = this.resources[name];
+        if (!res) {
+          res = this.addRes(EMResourceType.JSON, name, url);
+        }
+        if (res.hasLoaded) {
+          resolve(res.data);
+          return;
+        }
         res.onLoadCompleteCalls.push(resolve);
         if (res.isLoading) return;
         let fileName = name;
@@ -257,16 +264,20 @@ namespace leaf {
             debug && this.weakSet.add(res.data);
             debug && console.log(`[Res] 加载资源: ${res.name}，当前资源个数: ${this.getAliveResources().length}，资源列表: ${this.getAliveResources()}`);
           });
-      });
+      }));
     }
 
-    public static loadText(name: string, url: string): Promise<any> {
-      let res = this.resources[name];
-      if (!res) {
-        res = this.addRes(EMResourceType.TEXT, name, url);
-      }
-      if (res.hasLoaded) return res.data;
-      return new Promise<any>(resolve => {
+    public static loadText(name: string, url: string): XPromise<any> {
+      return ecs.ObjectPools.createRecyableObject(XPromise, (resolve => {
+        let res = this.resources[name];
+        if (!res) {
+          res = this.addRes(EMResourceType.TEXT, name, url);
+        }
+        if (res.hasLoaded) {
+          resolve(res.data);
+          return;
+        }
+
         res.onLoadCompleteCalls.push(resolve);
         if (res.isLoading) return;
         let fileName = name;
@@ -286,52 +297,54 @@ namespace leaf {
               res.onLoadCompleteCalls.shift()(res);
             }
           });
-      });
+      }));
     }
 
     public static loadResources(url: string = "default.res.json", resourceRoot: string = "resources/") {
-      return new Promise<void>(
-        resolve => {
-          url = resourceRoot + url;
-          let fileName = url.split("/")[url.split("/").length - 1];
-          ((ecs.ObjectPools.createRecyableObject(Loader as any)) as Loader)
-            .add(fileName, url, {
-              loadType: 1,
-              xhrType: 'text'
-            }).load((loader, resources) => {
-              let cfg = JSON.parse(resources[fileName].data);
-              loader.resources = {};
-              ecs.ObjectPools.releaseRecyableObject(loader as any);
-              for (let file of cfg.files) {
-                if (file.type === EMResourceType.TEXTURE) {
-                  Res.addRes(EMResourceType.TEXTURE, file.name, resourceRoot + file.path);
-                } else if (file.type === EMResourceType.SPRITE_SHEET) {
-                  Res.addRes(EMResourceType.SPRITE_SHEET, file.name, resourceRoot + file.path);
-                  for (let frame of file.frames) {
-                    Res.addRes(EMResourceType.SPRITE_SHEET_FRAME, frame, file.name);
-                  }
-                } else if (file.type === EMResourceType.TEXT) {
-                  Res.addRes(EMResourceType.TEXT, file.name, resourceRoot + file.path);
-                } else if (file.type === EMResourceType.JSON) {
-                  Res.addRes(EMResourceType.JSON, file.name, resourceRoot + file.path);
+      return ecs.ObjectPools.createRecyableObject(XPromise, (resolve => {
+        url = resourceRoot + url;
+        let fileName = url.split("/")[url.split("/").length - 1];
+        ((ecs.ObjectPools.createRecyableObject(Loader as any)) as Loader)
+          .add(fileName, url, {
+            loadType: 1,
+            xhrType: 'text'
+          }).load((loader, resources) => {
+            let cfg = JSON.parse(resources[fileName].data);
+            loader.resources = {};
+            ecs.ObjectPools.releaseRecyableObject(loader as any);
+            for (let file of cfg.files) {
+              if (file.type === EMResourceType.TEXTURE) {
+                Res.addRes(EMResourceType.TEXTURE, file.name, resourceRoot + file.path);
+              } else if (file.type === EMResourceType.SPRITE_SHEET) {
+                Res.addRes(EMResourceType.SPRITE_SHEET, file.name, resourceRoot + file.path);
+                for (let frame of file.frames) {
+                  Res.addRes(EMResourceType.SPRITE_SHEET_FRAME, frame, file.name);
                 }
+              } else if (file.type === EMResourceType.TEXT) {
+                Res.addRes(EMResourceType.TEXT, file.name, resourceRoot + file.path);
+              } else if (file.type === EMResourceType.JSON) {
+                Res.addRes(EMResourceType.JSON, file.name, resourceRoot + file.path);
               }
-              resolve();
-            });
-        }
-      )
+            }
+            resolve();
+          });
+      }))
     }
 
-    public static loadSpriteSheet(name: string, url: string): Promise<SpriteSheetResource> {
-      if (!hasStart) startClearResource();
-      let res: SpriteSheetResource = this.resources[name] as SpriteSheetResource;
-      if (res && res.hasLoaded) return res as any;
-      let fileName = "spriteSheet_" + name;
-      if (!res) {
-        res = this.addRes(EMResourceType.SPRITE_SHEET, name, url);
-      }
-      let end = url.split("/")[url.split("/").length - 1];
-      return new Promise<SpriteSheetResource>(resolve => {
+    public static loadSpriteSheet(name: string, url: string): XPromise<SpriteSheetResource> {
+      return ecs.ObjectPools.createRecyableObject(XPromise, (resolve => {
+        if (!hasStart) startClearResource();
+        let res: SpriteSheetResource = this.resources[name] as SpriteSheetResource;
+        if (res && res.hasLoaded) {
+          resolve(res as any);
+          return;
+        }
+        let fileName = "spriteSheet_" + name;
+        if (!res) {
+          res = this.addRes(EMResourceType.SPRITE_SHEET, name, url);
+        }
+        let end = url.split("/")[url.split("/").length - 1];
+
         res.onLoadCompleteCalls.push(resolve as any);
         if (res.isLoading) {
           return;
@@ -398,7 +411,7 @@ namespace leaf {
             }
           })
         })
-      })
+      })) as any;
     }
   }
 
@@ -453,18 +466,35 @@ namespace leaf {
       (this.count as any)--;
     }
 
-    async load() {
-      if (this.type === EMResourceType.TEXTURE) {
-        await Res.loadTexture(this.name, this.url);
-      } else if (this.type === EMResourceType.SPRITE_SHEET_FRAME) {
-        await Res.loadSpriteSheet((this as any as SpriteSheetFrameResource).spriteSheet.name,
-          (this as any as SpriteSheetFrameResource).spriteSheet.url);
-      } else if (this.type === EMResourceType.TEXT) {
-        await Res.loadText(this.name, this.url);
-      } else if (this.type === EMResourceType.JSON) {
-        await Res.loadJSON(this.name, this.url);
-      }
-      return this;
+    load() {
+      return ecs.ObjectPools.createRecyableObject<XPromise<Resource<T>>>(XPromise, (resolve, reject) => {
+        if (this.type === EMResourceType.TEXTURE) {
+          Res.loadTexture(this.name, this.url).then(r => {
+            resolve(this);
+          }).catch(r => {
+            reject(r);
+          });
+        } else if (this.type === EMResourceType.SPRITE_SHEET_FRAME) {
+          Res.loadSpriteSheet((this as any as SpriteSheetFrameResource).spriteSheet.name,
+            (this as any as SpriteSheetFrameResource).spriteSheet.url).then(r => {
+              resolve(this);
+            }).catch(r => {
+              reject(r);
+            });
+        } else if (this.type === EMResourceType.TEXT) {
+          Res.loadText(this.name, this.url).then(r => {
+            resolve(this);
+          }).catch(r => {
+            reject(r);
+          });
+        } else if (this.type === EMResourceType.JSON) {
+          Res.loadJSON(this.name, this.url).then(r => {
+            resolve(this);
+          }).catch(r => {
+            reject(r);
+          });
+        }
+      })
     }
 
   }
