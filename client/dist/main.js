@@ -263,32 +263,6 @@ var EliminationScene = /** @class */ (function () {
         var _this = this;
         this.world = world;
         world.scene = this.scene = new ecs.Scene();
-        console.error("hello!!!!");
-        // let bp =ecs.Entity.create();
-        // bp.parent = world.scene;
-        // bp.transform.anchorOffsetX = 30;
-        // bp.transform.anchorOffsetY = 50;
-        // bp.transform.angle = 30 * Math.PI / 180;
-        // bp.transform.x = 100;
-        // bp.transform.y = 100;
-        // bp.transform.scaleX = 2;
-        // bp.transform.scaleY = 2;
-        // let bm = ecs.Entity.create().addComponent(leaf.Bitmap);
-        // bm.entity.parent = bp;
-        // bm.resource = "pure-item-4-4";
-        // let label = ecs.Entity.create().addComponent(leaf.Label);
-        // label.parent = world.scene;
-        // label.text = "E";
-        // label.transform.x = 100;
-        // label.transform.y = 100;
-        // label.transform.alpha = 0.7;
-        // let label2 = ecs.Entity.create().addComponent(leaf.Label);
-        // label2.parent = world.scene;
-        // label2.text = "E";
-        // label2.transform.alpha = 0.7;
-        // label2.transform.x = 70;
-        // label2.transform.y = 50;
-        // console.error("wt");
         (function () { return __awaiter(_this, void 0, void 0, function () {
             var json, exml;
             return __generator(this, function (_a) {
@@ -306,7 +280,6 @@ var EliminationScene = /** @class */ (function () {
                 }
             });
         }); })();
-        console.error("??11");
     }
     EliminationScene.prototype.close = function () {
         this.scene.destroy();

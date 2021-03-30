@@ -290,7 +290,7 @@ namespace leaf {
     }
 
     public static loadResources(url: string = "default.res.json", resourceRoot: string = "resources/") {
-      return new Promise<any>(
+      return new Promise<void>(
         resolve => {
           url = resourceRoot + url;
           let fileName = url.split("/")[url.split("/").length - 1];
