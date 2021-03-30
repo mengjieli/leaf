@@ -28,6 +28,7 @@ var ProxyStruct = /** @class */ (function () {
         p.name = name;
         p.type = type;
         p.typeValue = typeValue;
+        this.properties.push(p);
         return p;
     };
     return ProxyStruct;
@@ -64,10 +65,21 @@ var ProxyMaker = /** @class */ (function () {
         this.version = v;
     }
     ProxyMaker.prototype.addStruct = function (st) {
+        var _this = this;
+        if (!st || this.structs.indexOf(st) != -1)
+            return;
         this.structs.push(st);
+        var v = new st();
+        v.properties.forEach(function (p) {
+            if (p.type === EMProxyPropertyType.STRUCT) {
+                _this.addStruct(p.typeValue);
+            }
+        });
     };
     ProxyMaker.prototype.addRemoteMethod = function (method) {
         this.methods.push(method);
+        this.addStruct(method.req);
+        this.addStruct(method.resp);
     };
     ProxyMaker.prototype.makeClient = function () {
     };
@@ -86,6 +98,7 @@ var ProxyMaker = /** @class */ (function () {
         try {
             for (var _b = __values(this.structs), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var st = _c.value;
+                strcut += this.makeStruct(new st()) + '\n\n';
             }
         }
         catch (e_1_1) { e_1 = { error: e_1_1 }; }
@@ -95,6 +108,28 @@ var ProxyMaker = /** @class */ (function () {
             }
             finally { if (e_1) throw e_1.error; }
         }
+        file = new lib.File(lib.File.join(url, "proxy/auto/struct.ts"));
+        file.save(strcut);
+    };
+    ProxyMaker.prototype.makeStruct = function (st) {
+        var str = "export class " + st.constructor.name + " {\n";
+        st.properties.forEach(function (p) {
+            if (p.type === EMProxyPropertyType.INT)
+                str += "\t" + p.name + ": number = 0;";
+            if (p.type === EMProxyPropertyType.STRING)
+                str += "\t" + p.name + ": string = '';";
+            if (p.type === EMProxyPropertyType.STRUCT) {
+                var pt = new p.typeValue();
+                str += "\t" + p.name + ": " + pt.constructor.name + " = new " + pt.constructor.name + "();";
+            }
+            if (p.type === EMProxyPropertyType.ARRAY_INT)
+                str += "\t" + p.name + ": number[] = [];";
+            if (p.type === EMProxyPropertyType.ARRAY_STRING)
+                str += "\t" + p.name + ": string[] = [];";
+            str += '\n';
+        });
+        str += "}";
+        return str;
     };
     return ProxyMaker;
 }());

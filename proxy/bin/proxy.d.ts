@@ -44,7 +44,9 @@ export declare class ProxyMaker {
     readonly version: Version;
     constructor(v: Version);
     private structs;
-    addStruct(st: ProxyStruct): void;
+    addStruct(st: {
+        new (): ProxyStruct;
+    }): void;
     private methods;
     addRemoteMethod(method: ProxyMethod): void;
     makeClient(): void;
@@ -53,4 +55,5 @@ export declare class ProxyMaker {
      * @param url src 目录
      */
     makeServer(url: string): void;
+    private makeStruct;
 }

@@ -15,15 +15,37 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var proxy_1 = require("./proxy");
 //绝对还原，客户端禁止使用 async 方法，替代 Promise 为 XPromise
-var RespBase = /** @class */ (function (_super) {
-    __extends(RespBase, _super);
-    function RespBase() {
+var RespCommon = /** @class */ (function (_super) {
+    __extends(RespCommon, _super);
+    function RespCommon() {
+        return _super.call(this) || this;
+    }
+    return RespCommon;
+}(proxy_1.ProxyStruct));
+var Resp = /** @class */ (function (_super) {
+    __extends(Resp, _super);
+    function Resp() {
         var _this = _super.call(this) || this;
-        _this.addProperty("result", proxy_1.EMProxyPropertyType.INT);
-        _this.addProperty("msg", proxy_1.EMProxyPropertyType.STRING);
+        _this.addProperty("common", proxy_1.EMProxyPropertyType.STRUCT, RespCommon);
         return _this;
     }
-    return RespBase;
+    return Resp;
+}(proxy_1.ProxyStruct));
+var ReqCommon = /** @class */ (function (_super) {
+    __extends(ReqCommon, _super);
+    function ReqCommon() {
+        return _super.call(this) || this;
+    }
+    return ReqCommon;
+}(proxy_1.ProxyStruct));
+var Req = /** @class */ (function (_super) {
+    __extends(Req, _super);
+    function Req() {
+        var _this = _super.call(this) || this;
+        _this.addProperty("common", proxy_1.EMProxyPropertyType.STRUCT, ReqCommon);
+        return _this;
+    }
+    return Req;
 }(proxy_1.ProxyStruct));
 var ReqLogin = /** @class */ (function (_super) {
     __extends(ReqLogin, _super);
@@ -34,23 +56,17 @@ var ReqLogin = /** @class */ (function (_super) {
         return _this;
     }
     return ReqLogin;
-}(proxy_1.ProxyStruct));
-var Resp = /** @class */ (function (_super) {
-    __extends(Resp, _super);
-    function Resp() {
-        var _this = _super.call(this) || this;
-        _this.addProperty("base", proxy_1.EMProxyPropertyType.STRUCT, RespBase);
-        return _this;
-    }
-    return Resp;
-}(proxy_1.ProxyStruct));
+}(Req));
 var RespLogin = /** @class */ (function (_super) {
     __extends(RespLogin, _super);
     function RespLogin() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super.call(this) || this;
+        _this.addProperty("result", proxy_1.EMProxyPropertyType.INT);
+        _this.addProperty("msg", proxy_1.EMProxyPropertyType.STRING);
+        return _this;
     }
     return RespLogin;
-}(RespBase));
+}(Resp));
 var mk = new proxy_1.ProxyMaker(new proxy_1.Version("1.0.0"));
 mk.addRemoteMethod(new proxy_1.ProxyMethod("Login", ReqLogin, RespLogin));
 mk.makeServer("./../server/src");

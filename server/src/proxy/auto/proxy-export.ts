@@ -1,1 +1,1 @@
-export * from "./../extend/login-extend"
+export * from "../extend/login"

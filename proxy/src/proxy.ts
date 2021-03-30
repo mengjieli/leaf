@@ -23,6 +23,7 @@ export class ProxyStruct {
         p.name = name;
         p.type = type;
         p.typeValue = typeValue;
+        this.properties.push(p);
         return p;
     }
 
@@ -72,16 +73,25 @@ export class ProxyMaker {
         this.version = v;
     }
 
-    private structs: ProxyStruct[] = [];
+    private structs: { new(): ProxyStruct }[] = [];
 
-    addStruct(st: ProxyStruct) {
+    addStruct(st: { new(): ProxyStruct }) {
+        if (!st || this.structs.indexOf(st) != -1) return;
         this.structs.push(st);
+        let v = new st();
+        v.properties.forEach(p => {
+            if (p.type === EMProxyPropertyType.STRUCT) {
+                this.addStruct(p.typeValue);
+            }
+        })
     }
 
     private methods: ProxyMethod[] = [];
 
     addRemoteMethod(method: ProxyMethod) {
         this.methods.push(method);
+        this.addStruct(method.req);
+        this.addStruct(method.resp);
     }
 
     makeClient() {
@@ -100,8 +110,27 @@ export class ProxyMaker {
 
         let strcut = ``;
         for (let st of this.structs) {
-
+            strcut += this.makeStruct(new st()) + '\n\n';
         }
+        file = new lib.File(lib.File.join(url, "proxy/auto/struct.ts"));
+        file.save(strcut);
+    }
+
+    private makeStruct(st: ProxyStruct): string {
+        let str = `export class ${st.constructor.name} {\n`;
+        st.properties.forEach(p => {
+            if (p.type === EMProxyPropertyType.INT) str += `\t${p.name}: number = 0;`;
+            if (p.type === EMProxyPropertyType.STRING) str += `\t${p.name}: string = '';`;
+            if (p.type === EMProxyPropertyType.STRUCT) {
+                let pt = new p.typeValue();
+                str += `\t${p.name}: ${pt.constructor.name} = new ${pt.constructor.name}();`;
+            }
+            if (p.type === EMProxyPropertyType.ARRAY_INT) str += `\t${p.name}: number[] = [];`;
+            if (p.type === EMProxyPropertyType.ARRAY_STRING) str += `\t${p.name}: string[] = [];`;
+            str += '\n';
+        })
+        str += `}`;
+        return str;
     }
 
 }

@@ -9,7 +9,7 @@ export abstract class RequestCommand {
   body: any;
   client: lib.WebsocketServerClient;
 
-  abstract execute():Promise<any>;
+  abstract execute(): Promise<any>;
 
   fail(errorCode: number, message: string = "") {
     this.send({
@@ -43,4 +43,5 @@ export abstract class RequestCommand {
   getOrangePath(path?: string) {
     return path ? join(global["params"].orangePath, path) : global["params"].orangePath;
   }
+
 }
