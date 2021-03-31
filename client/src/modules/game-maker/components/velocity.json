@@ -1,0 +1,15 @@
+{
+  "uuid": "position",
+  "properties": {
+    "vx": {
+      "name": "速度x",
+      "type": "int",
+      "init": 0
+    },
+    "vy": {
+      "name": "速度y",
+      "type": "int",
+      "init": 0
+    }
+  }
+}

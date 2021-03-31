@@ -1,0 +1,10 @@
+{
+  "uuid": "gravity",
+  "properties": {
+    "g": {
+      "name": "重力加速度",
+      "type": "int",
+      "init": 100
+    }
+  }
+}

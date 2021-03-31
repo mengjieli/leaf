@@ -1,0 +1,15 @@
+{
+  "uuid": "position",
+  "properties": {
+    "x": {
+      "name": "坐标x",
+      "type": "int",
+      "init": 0
+    },
+    "y": {
+      "name": "坐标x",
+      "type": "int",
+      "init": 0
+    }
+  }
+}
