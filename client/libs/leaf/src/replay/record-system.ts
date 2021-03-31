@@ -21,6 +21,14 @@ namespace leaf {
     }
 
     startReplay(replayRecords: any) {
+      let nrs = {};
+      for (let k in replayRecords) {
+        for (let r of replayRecords[k]) {
+          r.frame--;
+        }
+        nrs[(+k) - 1] = replayRecords[k];
+      }
+      replayRecords = nrs;
       this.replayRecords = replayRecords;
       this.isReplaying = true;
     }

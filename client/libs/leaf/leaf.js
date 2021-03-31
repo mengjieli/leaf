@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    };
+    }
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -568,6 +568,25 @@ var leaf;
             this.isRecording = true;
         };
         RecordSystem.prototype.startReplay = function (replayRecords) {
+            var e_2, _a;
+            var nrs = {};
+            for (var k in replayRecords) {
+                try {
+                    for (var _b = __values(replayRecords[k]), _c = _b.next(); !_c.done; _c = _b.next()) {
+                        var r = _c.value;
+                        r.frame--;
+                    }
+                }
+                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                finally {
+                    try {
+                        if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                    }
+                    finally { if (e_2) throw e_2.error; }
+                }
+                nrs[(+k) - 1] = replayRecords[k];
+            }
+            replayRecords = nrs;
             this.replayRecords = replayRecords;
             this.isReplaying = true;
         };
@@ -640,7 +659,7 @@ var leaf;
             }
         };
         RecordSystem.prototype.getRecord = function (id) {
-            var e_2, _a;
+            var e_3, _a;
             for (var k in this.records) {
                 try {
                     for (var _b = __values(this.records[k]), _c = _b.next(); !_c.done; _c = _b.next()) {
@@ -649,12 +668,12 @@ var leaf;
                             return r;
                     }
                 }
-                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                catch (e_3_1) { e_3 = { error: e_3_1 }; }
                 finally {
                     try {
                         if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                     }
-                    finally { if (e_2) throw e_2.error; }
+                    finally { if (e_3) throw e_3.error; }
                 }
             }
         };
@@ -741,10 +760,10 @@ var leaf;
                             // self_1.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
                         }
                         else {
-                            // this.loadComplete();
-                            setTimeout(function () {
-                                _this.loadComplete();
-                            }, 1000 * Math.random());
+                            _this.loadComplete();
+                            // setTimeout(()=>{
+                            //     this.loadComplete();
+                            // },0);
                         }
                     }, 0);
                 }
@@ -840,7 +859,7 @@ var leaf;
             return this.resources[name];
         };
         Res.clearUnsedTextures = function () {
-            var e_3, _a, e_4, _b, e_5, _c, e_6, _d, e_7, _e;
+            var e_4, _a, e_5, _b, e_6, _c, e_7, _d, e_8, _e;
             var c = 0;
             var list = [];
             try {
@@ -866,12 +885,12 @@ var leaf;
                     leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
                 }
             }
-            catch (e_3_1) { e_3 = { error: e_3_1 }; }
+            catch (e_4_1) { e_4 = { error: e_4_1 }; }
             finally {
                 try {
                     if (_g && !_g.done && (_a = _f.return)) _a.call(_f);
                 }
-                finally { if (e_3) throw e_3.error; }
+                finally { if (e_4) throw e_4.error; }
             }
             try {
                 for (var _h = __values(this.spriteSheets), _j = _h.next(); !_j.done; _j = _h.next()) {
@@ -893,12 +912,12 @@ var leaf;
                             }
                         }
                     }
-                    catch (e_5_1) { e_5 = { error: e_5_1 }; }
+                    catch (e_6_1) { e_6 = { error: e_6_1 }; }
                     finally {
                         try {
                             if (_l && !_l.done && (_c = _k.return)) _c.call(_k);
                         }
-                        finally { if (e_5) throw e_5.error; }
+                        finally { if (e_6) throw e_6.error; }
                     }
                     if (txt.data) {
                         // PIXI.BaseTexture.removeFromCache(txt.texture_url);
@@ -913,12 +932,12 @@ var leaf;
                     leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
                 }
             }
-            catch (e_4_1) { e_4 = { error: e_4_1 }; }
+            catch (e_5_1) { e_5 = { error: e_5_1 }; }
             finally {
                 try {
                     if (_j && !_j.done && (_b = _h.return)) _b.call(_h);
                 }
-                finally { if (e_4) throw e_4.error; }
+                finally { if (e_5) throw e_5.error; }
             }
             try {
                 for (var _m = __values(this.texts), _o = _m.next(); !_o.done; _o = _m.next()) {
@@ -934,12 +953,12 @@ var leaf;
                     leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
                 }
             }
-            catch (e_6_1) { e_6 = { error: e_6_1 }; }
+            catch (e_7_1) { e_7 = { error: e_7_1 }; }
             finally {
                 try {
                     if (_o && !_o.done && (_d = _m.return)) _d.call(_m);
                 }
-                finally { if (e_6) throw e_6.error; }
+                finally { if (e_7) throw e_7.error; }
             }
             try {
                 for (var _p = __values(this.jsons), _q = _p.next(); !_q.done; _q = _p.next()) {
@@ -955,17 +974,17 @@ var leaf;
                     leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
                 }
             }
-            catch (e_7_1) { e_7 = { error: e_7_1 }; }
+            catch (e_8_1) { e_8 = { error: e_8_1 }; }
             finally {
                 try {
                     if (_q && !_q.done && (_e = _p.return)) _e.call(_p);
                 }
-                finally { if (e_7) throw e_7.error; }
+                finally { if (e_8) throw e_8.error; }
             }
             leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90\uFF0C\u8FD8\u5269 " + c + " \u4E2A\u8D44\u6E90: " + list);
         };
         Res.getAliveResources = function () {
-            var e_8, _a, e_9, _b, e_10, _c, e_11, _d;
+            var e_9, _a, e_10, _b, e_11, _c, e_12, _d;
             var list = [];
             try {
                 for (var _e = __values(this.singleTexutres), _f = _e.next(); !_f.done; _f = _e.next()) {
@@ -975,12 +994,12 @@ var leaf;
                     }
                 }
             }
-            catch (e_8_1) { e_8 = { error: e_8_1 }; }
+            catch (e_9_1) { e_9 = { error: e_9_1 }; }
             finally {
                 try {
                     if (_f && !_f.done && (_a = _e.return)) _a.call(_e);
                 }
-                finally { if (e_8) throw e_8.error; }
+                finally { if (e_9) throw e_9.error; }
             }
             try {
                 for (var _g = __values(this.spriteSheets), _h = _g.next(); !_h.done; _h = _g.next()) {
@@ -990,12 +1009,12 @@ var leaf;
                     }
                 }
             }
-            catch (e_9_1) { e_9 = { error: e_9_1 }; }
+            catch (e_10_1) { e_10 = { error: e_10_1 }; }
             finally {
                 try {
                     if (_h && !_h.done && (_b = _g.return)) _b.call(_g);
                 }
-                finally { if (e_9) throw e_9.error; }
+                finally { if (e_10) throw e_10.error; }
             }
             try {
                 for (var _j = __values(this.texts), _k = _j.next(); !_k.done; _k = _j.next()) {
@@ -1005,12 +1024,12 @@ var leaf;
                     }
                 }
             }
-            catch (e_10_1) { e_10 = { error: e_10_1 }; }
+            catch (e_11_1) { e_11 = { error: e_11_1 }; }
             finally {
                 try {
                     if (_k && !_k.done && (_c = _j.return)) _c.call(_j);
                 }
-                finally { if (e_10) throw e_10.error; }
+                finally { if (e_11) throw e_11.error; }
             }
             try {
                 for (var _l = __values(this.jsons), _m = _l.next(); !_m.done; _m = _l.next()) {
@@ -1020,12 +1039,12 @@ var leaf;
                     }
                 }
             }
-            catch (e_11_1) { e_11 = { error: e_11_1 }; }
+            catch (e_12_1) { e_12 = { error: e_12_1 }; }
             finally {
                 try {
                     if (_m && !_m.done && (_d = _l.return)) _d.call(_l);
                 }
-                finally { if (e_11) throw e_11.error; }
+                finally { if (e_12) throw e_12.error; }
             }
             return list;
         };
@@ -1228,7 +1247,7 @@ var leaf;
                     loadType: 1,
                     xhrType: 'text'
                 }).load(function (loader, resources) {
-                    var e_12, _a, e_13, _b;
+                    var e_13, _a, e_14, _b;
                     var cfg = JSON.parse(resources[fileName].data);
                     loader.resources = {};
                     ecs.ObjectPools.releaseRecyableObject(loader);
@@ -1246,12 +1265,12 @@ var leaf;
                                         Res.addRes(EMResourceType.SPRITE_SHEET_FRAME, frame, file.name);
                                     }
                                 }
-                                catch (e_13_1) { e_13 = { error: e_13_1 }; }
+                                catch (e_14_1) { e_14 = { error: e_14_1 }; }
                                 finally {
                                     try {
                                         if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
                                     }
-                                    finally { if (e_13) throw e_13.error; }
+                                    finally { if (e_14) throw e_14.error; }
                                 }
                             }
                             else if (file.type === EMResourceType.TEXT) {
@@ -1262,12 +1281,12 @@ var leaf;
                             }
                         }
                     }
-                    catch (e_12_1) { e_12 = { error: e_12_1 }; }
+                    catch (e_13_1) { e_13 = { error: e_13_1 }; }
                     finally {
                         try {
                             if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
                         }
-                        finally { if (e_12) throw e_12.error; }
+                        finally { if (e_13) throw e_13.error; }
                     }
                     resolve();
                 });

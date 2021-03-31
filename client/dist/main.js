@@ -199,7 +199,7 @@ var EliminationScene = /** @class */ (function () {
     function EliminationScene(world) {
         var r = world.getSystem(leaf.RecordSystem);
         // r.startReplay({ "36": [{ "id": 0, "frame": 36 }], "63": [{ "id": 1, "frame": 63 }], "64": [{ "id": 2, "frame": 64 }] });
-        r.startReplay({ "32": [{ "id": 0, "frame": 32 }], "63": [{ "id": 1, "frame": 63 }], "64": [{ "id": 2, "frame": 64 }] });
+        r.startReplay({ "29": [{ "id": 0, "frame": 29 }], "53": [{ "id": 1, "frame": 53 }], "54": [{ "id": 2, "frame": 54 }] });
         // r.startRecord();
         console.error("?");
         this.world = world;

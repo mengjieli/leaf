@@ -151,10 +151,10 @@ namespace leaf {
                         // self_1.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
                     }
                     else {
-                        // this.loadComplete();
-                        setTimeout(()=>{
-                            this.loadComplete();
-                        },1000*Math.random());
+                        this.loadComplete();
+                        // setTimeout(()=>{
+                        //     this.loadComplete();
+                        // },0);
                     }
                 }, 0);
             }
