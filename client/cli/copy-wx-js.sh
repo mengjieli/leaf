@@ -14,3 +14,4 @@ cp ./../web/libs/orange-modules/native/native.js ./../../wxgame/js/libs/native.j
 cp ./../web/libs/orange-modules/sync-data/sync-data.js ./../../wxgame/js/libs/sync-data.js
 
 cp ./../dist/main.js ./../../wxgame/js/main.js
+cp -r ./../resources ./../../wxgame/resources

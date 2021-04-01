@@ -19,6 +19,39 @@ namespace leaf {
 
         static init() {
             var canvas = (window["canvas"] || document.getElementById('leaf')) as HTMLCanvasElement;
+            if (window["wx"]) {
+                window["wx"].onTouchStart((e) => {
+                    for (let t of e.changedTouches) {
+                        TouchManager.start(t.identifier, t.clientX, t.clientY);
+                    }
+                });
+                window["wx"].onTouchMove((e) => {
+                    for (let t of e.changedTouches) {
+                        TouchManager.move(t.identifier, t.clientX, t.clientY);
+                    }
+                })
+                window["wx"].onTouchEnd((e) => {
+                    for (let t of e.changedTouches) {
+                        TouchManager.move(t.identifier, t.clientX, t.clientY);
+                    }
+                })
+            } else {
+                canvas.addEventListener("touchstart", function (e: any) {
+                    for (let t of e.changedTouches) {
+                        TouchManager.start(t.identifier, t.clientX, t.clientY);
+                    }
+                })
+                canvas.addEventListener("touchmove", function (e: any) {
+                    for (let t of e.changedTouches) {
+                        TouchManager.move(t.identifier, t.clientX, t.clientY);
+                    }
+                })
+                canvas.addEventListener("touchend", function (e: any) {
+                    for (let t of e.changedTouches) {
+                        TouchManager.end(t.identifier, t.clientX, t.clientY);
+                    }
+                })
+            }
             this.width = canvas.width;
             this.height = canvas.height;
             var names = ["experimental-webgl", "webgl"];

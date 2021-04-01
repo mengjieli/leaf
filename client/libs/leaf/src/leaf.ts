@@ -99,3 +99,5 @@ namespace leaf {
     }
 
 }
+
+window["leaf"] = leaf;

@@ -18,9 +18,8 @@
     "checkSiteMap": true,
     "uploadWithSourceMap": true,
     "compileHotReLoad": false,
-    "useMultiFrameRuntime": true,
+    "useMultiFrameRuntime": false,
     "useApiHook": true,
-    "useApiHostProcess": false,
     "babelSetting": {
       "ignore": [],
       "disablePlugins": [],
@@ -39,7 +38,9 @@
   "compileType": "game",
   "libVersion": "1.9.94",
   "appid": "wxaeac8fa2bfa92d04",
-  "projectname": "minigame-2",
+  "projectname": "leaf-game",
+  "simulatorType": "wechat",
+  "simulatorPluginLibVersion": {},
   "condition": {
     "search": {
       "list": []

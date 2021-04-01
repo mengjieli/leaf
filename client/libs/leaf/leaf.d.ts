@@ -585,6 +585,13 @@ declare namespace leaf {
     }
 }
 declare namespace leaf {
+    class TouchManager {
+        static start(touchId: number, touchX: number, touchY: number): void;
+        static move(touchId: number, touchX: number, touchY: number): void;
+        static end(touchId: number, touchX: number, touchY: number): void;
+    }
+}
+declare namespace leaf {
     class XPromise<T> {
         private resolve;
         private reject;

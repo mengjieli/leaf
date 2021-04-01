@@ -1,5 +1,6 @@
 import { ImageLoader } from "./ImageLoader";
 import { EliminationScene } from "./modules/elimination/elimination-scene";
+import { LinkScene } from "./modules/link-game/link-scene";
 
 export class Main {
 
@@ -24,9 +25,15 @@ export class Main {
                 }
             });
         }
+        leaf.init();
+        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 480;
+        console.error(leaf.GLCore.width, leaf.world.root.transform.scaleX);
         leaf.Res.loadResources().then(() => {
-            let world = leaf.init();
-            new EliminationScene(world);
+            leaf.Res.getRes("block_png").load().then(
+                () => {
+                    new LinkScene();
+                }
+            )
         })
     }
 

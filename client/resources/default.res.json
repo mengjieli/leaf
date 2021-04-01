@@ -1200,6 +1200,11 @@
       "name": "config_json",
       "path": "seed/config.json",
       "type": 5
+    },
+    {
+      "name": "block_png",
+      "path": "atlas/block.png",
+      "type": 1
     }
   ]
 }

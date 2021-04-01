@@ -14,7 +14,7 @@ import './js/libs/symbol'
 
 import './js/main'
 
-window["IS_WEB"] = true;
+window["IS_WEB"] = false;
 
 var fs = window.wxfs = wx.getFileSystemManager();
 window.wxloadText = function(url,onComplete) {

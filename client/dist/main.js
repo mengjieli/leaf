@@ -132,7 +132,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var elimination_scene_1 = __webpack_require__(/*! ./modules/elimination/elimination-scene */ "../src/modules/elimination/elimination-scene.ts");
+var link_scene_1 = __webpack_require__(/*! ./modules/link-game/link-scene */ "../src/modules/link-game/link-scene.ts");
 var Main = /** @class */ (function () {
     function Main() {
         this.init();
@@ -162,9 +162,13 @@ var Main = /** @class */ (function () {
                         _a.sent();
                         _a.label = 2;
                     case 2:
+                        leaf.init();
+                        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 480;
+                        console.error(leaf.GLCore.width, leaf.world.root.transform.scaleX);
                         leaf.Res.loadResources().then(function () {
-                            var world = leaf.init();
-                            new elimination_scene_1.EliminationScene(world);
+                            leaf.Res.getRes("block_png").load().then(function () {
+                                new link_scene_1.LinkScene();
+                            });
                         });
                         return [2 /*return*/];
                 }
@@ -179,15 +183,71 @@ window["Main"] = Main;
 
 /***/ }),
 
-/***/ "../src/modules/elimination/elimination-scene.ts":
-/*!*******************************************************!*\
-  !*** ../src/modules/elimination/elimination-scene.ts ***!
-  \*******************************************************/
+/***/ "../src/modules/link-game/components/link-game.ts":
+/*!********************************************************!*\
+  !*** ../src/modules/link-game/components/link-game.ts ***!
+  \********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+orange.autoloadLink("LinkScene");
+var LinkGame = /** @class */ (function (_super) {
+    __extends(LinkGame, _super);
+    function LinkGame() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    LinkGame.prototype.awake = function () {
+        var bm = this.addComponent(leaf.Bitmap);
+        bm.resource = "block_png";
+        this.entity.transform.scaleX = 470;
+        this.entity.transform.scaleY = 100;
+        bm.tint = 0x550000;
+    };
+    return LinkGame;
+}(ecs.Component));
+exports.LinkGame = LinkGame;
+
+
+/***/ }),
+
+/***/ "../src/modules/link-game/link-scene.ts":
+/*!**********************************************!*\
+  !*** ../src/modules/link-game/link-scene.ts ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -195,28 +255,52 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var EliminationScene = /** @class */ (function () {
-    function EliminationScene(world) {
-        this.world = world;
-        world.scene = this.scene = new ecs.Scene();
-        // leaf.Res.getRes("pure-exml_json").load().then(() => {
-        //     let json = leaf.Res.getRes("pure-exml_json").data["pure-chicken-show.json"];
-        //     let exml = ecs.Entity.create().addComponent(eui.EXML, json);
-        //     exml.entity.parent = world.scene;
-        //     exml.playTweenGroup(exml.animation, 0);
-        //     window["te"] = exml;
-        //     console.error(json, leaf.world.runInfo.frame);
-        // })
+var module_scene_1 = __webpack_require__(/*! ../../utils/ui/module-scene */ "../src/utils/ui/module-scene.ts");
+var link_game_1 = __webpack_require__(/*! ./components/link-game */ "../src/modules/link-game/components/link-game.ts");
+var LinkScene = /** @class */ (function (_super) {
+    __extends(LinkScene, _super);
+    function LinkScene() {
+        var _this = _super.call(this) || this;
+        ecs.Entity.create().addComponent(link_game_1.LinkGame).parent = _this.scene;
+        return _this;
     }
-    EliminationScene.prototype.close = function () {
-        this.scene.destroy();
+    LinkScene = __decorate([
+        orange.autoload("LinkScene")
+    ], LinkScene);
+    return LinkScene;
+}(module_scene_1.ModuleScene));
+exports.LinkScene = LinkScene;
+
+
+/***/ }),
+
+/***/ "../src/utils/ui/module-scene.ts":
+/*!***************************************!*\
+  !*** ../src/utils/ui/module-scene.ts ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var ModuleScene = /** @class */ (function () {
+    function ModuleScene() {
+        this.scene = new ecs.Scene();
+        leaf.world.scene = this.scene;
+    }
+    ModuleScene.prototype.close = function () {
+        if (this.scene) {
+            if (this.scene.world) {
+                this.scene.world.scene = null;
+            }
+            this.scene.destroy();
+            this.scene = null;
+        }
     };
-    EliminationScene = __decorate([
-        orange.autoload("EliminationScene")
-    ], EliminationScene);
-    return EliminationScene;
+    return ModuleScene;
 }());
-exports.EliminationScene = EliminationScene;
+exports.ModuleScene = ModuleScene;
 
 
 /***/ })
