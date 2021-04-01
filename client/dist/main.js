@@ -218,6 +218,9 @@ var LinkGame = /** @class */ (function (_super) {
         this.entity.transform.scaleX = 470;
         this.entity.transform.scaleY = 100;
         bm.tint = 0x550000;
+        bm.addComponent(leaf.TouchComponent).onTouchEnd.on(function (e) {
+            console.error(e.localX, e.localY, e.stageX, e.stageY);
+        });
     };
     return LinkGame;
 }(ecs.Component));

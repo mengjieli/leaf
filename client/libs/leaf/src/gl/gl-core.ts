@@ -32,7 +32,7 @@ namespace leaf {
                 })
                 window["wx"].onTouchEnd((e) => {
                     for (let t of e.changedTouches) {
-                        TouchManager.move(t.identifier, t.clientX, t.clientY);
+                        TouchManager.end(t.identifier, t.clientX, t.clientY);
                     }
                 })
             } else {

@@ -1,3 +1,13 @@
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -11,16 +21,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-};
 var leaf;
 (function (leaf) {
     leaf.debug = false;
@@ -152,9 +152,106 @@ var leaf;
         }
         GLCore.init = function () {
             var canvas = (window["canvas"] || document.getElementById('leaf'));
-            canvas.addEventListener("mousedown", function (e) {
-                console.error(e);
-            });
+            if (window["wx"]) {
+                window["wx"].onTouchStart(function (e) {
+                    var e_1, _a;
+                    try {
+                        for (var _b = __values(e.changedTouches), _c = _b.next(); !_c.done; _c = _b.next()) {
+                            var t = _c.value;
+                            leaf.TouchManager.start(t.identifier, t.clientX, t.clientY);
+                        }
+                    }
+                    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                    finally {
+                        try {
+                            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                        }
+                        finally { if (e_1) throw e_1.error; }
+                    }
+                });
+                window["wx"].onTouchMove(function (e) {
+                    var e_2, _a;
+                    try {
+                        for (var _b = __values(e.changedTouches), _c = _b.next(); !_c.done; _c = _b.next()) {
+                            var t = _c.value;
+                            leaf.TouchManager.move(t.identifier, t.clientX, t.clientY);
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
+                });
+                window["wx"].onTouchEnd(function (e) {
+                    var e_3, _a;
+                    try {
+                        for (var _b = __values(e.changedTouches), _c = _b.next(); !_c.done; _c = _b.next()) {
+                            var t = _c.value;
+                            leaf.TouchManager.end(t.identifier, t.clientX, t.clientY);
+                        }
+                    }
+                    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                    finally {
+                        try {
+                            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                        }
+                        finally { if (e_3) throw e_3.error; }
+                    }
+                });
+            }
+            else {
+                canvas.addEventListener("touchstart", function (e) {
+                    var e_4, _a;
+                    try {
+                        for (var _b = __values(e.changedTouches), _c = _b.next(); !_c.done; _c = _b.next()) {
+                            var t = _c.value;
+                            leaf.TouchManager.start(t.identifier, t.clientX, t.clientY);
+                        }
+                    }
+                    catch (e_4_1) { e_4 = { error: e_4_1 }; }
+                    finally {
+                        try {
+                            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                        }
+                        finally { if (e_4) throw e_4.error; }
+                    }
+                });
+                canvas.addEventListener("touchmove", function (e) {
+                    var e_5, _a;
+                    try {
+                        for (var _b = __values(e.changedTouches), _c = _b.next(); !_c.done; _c = _b.next()) {
+                            var t = _c.value;
+                            leaf.TouchManager.move(t.identifier, t.clientX, t.clientY);
+                        }
+                    }
+                    catch (e_5_1) { e_5 = { error: e_5_1 }; }
+                    finally {
+                        try {
+                            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                        }
+                        finally { if (e_5) throw e_5.error; }
+                    }
+                });
+                canvas.addEventListener("touchend", function (e) {
+                    var e_6, _a;
+                    try {
+                        for (var _b = __values(e.changedTouches), _c = _b.next(); !_c.done; _c = _b.next()) {
+                            var t = _c.value;
+                            leaf.TouchManager.end(t.identifier, t.clientX, t.clientY);
+                        }
+                    }
+                    catch (e_6_1) { e_6 = { error: e_6_1 }; }
+                    finally {
+                        try {
+                            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                        }
+                        finally { if (e_6) throw e_6.error; }
+                    }
+                });
+            }
             this.width = canvas.width;
             this.height = canvas.height;
             var names = ["experimental-webgl", "webgl"];
@@ -238,7 +335,7 @@ var leaf;
             return _super !== null && _super.apply(this, arguments) || this;
         }
         RenderSystem.prototype.update = function () {
-            var e_1, _a;
+            var e_7, _a;
             var gl = leaf.GLCore.gl;
             leaf.BlendModeFunc.changeBlendMode(leaf.BlendMode.NORMAL);
             //绑定舞台的渲染纹理。
@@ -260,12 +357,12 @@ var leaf;
                     task.render();
                 }
             }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            catch (e_7_1) { e_7 = { error: e_7_1 }; }
             finally {
                 try {
                     if (tasks_1_1 && !tasks_1_1.done && (_a = tasks_1.return)) _a.call(tasks_1);
                 }
-                finally { if (e_1) throw e_1.error; }
+                finally { if (e_7) throw e_7.error; }
             }
         };
         return RenderSystem;
@@ -283,6 +380,22 @@ var leaf;
         }
         Render.prototype.onDestroy = function () {
         };
+        Render.prototype.preRender = function () {
+        };
+        Object.defineProperty(Render.prototype, "width", {
+            get: function () {
+                return 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Render.prototype, "height", {
+            get: function () {
+                return 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Render.allowMultiply = false;
         return Render;
     }(ecs.Component));
@@ -350,6 +463,20 @@ var leaf;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Bitmap.prototype, "width", {
+            get: function () {
+                return this._texture ? this._texture.width : 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Bitmap.prototype, "height", {
+            get: function () {
+                return this._texture ? this._texture.height : 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Bitmap.prototype.preRender = function () {
             if (!this._texture)
                 return;
@@ -391,6 +518,8 @@ var leaf;
             _this._bold = false;
             _this._italic = false;
             _this._lineSpacing = 5;
+            _this._textWidth = 0;
+            _this._textHeight = 0;
             return _this;
         }
         Object.defineProperty(Label.prototype, "text", {
@@ -475,6 +604,7 @@ var leaf;
             var r = this._fontColor >> 16;
             var g = this._fontColor >> 8 & 0xFF;
             var b = this._fontColor & 0xFF;
+            this._textHeight = 0;
             for (var i = 0; i < this._text.length; i++) {
                 var char = this._text.charAt(i);
                 if (char == "\n" || char == "\r") {
@@ -489,9 +619,27 @@ var leaf;
                 m.concat(w);
                 this.shader.addTask(txt.texture, m, this.entity.transform.worldAlpha, this.blendMode, 0xffffff);
                 x += txt.width * rScale;
+                if (x > this._textWidth)
+                    this._textWidth = x;
             }
+            this._textHeight = y + this.fontSize;
         };
+        Object.defineProperty(Label.prototype, "width", {
+            get: function () {
+                return this._textWidth;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Label.prototype, "height", {
+            get: function () {
+                return this._textHeight;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Label.prototype.onDestroy = function () {
+            this._textWidth = this._textHeight = 0;
             this._text = "";
             this._fontColor = 0xffffff;
             this._fontFamily = "sans-serif";
@@ -572,7 +720,7 @@ var leaf;
             this.isRecording = true;
         };
         RecordSystem.prototype.startReplay = function (replayRecords) {
-            var e_2, _a;
+            var e_8, _a;
             var nrs = {};
             for (var k in replayRecords) {
                 try {
@@ -581,12 +729,12 @@ var leaf;
                         r.frame--;
                     }
                 }
-                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                catch (e_8_1) { e_8 = { error: e_8_1 }; }
                 finally {
                     try {
                         if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                     }
-                    finally { if (e_2) throw e_2.error; }
+                    finally { if (e_8) throw e_8.error; }
                 }
                 nrs[(+k) - 1] = replayRecords[k];
             }
@@ -663,7 +811,7 @@ var leaf;
             }
         };
         RecordSystem.prototype.getRecord = function (id) {
-            var e_3, _a;
+            var e_9, _a;
             for (var k in this.records) {
                 try {
                     for (var _b = __values(this.records[k]), _c = _b.next(); !_c.done; _c = _b.next()) {
@@ -672,12 +820,12 @@ var leaf;
                             return r;
                     }
                 }
-                catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                catch (e_9_1) { e_9 = { error: e_9_1 }; }
                 finally {
                     try {
                         if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                     }
-                    finally { if (e_3) throw e_3.error; }
+                    finally { if (e_9) throw e_9.error; }
                 }
             }
         };
@@ -863,7 +1011,7 @@ var leaf;
             return this.resources[name];
         };
         Res.clearUnsedTextures = function () {
-            var e_4, _a, e_5, _b, e_6, _c, e_7, _d, e_8, _e;
+            var e_10, _a, e_11, _b, e_12, _c, e_13, _d, e_14, _e;
             var c = 0;
             var list = [];
             try {
@@ -889,12 +1037,12 @@ var leaf;
                     leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
                 }
             }
-            catch (e_4_1) { e_4 = { error: e_4_1 }; }
+            catch (e_10_1) { e_10 = { error: e_10_1 }; }
             finally {
                 try {
                     if (_g && !_g.done && (_a = _f.return)) _a.call(_f);
                 }
-                finally { if (e_4) throw e_4.error; }
+                finally { if (e_10) throw e_10.error; }
             }
             try {
                 for (var _h = __values(this.spriteSheets), _j = _h.next(); !_j.done; _j = _h.next()) {
@@ -916,12 +1064,12 @@ var leaf;
                             }
                         }
                     }
-                    catch (e_6_1) { e_6 = { error: e_6_1 }; }
+                    catch (e_12_1) { e_12 = { error: e_12_1 }; }
                     finally {
                         try {
                             if (_l && !_l.done && (_c = _k.return)) _c.call(_k);
                         }
-                        finally { if (e_6) throw e_6.error; }
+                        finally { if (e_12) throw e_12.error; }
                     }
                     if (txt.data) {
                         // PIXI.BaseTexture.removeFromCache(txt.texture_url);
@@ -936,12 +1084,12 @@ var leaf;
                     leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
                 }
             }
-            catch (e_5_1) { e_5 = { error: e_5_1 }; }
+            catch (e_11_1) { e_11 = { error: e_11_1 }; }
             finally {
                 try {
                     if (_j && !_j.done && (_b = _h.return)) _b.call(_h);
                 }
-                finally { if (e_5) throw e_5.error; }
+                finally { if (e_11) throw e_11.error; }
             }
             try {
                 for (var _m = __values(this.texts), _o = _m.next(); !_o.done; _o = _m.next()) {
@@ -957,12 +1105,12 @@ var leaf;
                     leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
                 }
             }
-            catch (e_7_1) { e_7 = { error: e_7_1 }; }
+            catch (e_13_1) { e_13 = { error: e_13_1 }; }
             finally {
                 try {
                     if (_o && !_o.done && (_d = _m.return)) _d.call(_m);
                 }
-                finally { if (e_7) throw e_7.error; }
+                finally { if (e_13) throw e_13.error; }
             }
             try {
                 for (var _p = __values(this.jsons), _q = _p.next(); !_q.done; _q = _p.next()) {
@@ -978,17 +1126,17 @@ var leaf;
                     leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
                 }
             }
-            catch (e_8_1) { e_8 = { error: e_8_1 }; }
+            catch (e_14_1) { e_14 = { error: e_14_1 }; }
             finally {
                 try {
                     if (_q && !_q.done && (_e = _p.return)) _e.call(_p);
                 }
-                finally { if (e_8) throw e_8.error; }
+                finally { if (e_14) throw e_14.error; }
             }
             leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90\uFF0C\u8FD8\u5269 " + c + " \u4E2A\u8D44\u6E90: " + list);
         };
         Res.getAliveResources = function () {
-            var e_9, _a, e_10, _b, e_11, _c, e_12, _d;
+            var e_15, _a, e_16, _b, e_17, _c, e_18, _d;
             var list = [];
             try {
                 for (var _e = __values(this.singleTexutres), _f = _e.next(); !_f.done; _f = _e.next()) {
@@ -998,12 +1146,12 @@ var leaf;
                     }
                 }
             }
-            catch (e_9_1) { e_9 = { error: e_9_1 }; }
+            catch (e_15_1) { e_15 = { error: e_15_1 }; }
             finally {
                 try {
                     if (_f && !_f.done && (_a = _e.return)) _a.call(_e);
                 }
-                finally { if (e_9) throw e_9.error; }
+                finally { if (e_15) throw e_15.error; }
             }
             try {
                 for (var _g = __values(this.spriteSheets), _h = _g.next(); !_h.done; _h = _g.next()) {
@@ -1013,12 +1161,12 @@ var leaf;
                     }
                 }
             }
-            catch (e_10_1) { e_10 = { error: e_10_1 }; }
+            catch (e_16_1) { e_16 = { error: e_16_1 }; }
             finally {
                 try {
                     if (_h && !_h.done && (_b = _g.return)) _b.call(_g);
                 }
-                finally { if (e_10) throw e_10.error; }
+                finally { if (e_16) throw e_16.error; }
             }
             try {
                 for (var _j = __values(this.texts), _k = _j.next(); !_k.done; _k = _j.next()) {
@@ -1028,12 +1176,12 @@ var leaf;
                     }
                 }
             }
-            catch (e_11_1) { e_11 = { error: e_11_1 }; }
+            catch (e_17_1) { e_17 = { error: e_17_1 }; }
             finally {
                 try {
                     if (_k && !_k.done && (_c = _j.return)) _c.call(_j);
                 }
-                finally { if (e_11) throw e_11.error; }
+                finally { if (e_17) throw e_17.error; }
             }
             try {
                 for (var _l = __values(this.jsons), _m = _l.next(); !_m.done; _m = _l.next()) {
@@ -1043,12 +1191,12 @@ var leaf;
                     }
                 }
             }
-            catch (e_12_1) { e_12 = { error: e_12_1 }; }
+            catch (e_18_1) { e_18 = { error: e_18_1 }; }
             finally {
                 try {
                     if (_m && !_m.done && (_d = _l.return)) _d.call(_l);
                 }
-                finally { if (e_12) throw e_12.error; }
+                finally { if (e_18) throw e_18.error; }
             }
             return list;
         };
@@ -1251,7 +1399,7 @@ var leaf;
                     loadType: 1,
                     xhrType: 'text'
                 }).load(function (loader, resources) {
-                    var e_13, _a, e_14, _b;
+                    var e_19, _a, e_20, _b;
                     var cfg = JSON.parse(resources[fileName].data);
                     loader.resources = {};
                     ecs.ObjectPools.releaseRecyableObject(loader);
@@ -1269,12 +1417,12 @@ var leaf;
                                         Res.addRes(EMResourceType.SPRITE_SHEET_FRAME, frame, file.name);
                                     }
                                 }
-                                catch (e_14_1) { e_14 = { error: e_14_1 }; }
+                                catch (e_20_1) { e_20 = { error: e_20_1 }; }
                                 finally {
                                     try {
                                         if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
                                     }
-                                    finally { if (e_14) throw e_14.error; }
+                                    finally { if (e_20) throw e_20.error; }
                                 }
                             }
                             else if (file.type === EMResourceType.TEXT) {
@@ -1285,12 +1433,12 @@ var leaf;
                             }
                         }
                     }
-                    catch (e_13_1) { e_13 = { error: e_13_1 }; }
+                    catch (e_19_1) { e_19 = { error: e_19_1 }; }
                     finally {
                         try {
                             if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
                         }
-                        finally { if (e_13) throw e_13.error; }
+                        finally { if (e_19) throw e_19.error; }
                     }
                     resolve();
                 });
@@ -2732,6 +2880,125 @@ var leaf;
         return Texture;
     }());
     leaf.Texture = Texture;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var TouchComponent = /** @class */ (function (_super) {
+        __extends(TouchComponent, _super);
+        function TouchComponent() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.onTouchStart = new ecs.Broadcast();
+            _this.onTouchMove = new ecs.Broadcast();
+            _this.onTouchEnd = new ecs.Broadcast();
+            return _this;
+        }
+        TouchComponent.prototype.onDestroy = function () {
+            this.onTouchStart.removeAll();
+            this.onTouchMove.removeAll();
+            this.onTouchEnd.removeAll();
+        };
+        return TouchComponent;
+    }(ecs.Component));
+    leaf.TouchComponent = TouchComponent;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var TouchEvent = /** @class */ (function () {
+        function TouchEvent() {
+        }
+        return TouchEvent;
+    }());
+    leaf.TouchEvent = TouchEvent;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var TouchManager = /** @class */ (function () {
+        function TouchManager() {
+        }
+        TouchManager.start = function (touchId, touchX, touchY) {
+            if (!leaf.world)
+                return;
+            var target = this.findTarget(touchX, touchY, leaf.world.root) || leaf.world.root;
+            var e = new leaf.TouchEvent();
+            e.touchId = touchId;
+            var m = leaf.world.root.transform.reverse;
+            e.stageX = m.a * touchX + m.c * touchY + m.tx;
+            e.stageY = m.b * touchX + m.d * touchY + m.ty;
+            e.target = target;
+            this.dispatchTouchEvent(e, target, touchX, touchY, "start");
+        };
+        TouchManager.move = function (touchId, touchX, touchY) {
+            if (!leaf.world)
+                return;
+            var target = this.findTarget(touchX, touchY, leaf.world.root) || leaf.world.root;
+            var e = new leaf.TouchEvent();
+            e.touchId = touchId;
+            var m = leaf.world.root.transform.reverse;
+            e.stageX = m.a * touchX + m.c * touchY + m.tx;
+            e.stageY = m.b * touchX + m.d * touchY + m.ty;
+            e.target = target;
+            this.dispatchTouchEvent(e, target, touchX, touchY, "move");
+        };
+        TouchManager.end = function (touchId, touchX, touchY) {
+            if (!leaf.world)
+                return;
+            var target = this.findTarget(touchX, touchY, leaf.world.root) || leaf.world.root;
+            var e = new leaf.TouchEvent();
+            e.touchId = touchId;
+            var m = leaf.world.root.transform.reverse;
+            e.stageX = m.a * touchX + m.c * touchY + m.tx;
+            e.stageY = m.b * touchX + m.d * touchY + m.ty;
+            e.target = target;
+            this.dispatchTouchEvent(e, target, touchX, touchY, "end");
+        };
+        TouchManager.dispatchTouchEvent = function (e, target, touchX, touchY, type) {
+            var list = [];
+            var locals = [];
+            while (target) {
+                list.push(target);
+                target = target.parent;
+            }
+            for (var i = list.length - 1, x = 0, y = 0; i >= 0; i--) {
+                var m = list[i].transform.reverse;
+                x = m.a * touchX + m.c * touchY + m.tx;
+                y = m.b * touchX + m.d * touchY + m.ty;
+                touchX = x;
+                touchY = y;
+                locals.push([x, y]);
+            }
+            for (var i = 0; i < list.length; i++) {
+                e.localX = locals[list.length - 1 - i][0];
+                e.localY = locals[list.length - 1 - i][1];
+                e.currentTarget = list[i];
+                var tc = list[i].getComponent(leaf.TouchComponent);
+                if (tc) {
+                    if (type === 'start')
+                        tc.onTouchStart.dispatch(e);
+                    else if (type === 'move')
+                        tc.onTouchMove.dispatch(e);
+                    else if (type === 'end')
+                        tc.onTouchEnd.dispatch(e);
+                }
+            }
+        };
+        TouchManager.findTarget = function (touchX, touchY, checkEntity) {
+            var m = checkEntity.transform.reverse;
+            var x = m.a * touchX + m.c * touchY + m.tx;
+            var y = m.b * touchX + m.d * touchY + m.ty;
+            for (var i = 0; i < checkEntity.children.length; i++) {
+                var target = this.findTarget(x, y, checkEntity.children[i]);
+                if (target)
+                    return target;
+            }
+            var render = checkEntity.getComponent(leaf.Render);
+            if (render && render.width && render.height &&
+                x >= 0 && x < render.width && y >= 0 && y < render.height) {
+                return checkEntity;
+            }
+        };
+        return TouchManager;
+    }());
+    leaf.TouchManager = TouchManager;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {

@@ -190,7 +190,7 @@ var leaf;
                     try {
                         for (var _b = __values(e.changedTouches), _c = _b.next(); !_c.done; _c = _b.next()) {
                             var t = _c.value;
-                            leaf.TouchManager.move(t.identifier, t.clientX, t.clientY);
+                            leaf.TouchManager.end(t.identifier, t.clientX, t.clientY);
                         }
                     }
                     catch (e_3_1) { e_3 = { error: e_3_1 }; }
@@ -380,6 +380,22 @@ var leaf;
         }
         Render.prototype.onDestroy = function () {
         };
+        Render.prototype.preRender = function () {
+        };
+        Object.defineProperty(Render.prototype, "width", {
+            get: function () {
+                return 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Render.prototype, "height", {
+            get: function () {
+                return 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Render.allowMultiply = false;
         return Render;
     }(ecs.Component));
@@ -447,6 +463,20 @@ var leaf;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Bitmap.prototype, "width", {
+            get: function () {
+                return this._texture ? this._texture.width : 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Bitmap.prototype, "height", {
+            get: function () {
+                return this._texture ? this._texture.height : 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Bitmap.prototype.preRender = function () {
             if (!this._texture)
                 return;
@@ -488,6 +518,8 @@ var leaf;
             _this._bold = false;
             _this._italic = false;
             _this._lineSpacing = 5;
+            _this._textWidth = 0;
+            _this._textHeight = 0;
             return _this;
         }
         Object.defineProperty(Label.prototype, "text", {
@@ -572,6 +604,7 @@ var leaf;
             var r = this._fontColor >> 16;
             var g = this._fontColor >> 8 & 0xFF;
             var b = this._fontColor & 0xFF;
+            this._textHeight = 0;
             for (var i = 0; i < this._text.length; i++) {
                 var char = this._text.charAt(i);
                 if (char == "\n" || char == "\r") {
@@ -586,9 +619,27 @@ var leaf;
                 m.concat(w);
                 this.shader.addTask(txt.texture, m, this.entity.transform.worldAlpha, this.blendMode, 0xffffff);
                 x += txt.width * rScale;
+                if (x > this._textWidth)
+                    this._textWidth = x;
             }
+            this._textHeight = y + this.fontSize;
         };
+        Object.defineProperty(Label.prototype, "width", {
+            get: function () {
+                return this._textWidth;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Label.prototype, "height", {
+            get: function () {
+                return this._textHeight;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Label.prototype.onDestroy = function () {
+            this._textWidth = this._textHeight = 0;
             this._text = "";
             this._fontColor = 0xffffff;
             this._fontFamily = "sans-serif";
@@ -2832,17 +2883,118 @@ var leaf;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {
+    var TouchComponent = /** @class */ (function (_super) {
+        __extends(TouchComponent, _super);
+        function TouchComponent() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.onTouchStart = new ecs.Broadcast();
+            _this.onTouchMove = new ecs.Broadcast();
+            _this.onTouchEnd = new ecs.Broadcast();
+            return _this;
+        }
+        TouchComponent.prototype.onDestroy = function () {
+            this.onTouchStart.removeAll();
+            this.onTouchMove.removeAll();
+            this.onTouchEnd.removeAll();
+        };
+        return TouchComponent;
+    }(ecs.Component));
+    leaf.TouchComponent = TouchComponent;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var TouchEvent = /** @class */ (function () {
+        function TouchEvent() {
+        }
+        return TouchEvent;
+    }());
+    leaf.TouchEvent = TouchEvent;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
     var TouchManager = /** @class */ (function () {
         function TouchManager() {
         }
         TouchManager.start = function (touchId, touchX, touchY) {
-            console.error("start", touchId, touchX, touchY, touchX / leaf.world.root.transform.scaleX, touchY / leaf.world.root.transform.scaleY);
+            if (!leaf.world)
+                return;
+            var target = this.findTarget(touchX, touchY, leaf.world.root) || leaf.world.root;
+            var e = new leaf.TouchEvent();
+            e.touchId = touchId;
+            var m = leaf.world.root.transform.reverse;
+            e.stageX = m.a * touchX + m.c * touchY + m.tx;
+            e.stageY = m.b * touchX + m.d * touchY + m.ty;
+            e.target = target;
+            this.dispatchTouchEvent(e, target, touchX, touchY, "start");
         };
         TouchManager.move = function (touchId, touchX, touchY) {
-            console.error("move", touchId, touchX, touchY);
+            if (!leaf.world)
+                return;
+            var target = this.findTarget(touchX, touchY, leaf.world.root) || leaf.world.root;
+            var e = new leaf.TouchEvent();
+            e.touchId = touchId;
+            var m = leaf.world.root.transform.reverse;
+            e.stageX = m.a * touchX + m.c * touchY + m.tx;
+            e.stageY = m.b * touchX + m.d * touchY + m.ty;
+            e.target = target;
+            this.dispatchTouchEvent(e, target, touchX, touchY, "move");
         };
         TouchManager.end = function (touchId, touchX, touchY) {
-            console.error("end", touchId, touchX, touchY);
+            if (!leaf.world)
+                return;
+            var target = this.findTarget(touchX, touchY, leaf.world.root) || leaf.world.root;
+            var e = new leaf.TouchEvent();
+            e.touchId = touchId;
+            var m = leaf.world.root.transform.reverse;
+            e.stageX = m.a * touchX + m.c * touchY + m.tx;
+            e.stageY = m.b * touchX + m.d * touchY + m.ty;
+            e.target = target;
+            this.dispatchTouchEvent(e, target, touchX, touchY, "end");
+        };
+        TouchManager.dispatchTouchEvent = function (e, target, touchX, touchY, type) {
+            var list = [];
+            var locals = [];
+            while (target) {
+                list.push(target);
+                target = target.parent;
+            }
+            for (var i = list.length - 1, x = 0, y = 0; i >= 0; i--) {
+                var m = list[i].transform.reverse;
+                x = m.a * touchX + m.c * touchY + m.tx;
+                y = m.b * touchX + m.d * touchY + m.ty;
+                touchX = x;
+                touchY = y;
+                locals.push([x, y]);
+            }
+            for (var i = 0; i < list.length; i++) {
+                e.localX = locals[list.length - 1 - i][0];
+                e.localY = locals[list.length - 1 - i][1];
+                e.currentTarget = list[i];
+                var tc = list[i].getComponent(leaf.TouchComponent);
+                if (tc) {
+                    if (type === 'start')
+                        tc.onTouchStart.dispatch(e);
+                    else if (type === 'move')
+                        tc.onTouchMove.dispatch(e);
+                    else if (type === 'end')
+                        tc.onTouchEnd.dispatch(e);
+                }
+            }
+        };
+        TouchManager.findTarget = function (touchX, touchY, checkEntity) {
+            var m = checkEntity.transform.reverse;
+            var x = m.a * touchX + m.c * touchY + m.tx;
+            var y = m.b * touchX + m.d * touchY + m.ty;
+            for (var i = 0; i < checkEntity.children.length; i++) {
+                var target = this.findTarget(x, y, checkEntity.children[i]);
+                if (target)
+                    return target;
+            }
+            var render = checkEntity.getComponent(leaf.Render);
+            if (render && render.width && render.height &&
+                x >= 0 && x < render.width && y >= 0 && y < render.height) {
+                return checkEntity;
+            }
         };
         return TouchManager;
     }());

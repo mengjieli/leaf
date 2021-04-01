@@ -57,12 +57,14 @@ declare namespace leaf {
 declare namespace leaf {
 }
 declare namespace leaf {
-    abstract class Render extends ecs.Component {
+    class Render extends ecs.Component {
         readonly shader: Shader;
         static allowMultiply: boolean;
         blendMode: BlendMode;
         onDestroy(): void;
-        abstract preRender(): any;
+        preRender(): void;
+        readonly width: number;
+        readonly height: number;
     }
 }
 declare namespace leaf {
@@ -74,6 +76,8 @@ declare namespace leaf {
         resource: string;
         private _tint;
         tint: number;
+        readonly width: number;
+        readonly height: number;
         preRender(): void;
         onDestroy(): void;
         private static _shader;
@@ -97,7 +101,11 @@ declare namespace leaf {
         italic: boolean;
         private _lineSpacing;
         lineSpacing: number;
+        private _textWidth;
+        private _textHeight;
         preRender(): void;
+        readonly width: number;
+        readonly height: number;
         onDestroy(): void;
         static useScaleFont: boolean;
     }
@@ -585,10 +593,31 @@ declare namespace leaf {
     }
 }
 declare namespace leaf {
+    class TouchComponent extends ecs.Component {
+        readonly onTouchStart: ecs.Broadcast<TouchEvent>;
+        readonly onTouchMove: ecs.Broadcast<TouchEvent>;
+        readonly onTouchEnd: ecs.Broadcast<TouchEvent>;
+        onDestroy(): void;
+    }
+}
+declare namespace leaf {
+    class TouchEvent {
+        touchId: number;
+        localX: number;
+        localY: number;
+        stageX: number;
+        stageY: number;
+        target: ecs.Entity;
+        currentTarget: ecs.Entity;
+    }
+}
+declare namespace leaf {
     class TouchManager {
         static start(touchId: number, touchX: number, touchY: number): void;
         static move(touchId: number, touchX: number, touchY: number): void;
         static end(touchId: number, touchX: number, touchY: number): void;
+        private static dispatchTouchEvent;
+        private static findTarget;
     }
 }
 declare namespace leaf {

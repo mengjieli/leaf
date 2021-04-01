@@ -55,6 +55,14 @@ namespace leaf {
             }
         }
 
+        get width() {
+            return this._texture ? this._texture.width : 0;
+        }
+
+        get height() {
+            return this._texture ? this._texture.height : 0;
+        }
+
         preRender() {
             if (!this._texture) return;
             (this.shader as BitmapShaderTask).addTask(this.texture, this.entity.transform.worldMatrix, this.entity.transform.worldAlpha, this.blendMode, this._tint);

@@ -8,6 +8,9 @@ export class LinkGame extends ecs.Component {
         this.entity.transform.scaleX = 470;
         this.entity.transform.scaleY = 100;
         bm.tint = 0x550000;
+        bm.addComponent(leaf.TouchComponent).onTouchEnd.on(e => {
+            console.error(e.localX, e.localY, e.stageX, e.stageY);
+        })
     }
 
 }

@@ -1,6 +1,6 @@
 namespace leaf {
 
-    export abstract class Render extends ecs.Component {
+    export class Render extends ecs.Component {
 
         readonly shader: Shader;
 
@@ -11,8 +11,17 @@ namespace leaf {
         onDestroy() {
         }
 
-        abstract preRender();
+        preRender() {
 
+        }
+
+        get width() {
+            return 0;
+        }
+
+        get height() {
+            return 0;
+        }
     }
 
 }

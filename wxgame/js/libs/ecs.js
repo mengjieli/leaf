@@ -14,7 +14,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    };
+    }
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -2051,11 +2051,16 @@ var ecs;
             /**
              * @internal
              */
-            this._local = new ecs.Matrix();
+            this.dirty = false;
             /**
              * @internal
              */
-            this.dirty = false;
+            this.reverseDirty = false;
+            /**
+             * @internal
+             */
+            this._local = new ecs.Matrix();
+            this._reverse = new ecs.Matrix();
             /**
              * @internal
              */
@@ -2074,7 +2079,7 @@ var ecs;
             set: function (val) {
                 if (this._x === val)
                     return;
-                this.dirty = true;
+                this.dirty = this.reverseDirty = true;
                 this._x = val;
             },
             enumerable: true,
@@ -2085,7 +2090,7 @@ var ecs;
             set: function (val) {
                 if (this._y === val)
                     return;
-                this.dirty = true;
+                this.dirty = this.reverseDirty = true;
                 this._y = val;
             },
             enumerable: true,
@@ -2096,7 +2101,7 @@ var ecs;
             set: function (val) {
                 if (this._anchorOffsetX === val)
                     return;
-                this.dirty = true;
+                this.dirty = this.reverseDirty = true;
                 this._anchorOffsetX = val;
             },
             enumerable: true,
@@ -2107,7 +2112,7 @@ var ecs;
             set: function (val) {
                 if (this._anchorOffsetY === val)
                     return;
-                this.dirty = true;
+                this.dirty = this.reverseDirty = true;
                 this._anchorOffsetY = val;
             },
             enumerable: true,
@@ -2118,7 +2123,7 @@ var ecs;
             set: function (val) {
                 if (this._scaleX === val)
                     return;
-                this.dirty = true;
+                this.dirty = this.reverseDirty = true;
                 this._scaleX = val;
             },
             enumerable: true,
@@ -2129,7 +2134,7 @@ var ecs;
             set: function (val) {
                 if (this._scaleY === val)
                     return;
-                this.dirty = true;
+                this.dirty = this.reverseDirty = true;
                 this._scaleY = val;
             },
             enumerable: true,
@@ -2140,7 +2145,7 @@ var ecs;
             set: function (val) {
                 if (this._angle === val)
                     return;
-                this.dirty = true;
+                this.dirty = this.reverseDirty = true;
                 this._angle = val;
             },
             enumerable: true,
@@ -2193,6 +2198,38 @@ var ecs;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Transform.prototype, "reverse", {
+            get: function () {
+                if (this.reverseDirty) {
+                    this.reverseDirty = false;
+                    var local = this._reverse;
+                    local.identity();
+                    var sx = 1 / this._scaleX;
+                    var sy = 1 / this._scaleY;
+                    if (sx != 1 || sy != 1) {
+                        local.a *= sx;
+                        local.d *= sy;
+                    }
+                    if (this._angle) {
+                        var sin = Math.sin(-this._angle);
+                        var cos = Math.cos(-this._angle);
+                        local.a = cos * sx;
+                        local.b = sin * sx;
+                        local.c = -sin * sy;
+                        local.d = cos * sy;
+                    }
+                    var tx = -this._anchorOffsetX * local.a - this._x;
+                    var ty = -this._anchorOffsetY * local.d - this._y;
+                    tx += -this._anchorOffsetY * local.c;
+                    ty += -this._anchorOffsetX * local.b;
+                    local.tx = tx;
+                    local.ty = ty;
+                }
+                return this._reverse;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(Transform.prototype, "worldMatrix", {
             get: function () {
                 var dis = this.$parent;
@@ -2221,7 +2258,8 @@ var ecs;
             configurable: true
         });
         Transform.prototype.reset = function () {
-            this.local.identity();
+            this._local.identity();
+            this._reverse.identity();
             this.dirty = false;
             this._anchorOffsetX = this._anchorOffsetY = this._x = this._y = this._angle = 0;
             this._scaleX = this._scaleY = this._alpha = 1;

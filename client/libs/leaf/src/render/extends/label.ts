@@ -80,6 +80,10 @@ namespace leaf {
             this._lineSpacing = val;
         }
 
+        private _textWidth = 0;
+
+        private _textHeight = 0;
+
         preRender() {
             let x = 0;
             let y = 0;
@@ -92,6 +96,7 @@ namespace leaf {
             let r = this._fontColor >> 16;
             let g = this._fontColor >> 8 & 0xFF;
             let b = this._fontColor & 0xFF;
+            this._textHeight = 0;
             for (let i = 0; i < this._text.length; i++) {
                 let char = this._text.charAt(i);
                 if (char == "\n" || char == "\r") {
@@ -106,10 +111,21 @@ namespace leaf {
                 m.concat(w);
                 (this.shader as BitmapShaderTask).addTask(txt.texture, m, this.entity.transform.worldAlpha, this.blendMode, 0xffffff);
                 x += txt.width * rScale;
+                if (x > this._textWidth) this._textWidth = x;
             }
+            this._textHeight = y + this.fontSize;
+        }
+
+        get width() {
+            return this._textWidth;
+        }
+
+        get height() {
+            return this._textHeight;
         }
 
         onDestroy() {
+            this._textWidth = this._textHeight = 0;
             this._text = "";
             this._fontColor = 0xffffff;
             this._fontFamily = "sans-serif";

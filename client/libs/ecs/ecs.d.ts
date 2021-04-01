@@ -364,6 +364,7 @@ declare namespace ecs {
 declare namespace ecs {
     class Transform {
         constructor(entity: Entity);
+        private _reverse;
         readonly entity: Entity;
         x: number;
         y: number;
@@ -375,6 +376,7 @@ declare namespace ecs {
         alpha: number;
         readonly parent: Transform;
         readonly local: Matrix;
+        readonly reverse: Matrix;
         readonly worldMatrix: Matrix;
         readonly worldAlpha: number;
         reset(): void;
