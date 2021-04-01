@@ -135,7 +135,7 @@ namespace leaf {
             this._lineSpacing = 5;
         }
 
-        static useScaleFont = false;
+        static useScaleFont = true;
     }
 
 }

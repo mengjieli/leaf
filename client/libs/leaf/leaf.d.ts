@@ -43,7 +43,7 @@ declare namespace leaf {
         static width: number;
         static height: number;
         static textureId: number;
-        static scale: number;
+        static readonly scale: number;
         static init(): WebGLRenderingContext;
         /**
         * 这里并没有加 image 对应 texture 的对应表，也就是说调用两次 createTexture，传同一个 image，会创建两个 texture，还可以进一步优化。
@@ -488,6 +488,23 @@ declare namespace leaf {
     }
 }
 declare namespace leaf {
+    class DrawTexture {
+        private canvas;
+        protected context2d: CanvasRenderingContext2D;
+        readonly texture: WebGLTexture;
+        readonly width: number;
+        readonly height: number;
+        constructor(width: number, height: number);
+        update(): void;
+    }
+}
+declare namespace leaf {
+    class PointTexture extends DrawTexture {
+        getColor(color: number): Texture;
+        static readonly ist: PointTexture;
+    }
+}
+declare namespace leaf {
     /**
      * 单个文字信息比如字母 a 就对应一个 TextAtlasInfo，字母 b 又是另外一个 TextAtlasInfo
      */
@@ -618,6 +635,15 @@ declare namespace leaf {
         static end(touchId: number, touchX: number, touchY: number): void;
         private static dispatchTouchEvent;
         private static findTarget;
+    }
+}
+declare namespace leaf {
+    class StateWin extends ecs.Component {
+        awake(): void;
+        lateUpdate(): void;
+        private static ist;
+        static show(): void;
+        static hide(): void;
     }
 }
 declare namespace leaf {

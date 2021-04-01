@@ -174,6 +174,9 @@ namespace leaf {
         private tints = [];
 
         addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode, tint: number) {
+            if (texture.dirty) {
+                texture.update();
+            }
             var txtureIndex = this.textures.length ? this.textures[this.textures.length - 1].indexOf(texture.texture) : -1;
             if (!this.textures.length ||
                 txtureIndex === -1 &&

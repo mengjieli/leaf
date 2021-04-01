@@ -10,7 +10,9 @@ namespace leaf {
 
         static textureId: number = 0;
 
-        static scale: number = 1;
+        static get scale():number {
+            return leaf.world ? leaf.world.root.transform.scaleX : 1;
+        }
 
         /**
          * @internal

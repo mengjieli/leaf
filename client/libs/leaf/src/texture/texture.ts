@@ -2,9 +2,9 @@ namespace leaf {
 
     export class Texture {
 
-        private static id:number = 0;
+        private static id: number = 0;
 
-        constructor(texture:WebGLTexture, width:number, height:number, sourceX?:number, sourceY?:number, sourceWidth?:number, sourceHeight?:number) {
+        constructor(texture: WebGLTexture, width: number, height: number, sourceX?: number, sourceY?: number, sourceWidth?: number, sourceHeight?: number) {
             this._texture = texture;
             this._width = +width | 0;
             this._height = +height | 0;
@@ -26,99 +26,110 @@ namespace leaf {
             Texture.id++;
         }
 
-        private _id:number = 0;
-        public get id():number {
+        private _id: number = 0;
+        public get id(): number {
             return this._id;
         }
 
-        private _texture:WebGLTexture;
-        public get texture():WebGLTexture {
+        private _texture: WebGLTexture;
+        public get texture(): WebGLTexture {
             return this._texture;
         }
 
-        public set texture(val:WebGLTexture) {
+        public set texture(val: WebGLTexture) {
             this._texture = val;
         }
 
-        private _width:number;
-        public get width():number {
+        private _width: number;
+        public get width(): number {
             return this._width;
         }
 
-        public set width(val:number) {
+        public set width(val: number) {
             this._width = +val | 0;
         }
 
-        private _height:number;
-        public get height():number {
+        private _height: number;
+        public get height(): number {
             return this._height;
         }
 
-        public set height(val:number) {
+        public set height(val: number) {
             this._height = +val | 0;
         }
 
-        private _sourceX:number;
-        public get sourceX():number {
+        private _sourceX: number;
+        public get sourceX(): number {
             return this._sourceX;
         }
 
-        public set sourceX(val:number) {
+        public set sourceX(val: number) {
             this._sourceX = +val | 0;
         }
 
-        private _sourceY:number;
-        public get sourceY():number {
+        private _sourceY: number;
+        public get sourceY(): number {
             return this._sourceY;
         }
 
-        public set sourceY(val:number) {
+        public set sourceY(val: number) {
             this._sourceY = +val | 0;
         }
 
-        private _sourceWidth:number;
-        public get sourceWidth():number {
+        private _sourceWidth: number;
+        public get sourceWidth(): number {
             return this._sourceWidth;
         }
 
-        public set sourceWidth(val:number) {
+        public set sourceWidth(val: number) {
             this._sourceWidth = +val | 0;
         }
 
-        private _sourceHeight:number;
-        public get sourceHeight():number {
+        private _sourceHeight: number;
+        public get sourceHeight(): number {
             return this._sourceHeight;
         }
 
-        public set sourceHeight(val:number) {
+        public set sourceHeight(val: number) {
             this._sourceHeight = +val | 0;
         }
 
-        private _startX:number;
-        public get startX():number {
+        private _startX: number;
+        public get startX(): number {
             return this._startX;
         }
 
-        private _startY:number;
-        public get startY():number {
+        private _startY: number;
+        public get startY(): number {
             return this._startY;
         }
 
-        private _endX:number;
-        public get endX():number {
+        private _endX: number;
+        public get endX(): number {
             return this._endX;
         }
 
-        private _endY:number;
-        public get endY():number {
+        private _endY: number;
+        public get endY(): number {
             return this._endY;
         }
 
-        public destroy():void {
+        public destroy(): void {
             // Stage.$webgl.deleteTexture(this._texture);
             GLCore.gl.deleteTexture(this._texture);
             this._texture = null;
+            this.dirty = false;
         }
+
+        /**
+         * @internal
+         */
+        dirty: boolean = false;
+
+        /**
+         * @internal
+         */
+        update: Function;
     }
 
 }
