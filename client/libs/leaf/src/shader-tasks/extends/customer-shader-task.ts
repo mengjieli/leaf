@@ -2,7 +2,7 @@ namespace leaf {
 
     export var $size = (new Float32Array([0.0])).BYTES_PER_ELEMENT;
 
-    export class BitmapShaderTask5 extends Shader {
+    export class CustomerShaderTask extends Shader {
 
         private a_Position: any;
         private a_TexCoord: any;
@@ -12,10 +12,12 @@ namespace leaf {
         private u_Samplers: any[];
         private u_Color: any;
 
-        constructor() {
+        gl: WebGLRenderingContext;
+
+        constructor(vertexSource: string, fragmentSource: string) {
             super();
             //初始化作色器、program
-            this.initProgram();
+            this.initProgram(vertexSource, fragmentSource);
             //初始化作色器固定变量 和 获取作色器中得变量
             this.initAttriLocation();
         }
@@ -27,67 +29,8 @@ namespace leaf {
          * 目前没有加 filter (滤镜) 的功能，后续可以继续扩展这两个 shader
          * @param gl
          */
-        private initProgram(): void {
-            var gl = GLCore.gl;
-            var vertexSource = `
-             attribute vec2 a_TexCoord;
-             attribute vec4 a_Position;
-             attribute float a_Alpha;
-             attribute float a_Sampler;
-             uniform mat4 u_PMatrix;
-             varying vec2 v_TexCoord;
-             varying float v_Alpha;
-             varying float v_Sampler;
-             void main(void)
-             {
-                gl_Position = u_PMatrix*a_Position;
-                v_TexCoord = a_TexCoord;
-                v_Alpha = a_Alpha;
-                v_Sampler = a_Sampler;
-             }
-             `;
-
-
-            var fragmentSource = `
-             precision mediump float;
-             varying vec2 v_TexCoord;
-             varying float v_Alpha;
-             varying float v_Sampler;
-             uniform vec4 u_Color;
-             uniform sampler2D u_Sampler0;
-             uniform sampler2D u_Sampler1;
-             uniform sampler2D u_Sampler2;
-             uniform sampler2D u_Sampler3;
-             uniform sampler2D u_Sampler4;
-             uniform sampler2D u_Sampler5;
-             uniform sampler2D u_Sampler6;
-             uniform sampler2D u_Sampler7;
-             vec4 getTextureColor(vec2 coord);
-             void main(void)
-             {
-                gl_FragColor = getTextureColor(v_TexCoord)*u_Color*v_Alpha;
-             }
-             vec4 getTextureColor(vec2 coord) {
-                if(v_Sampler == 0.0) {
-                    return texture2D(u_Sampler0,v_TexCoord);
-                } else if(v_Sampler == 1.0) {
-                    return texture2D(u_Sampler1,v_TexCoord);
-                } else if(v_Sampler == 2.0) {
-                    return texture2D(u_Sampler2,v_TexCoord);
-                } else if(v_Sampler == 3.0) {
-                    return texture2D(u_Sampler3,v_TexCoord);
-                } else if(v_Sampler == 4.0) {
-                    return texture2D(u_Sampler4,v_TexCoord);
-                } else if(v_Sampler == 5.0) {
-                    return texture2D(u_Sampler5,v_TexCoord);
-                } else if(v_Sampler == 6.0) {
-                    return texture2D(u_Sampler6,v_TexCoord);
-                } else if(v_Sampler == 7.0) {
-                    return texture2D(u_Sampler7,v_TexCoord);
-                }
-             }
-             `;
-
+        private initProgram(vertexSource: string, fragmentSource: string): void {
+            var gl = this.gl = GLCore.gl;
             var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
             var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
             this.program = this.createWebGLProgram(vertexShader, fragmentShader);
@@ -114,7 +57,7 @@ namespace leaf {
             projectionMatrix[5] = -2 / GLCore.height;
 
             var program = this.program;
-            program["name"] = "bitmap program";
+            program["name"] = "customer program";
             gl.useProgram(this.program);
 
             if (!this.buffer) {
@@ -172,18 +115,21 @@ namespace leaf {
         private blendMode = [];
         private indiceData = [];
         private tints = [];
+        private newAddNew: boolean = true;
 
         addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode, tint: number) {
             if (texture.dirty) {
                 texture.update();
             }
             var txtureIndex = this.textures.length ? this.textures[this.textures.length - 1].indexOf(texture.texture) : -1;
-            if (!this.textures.length ||
+            if (this.newAddNew ||
+                !this.textures.length ||
                 txtureIndex === -1 &&
                 this.textures[this.textures.length - 1].length >= 8 ||
                 this.count.length && this.count[this.count.length - 1] > 512 ||
                 this.blendMode[this.blendMode.length - 1] != blendMode ||
                 this.tints[this.tints.length - 1] != tint) {
+                this.newAddNew = false;
                 this.textures.push([texture.texture]);
                 txtureIndex = 0;
                 this.positionData.push([]);
@@ -233,12 +179,25 @@ namespace leaf {
             this.count[this.count.length - 1]++;
         }
 
+        renderCounts: number[] = [];
+        lastRenderCount: number = 0;
+        renderIndex = 0;
+
+        startNewTask() {
+            if (this.lastRenderCount != this.textures.length) {
+                this.renderCounts.push(this.textures.length);
+                this.lastRenderCount = this.textures.length;
+            }
+            this.newAddNew = true;
+        }
+
         /**
          * 渲染
          */
         public render(): void {
             var _this = this;
             var gl = GLCore.gl;
+            var max = this.renderCounts.pop();
             gl.useProgram(_this.program);
             //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
             gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -246,8 +205,9 @@ namespace leaf {
             gl.vertexAttribPointer(_this.a_TexCoord, 2, gl.FLOAT, false, $size * 6, $size * 2);
             gl.vertexAttribPointer(_this.a_Alpha, 1, gl.FLOAT, false, $size * 6, $size * 4);
             gl.vertexAttribPointer(_this.a_Sampler, 1, gl.FLOAT, false, $size * 6, $size * 5);
+            var i = this.renderIndex;
             //开始渲染任务
-            for (var i = 0, len = _this.textures.length; i < len; i++) {
+            for (var len = _this.textures.length; i < len && i < max; i++) {
                 //切换混合模式
                 BlendModeFunc.changeBlendMode(this.blendMode[i]);
                 gl.uniform4f(this.u_Color, (this.tints[i] >> 16) / 255.0, ((this.tints[i] >> 8) & 0xFF) / 255.0, (this.tints[i] & 0xFF) / 255.0, 1);
@@ -266,7 +226,10 @@ namespace leaf {
                 runInfo.drawCount += _this.count[i];
                 runInfo.drawCall++;
             }
-            this.reset();
+            _this.renderIndex = i;
+            if (_this.renderIndex === _this.textures.length) {
+                _this.reset();
+            }
         }
 
         public reset(): void {
@@ -276,8 +239,10 @@ namespace leaf {
             _this.positionData = [];
             _this.blendMode = [];
             _this.tints = [];
+            _this.renderCounts.length = 0;
+            _this.lastRenderCount = 0;
+            _this.renderIndex = 0;
         }
-
 
     }
 

@@ -11,11 +11,11 @@ namespace ecs {
             Entity.onCreateEntity && Entity.onCreateEntity(this);
         }
 
-        $setParent(val: Entity) {
+        $setParent(val: Entity, index: number = -1) {
             if (this.world && this.world.$scene === this) {
                 this.world.$scene = null;
             }
-            super.$setParent(val);
+            super.$setParent(val, index);
         }
 
         destroy() {

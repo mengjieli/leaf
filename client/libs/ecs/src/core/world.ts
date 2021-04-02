@@ -30,10 +30,10 @@ namespace ecs {
             (this.root.world as any) = this;
             this.onAddEntity(this.root);
             this._lastTime = Date.now();
-            this.addSystem(AwakeSystem);
-            this.addSystem(StartSystem);
-            this.addSystem(UpdateSystem);
-            this.addSystem(LateUpdateSystem);
+            this.addSystem(AwakeSystem, null, -1);
+            this.addSystem(StartSystem, null, -1);
+            this.addSystem(UpdateSystem, null, -1);
+            this.addSystem(LateUpdateSystem, null, -1);
         }
 
         /**
@@ -157,7 +157,7 @@ namespace ecs {
             }
         }
 
-        addSystem<T extends IdObject>(systemClass: { new(): System<T> }, initArgs?: string | IComponentClass<any>[]) {
+        addSystem<T extends IdObject>(systemClass: { new(): System<T> }, initArgs?: string | IComponentClass<any>[], reverseIndex = 2) {
             if (initArgs && !(typeof initArgs === 'string')) {
                 for (let comp of initArgs) {
                     Component.register(comp);
@@ -181,7 +181,8 @@ namespace ecs {
             }
             let system = ecs.ObjectPools.createRecyableObject(systemClass, initArgs);
             if (this.systems.indexOf(system) !== -1) return;
-            this.systems.push(system);
+            if (reverseIndex === -1) this.systems.push(system);
+            else this.systems.splice(this.systems.length - reverseIndex, 0, system);
             if (system.query) {
                 this.queries.push(system.query);
                 for (let entityNode = this.entities.head; entityNode; entityNode = entityNode.next) {
@@ -398,7 +399,7 @@ namespace ecs {
         public set scene(val: Scene) {
             this.$scene && (this.$scene.parent = null);
             this.$scene = val;
-            this.$scene && (this.$scene.parent = this.root);
+            this.$scene && this.root.addChildAt(this.$scene, 1);
         }
     }
 

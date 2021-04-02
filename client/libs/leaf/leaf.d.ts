@@ -6,10 +6,18 @@ declare namespace leaf {
         runTime: number;
         drawCall: number;
         drawCount: number;
+        logicTime: number;
+        renderTime: number;
+        preRenderTime: number;
+        glRenderTime: number;
         fps: number;
-        fpsTime: number;
-        fpsDrawCall: number;
-        fpsDrawCount: number;
+        frameTime: number;
+        frameLogicTime: number;
+        frameRenderTime: number;
+        framePreRenderTime: number;
+        frameGlRenderTime: number;
+        frameDrawCall: number;
+        frameDrawCount: number;
     };
     /**
      * 暂停
@@ -57,19 +65,42 @@ declare namespace leaf {
 declare namespace leaf {
 }
 declare namespace leaf {
+}
+declare namespace leaf {
     class Render extends ecs.Component {
         readonly shader: Shader;
         static allowMultiply: boolean;
         blendMode: BlendMode;
+        renderChildren: boolean;
         onDestroy(): void;
         preRender(): void;
+        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader): void;
         readonly width: number;
         readonly height: number;
     }
 }
 declare namespace leaf {
+    class BatchRender extends Render {
+        shader: BatchShaderTask;
+        renderChildren: boolean;
+        private matrix;
+        preRender2(matrix: ecs.Matrix, alpha: number): void;
+        refresh(): void;
+        preRenderEntity(entity: ecs.Entity, matrix: ecs.Matrix, alpha: number): void;
+        projectionMatrix: Float32Array;
+        textures: WebGLTexture[][];
+        count: any[];
+        positionData: any[];
+        blendModes: any[];
+        tints: any[];
+        buffers: WebGLBuffer[];
+        private reset;
+        onDestroy(): void;
+    }
+}
+declare namespace leaf {
     class Bitmap extends Render {
-        shader: BitmapShaderTask;
+        shader: NormalShaderTask;
         private _resource;
         private _res;
         texture: Texture;
@@ -79,14 +110,13 @@ declare namespace leaf {
         readonly width: number;
         readonly height: number;
         preRender(): void;
+        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader): void;
         onDestroy(): void;
-        private static _shader;
-        static readonly shader: BitmapShaderTask;
     }
 }
 declare namespace leaf {
     class Label extends Render {
-        shader: BitmapShaderTask;
+        shader: NormalShaderTask;
         private _text;
         text: string;
         private _fontColor;
@@ -104,6 +134,8 @@ declare namespace leaf {
         private _textWidth;
         private _textHeight;
         preRender(): void;
+        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader): void;
+        private preRenderReal;
         readonly width: number;
         readonly height: number;
         onDestroy(): void;
@@ -282,19 +314,66 @@ declare namespace leaf {
          */
         createShader(type: number, source: string): WebGLShader;
         abstract addTask(...args: any[]): any;
+        startNewTask(): void;
         abstract render(): any;
     }
 }
 declare namespace leaf {
     var $size: number;
-    class BitmapShaderTask extends Shader {
+    class BatchShaderTask extends Shader {
+        private a_Position;
+        private a_TexCoord;
+        private a_Alpha;
+        private a_Sampler;
+        private u_PMatrix;
+        private u_GMatrix;
+        private u_Samplers;
+        private u_Color;
+        constructor();
+        /**
+         * 初始化作色器、program
+         * 1. 初始化 shader
+         * 2. 初始化 program
+         * 目前没有加 filter (滤镜) 的功能，后续可以继续扩展这两个 shader
+         * @param gl
+         */
+        private initProgram;
+        private projectionMatrix;
+        private indiceData;
+        /**
+         * 初始化作色器固定变量 和 获取作色器中得变量
+         * 主要初始化投影矩阵，投影矩阵不用每次调用都初始化，只要设置一次即可，除非舞台 (Stage) 的大小改变 (glViewPort)
+         * 获取一些变量。
+         * @param gl
+         * @param width
+         * @param height
+         */
+        private initAttriLocation;
+        curBatch: BatchRender;
+        addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode, tint: number): void;
+        batchs: BatchRender[];
+        startNewTask(): void;
+        /**
+         * 渲染
+         */
+        render(): void;
+        renderBatch(batch: any): void;
+        private static _shader;
+        static readonly shader: BatchShaderTask;
+    }
+}
+declare namespace leaf {
+    var $size: number;
+    class CustomerShaderTask extends Shader {
         private a_Position;
         private a_TexCoord;
         private a_Alpha;
         private a_Sampler;
         private u_PMatrix;
         private u_Samplers;
-        constructor();
+        private u_Color;
+        gl: WebGLRenderingContext;
+        constructor(vertexSource: string, fragmentSource: string);
         /**
          * 初始化作色器、program
          * 1. 初始化 shader
@@ -317,7 +396,14 @@ declare namespace leaf {
         private count;
         private positionData;
         private blendMode;
-        addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode, tint?: number): void;
+        private indiceData;
+        private tints;
+        private newAddNew;
+        addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode, tint: number): void;
+        renderCounts: number[];
+        lastRenderCount: number;
+        renderIndex: number;
+        startNewTask(): void;
         /**
          * 渲染
          */
@@ -327,7 +413,7 @@ declare namespace leaf {
 }
 declare namespace leaf {
     var $size: number;
-    class BitmapShaderTask5 extends Shader {
+    class NormalShaderTask extends Shader {
         private a_Position;
         private a_TexCoord;
         private a_Alpha;
@@ -360,131 +446,19 @@ declare namespace leaf {
         private blendMode;
         private indiceData;
         private tints;
+        private newAddNew;
         addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode, tint: number): void;
+        renderCounts: number[];
+        lastRenderCount: number;
+        renderIndex: number;
+        startNewTask(): void;
         /**
          * 渲染
          */
         render(): void;
         reset(): void;
-    }
-}
-declare namespace leaf {
-    var $size: number;
-    class BitmapShaderTask2 extends Shader {
-        a_Position: any;
-        a_TexCoord: any;
-        a_Alpha: any;
-        a_Sampler: any;
-        u_PMatrix: any;
-        constructor();
-        /**
-         * 初始化作色器、program
-         * 1. 初始化 shader
-         * 2. 初始化 program
-         * 目前没有加 filter (滤镜) 的功能，后续可以继续扩展这两个 shader
-         * @param gl
-         */
-        private initProgram;
-        private projectionMatrix;
-        /**
-         * 初始化作色器固定变量 和 获取作色器中得变量
-         * 主要初始化投影矩阵，投影矩阵不用每次调用都初始化，只要设置一次即可，除非舞台 (Stage) 的大小改变 (glViewPort)
-         * 获取一些变量。
-         * @param gl
-         * @param width
-         * @param height
-         */
-        private initAttriLocation;
-        private textures;
-        private count;
-        private positionData;
-        private blendMode;
-        addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode): void;
-        /**
-         * 渲染
-         */
-        render(): void;
-        reset(): void;
-    }
-}
-declare namespace leaf {
-    var $size: number;
-    class BitmapShaderTask3 extends Shader {
-        a_Position: any;
-        a_TexCoord: any;
-        u_Alpha: any;
-        a_Sampler: any;
-        u_PMatrix: any;
-        constructor();
-        /**
-         * 初始化作色器、program
-         * 1. 初始化 shader
-         * 2. 初始化 program
-         * 目前没有加 filter (滤镜) 的功能，后续可以继续扩展这两个 shader
-         * @param gl
-         */
-        private initProgram;
-        private projectionMatrix;
-        /**
-         * 初始化作色器固定变量 和 获取作色器中得变量
-         * 主要初始化投影矩阵，投影矩阵不用每次调用都初始化，只要设置一次即可，除非舞台 (Stage) 的大小改变 (glViewPort)
-         * 获取一些变量。
-         * @param gl
-         * @param width
-         * @param height
-         */
-        private initAttriLocation;
-        private textures;
-        private count;
-        private positionData;
-        private blendMode;
-        private alpha;
-        addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode): void;
-        /**
-         * 渲染
-         */
-        render(): void;
-        reset(): void;
-    }
-}
-declare namespace leaf {
-    var $size: number;
-    class BitmapShaderTask4 extends Shader {
-        a_Position: any;
-        a_TexCoord: any;
-        a_Alpha: any;
-        a_Sampler: any;
-        u_PMatrix: any;
-        constructor();
-        /**
-         * 初始化作色器、program
-         * 1. 初始化 shader
-         * 2. 初始化 program
-         * 目前没有加 filter (滤镜) 的功能，后续可以继续扩展这两个 shader
-         * @param gl
-         */
-        private initProgram;
-        private projectionMatrix;
-        /**
-         * 初始化作色器固定变量 和 获取作色器中得变量
-         * 主要初始化投影矩阵，投影矩阵不用每次调用都初始化，只要设置一次即可，除非舞台 (Stage) 的大小改变 (glViewPort)
-         * 获取一些变量。
-         * @param gl
-         * @param width
-         * @param height
-         */
-        private initAttriLocation;
-        private textures;
-        private count;
-        private positionData;
-        private indiceData;
-        private blendMode;
-        addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode): void;
-        /**
-         * 渲染
-         */
-        render(): void;
-        reset(): void;
+        private static _shader;
+        static readonly shader: NormalShaderTask;
     }
 }
 declare namespace leaf {
@@ -501,7 +475,8 @@ declare namespace leaf {
 declare namespace leaf {
     class PointTexture extends DrawTexture {
         getColor(color: number): Texture;
-        static readonly ist: PointTexture;
+        readonly isFull: boolean;
+        static getTexture(color: number): Texture;
     }
 }
 declare namespace leaf {

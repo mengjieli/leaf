@@ -99,6 +99,8 @@ namespace leaf {
             var gl = this.gl;
             var texture = gl.createTexture();
             texture["id"] = this.textureId;
+            texture["width"] = image.width;
+            texture["height"] = image.height;
             this.textureId++;
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);

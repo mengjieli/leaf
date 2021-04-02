@@ -1503,6 +1503,7 @@ var ecs;
             this.d = 1;
             this.tx = 0;
             this.ty = 0;
+            return this;
         };
         Matrix.prototype.setTo = function (a, b, c, d, tx, ty) {
             this.a = a;
@@ -1511,21 +1512,25 @@ var ecs;
             this.d = d;
             this.tx = tx;
             this.ty = ty;
+            return this;
         };
         Matrix.prototype.translate = function (x, y) {
             this.tx += x;
             this.ty += y;
+            return this;
         };
         Matrix.prototype.rotate = function (angle) {
             var sin = Math.sin(angle);
             var cos = Math.cos(angle);
             this.setTo(this.a * cos - this.c * sin, this.a * sin + this.c * cos, this.b * cos - this.d * sin, this.b * sin + this.d * cos, this.tx * cos - this.ty * sin, this.tx * sin + this.ty * cos);
+            return this;
         };
         Matrix.prototype.scale = function (scaleX, scaleY) {
             this.a *= scaleX;
             this.d *= scaleY;
             this.tx *= scaleX;
             this.ty *= scaleY;
+            return this;
         };
         // transformPoint(pointX, pointY, resultPoint) {
         //     var x = this.a * pointX + this.c * pointY + this.tx;
@@ -1547,6 +1552,7 @@ var ecs;
             this.b = sin * scaleY;
             this.c = -sin * scaleX;
             this.d = cos * scaleY;
+            return this;
         };
         Matrix.prototype.$updateRST = function (rotation, scaleX, scaleY, tx, ty) {
             var sin = 0;
@@ -1561,6 +1567,7 @@ var ecs;
             this.d = cos * scaleY;
             this.tx = cos * scaleX * tx - sin * scaleY * ty;
             this.ty = sin * scaleX * tx + cos * scaleY * ty;
+            return this;
         };
         Matrix.prototype.$transformRectangle = function (rect) {
             var a = this.a;
@@ -1606,6 +1613,7 @@ var ecs;
             }
             rect.y = Math.floor(y0 < y2 ? y0 : y2);
             rect.height = Math.ceil((y1 > y3 ? y1 : y3) - rect.y);
+            return this;
         };
         Matrix.prototype.concat = function (other) {
             var a = this.a * other.a;
@@ -1628,6 +1636,7 @@ var ecs;
             this.d = d;
             this.tx = tx;
             this.ty = ty;
+            return this;
         };
         Matrix.prototype.reconcat = function (other) {
             var _this = other;
@@ -1652,6 +1661,7 @@ var ecs;
             this.d = d;
             this.tx = tx;
             this.ty = ty;
+            return this;
         };
         Object.defineProperty(Matrix.prototype, "deformation", {
             get: function () {
@@ -1671,11 +1681,13 @@ var ecs;
             matrix.tx = this.tx;
             matrix.ty = this.ty;
             this._storeList.push(matrix);
+            return this;
         };
         Matrix.prototype.restore = function () {
             var matrix = this._storeList.pop();
             this.setTo(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
             Matrix.release(matrix);
+            return this;
         };
         Matrix.release = function (matrix) {
             if (!matrix) {
@@ -2297,10 +2309,10 @@ var ecs;
             this.root.world = this;
             this.onAddEntity(this.root);
             this._lastTime = Date.now();
-            this.addSystem(ecs.AwakeSystem);
-            this.addSystem(ecs.StartSystem);
-            this.addSystem(ecs.UpdateSystem);
-            this.addSystem(ecs.LateUpdateSystem);
+            this.addSystem(ecs.AwakeSystem, null, -1);
+            this.addSystem(ecs.StartSystem, null, -1);
+            this.addSystem(ecs.UpdateSystem, null, -1);
+            this.addSystem(ecs.LateUpdateSystem, null, -1);
         }
         World.prototype.update = function (dt) {
             var e_7, _a, e_8, _b;
@@ -2455,7 +2467,8 @@ var ecs;
                 this.queries[i].onRemoveComponent(entity, component);
             }
         };
-        World.prototype.addSystem = function (systemClass, initArgs) {
+        World.prototype.addSystem = function (systemClass, initArgs, reverseIndex) {
+            if (reverseIndex === void 0) { reverseIndex = 2; }
             var e_11, _a, e_12, _b;
             if (initArgs && !(typeof initArgs === 'string')) {
                 try {
@@ -2503,7 +2516,10 @@ var ecs;
             var system = ecs.ObjectPools.createRecyableObject(systemClass, initArgs);
             if (this.systems.indexOf(system) !== -1)
                 return;
-            this.systems.push(system);
+            if (reverseIndex === -1)
+                this.systems.push(system);
+            else
+                this.systems.splice(this.systems.length - reverseIndex, 0, system);
             if (system.query) {
                 this.queries.push(system.query);
                 for (var entityNode = this.entities.head; entityNode; entityNode = entityNode.next) {
@@ -2794,7 +2810,7 @@ var ecs;
             set: function (val) {
                 this.$scene && (this.$scene.parent = null);
                 this.$scene = val;
-                this.$scene && (this.$scene.parent = this.root);
+                this.$scene && this.root.addChildAt(this.$scene, 1);
             },
             enumerable: true,
             configurable: true
@@ -3015,11 +3031,12 @@ var ecs;
             ecs.Entity.onCreateEntity && ecs.Entity.onCreateEntity(_this);
             return _this;
         }
-        Scene.prototype.$setParent = function (val) {
+        Scene.prototype.$setParent = function (val, index) {
+            if (index === void 0) { index = -1; }
             if (this.world && this.world.$scene === this) {
                 this.world.$scene = null;
             }
-            _super.prototype.$setParent.call(this, val);
+            _super.prototype.$setParent.call(this, val, index);
         };
         Scene.prototype.destroy = function () {
             _super.prototype.destroy.call(this);

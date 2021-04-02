@@ -9,19 +9,35 @@ namespace leaf {
         runTime: number,
         drawCall: number,
         drawCount: number,
+        logicTime: number,
+        renderTime: number,
+        preRenderTime: number,
+        glRenderTime: number,
         fps: number,
-        fpsTime: number,
-        fpsDrawCall: number,
-        fpsDrawCount: number,
+        frameTime: number,
+        frameLogicTime: number,
+        frameRenderTime: number,
+        framePreRenderTime: number,
+        frameGlRenderTime: number,
+        frameDrawCall: number,
+        frameDrawCount: number,
     } = {
         frame: 0,
         runTime: 0,
         drawCall: 0,
         drawCount: 0,
+        logicTime: 0,
+        renderTime: 0,
+        preRenderTime: 0,
+        glRenderTime: 0,
         fps: 0,
-        fpsTime: 0,
-        fpsDrawCall: 0,
-        fpsDrawCount: 0,
+        frameTime: 0,
+        frameLogicTime: 0,
+        frameRenderTime: 0,
+        framePreRenderTime: 0,
+        frameGlRenderTime: 0,
+        frameDrawCall: 0,
+        frameDrawCount: 0,
     };
 
     var runFlag = true;
@@ -60,12 +76,20 @@ namespace leaf {
         let rs: RecordSystem;
         world.addSystem(RecordSystem, [RecordComponent]);
         rs = world.getSystem(RecordSystem);
-        world.addSystem(RenderSystem, [Render as any]);
+        var rm = new RenerManager();
+        var renderType = 2;
+        if (renderType === 1) {
+            world.addSystem(RenderSystem, [Render as any]);
+        }
         var t = 0;
         var lastTime = Date.now();
         var lastFrame = 0;
         var lastDraCall = 0;
         var lastDrawCount = 0;
+        var lastLogicTime = 0;
+        var lastRenderTime = 0;
+        var lastPreRenderTime = 0;
+        var lastGlRenderTime = 0;
         onTick = function (): void {
             if (rs.checkReplayReady() === false) {
                 requestAnimationFrame.call(window, onTick);
@@ -76,20 +100,33 @@ namespace leaf {
                 return;
             }
             let now = Date.now();
+            let rt = runInfo.renderTime;
             world.update();
+            if (renderType === 2) {
+                rm.update();
+            }
             requestAnimationFrame.call(window, onTick);
             let end = Date.now();
+            runInfo.logicTime += end - now - (runInfo.renderTime - rt);
             t += end - now;
             runInfo.frame++;
             runInfo.runTime += end - now;
             if (end - lastTime >= 1000) {
                 runInfo.fps = (~~(10 * (runInfo.frame - lastFrame) * 1000 / (end - lastTime))) / 10;
-                runInfo.fpsTime = (~~(10 * t / (runInfo.frame - lastFrame))) / 10;
-                runInfo.fpsDrawCall = (~~((runInfo.drawCall - lastDraCall) / (runInfo.frame - lastFrame)));
-                runInfo.fpsDrawCount = (~~((runInfo.drawCount - lastDrawCount) / (runInfo.frame - lastFrame)));
+                runInfo.frameTime = (~~(10 * t / (runInfo.frame - lastFrame))) / 10;
+                runInfo.frameLogicTime = (~~(10 * (runInfo.logicTime - lastLogicTime) / (runInfo.frame - lastFrame))) / 10;
+                runInfo.frameRenderTime = (~~(10 * (runInfo.renderTime - lastRenderTime) / (runInfo.frame - lastFrame))) / 10;
+                runInfo.framePreRenderTime = (~~(10 * (runInfo.preRenderTime - lastPreRenderTime) / (runInfo.frame - lastFrame))) / 10;
+                runInfo.frameGlRenderTime = (~~(10 * (runInfo.glRenderTime - lastGlRenderTime) / (runInfo.frame - lastFrame))) / 10;
+                runInfo.frameDrawCall = (~~((runInfo.drawCall - lastDraCall) / (runInfo.frame - lastFrame)));
+                runInfo.frameDrawCount = (~~((runInfo.drawCount - lastDrawCount) / (runInfo.frame - lastFrame)));
                 lastFrame = runInfo.frame;
                 lastDraCall = runInfo.drawCall;
                 lastDrawCount = runInfo.drawCount;
+                lastLogicTime = runInfo.logicTime;
+                lastRenderTime = runInfo.renderTime;
+                lastPreRenderTime = runInfo.preRenderTime;
+                lastGlRenderTime = runInfo.glRenderTime;
                 lastTime = end;
                 t = 0;
             }

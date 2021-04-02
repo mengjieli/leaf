@@ -218,19 +218,19 @@ declare namespace ecs {
         ty: number;
         _storeList: any[];
         constructor();
-        identity(): void;
-        setTo(a: any, b: any, c: any, d: any, tx: any, ty: any): void;
-        translate(x: any, y: any): void;
-        rotate(angle: any): void;
-        scale(scaleX: any, scaleY: any): void;
-        $updateSR(scaleX: any, scaleY: any, rotation: any): void;
-        $updateRST(rotation: any, scaleX: any, scaleY: any, tx: any, ty: any): void;
-        $transformRectangle(rect: any): void;
-        concat(other: any): void;
-        reconcat(other: any): void;
+        identity(): this;
+        setTo(a: any, b: any, c: any, d: any, tx: any, ty: any): this;
+        translate(x: any, y: any): this;
+        rotate(angle: any): this;
+        scale(scaleX: any, scaleY: any): this;
+        $updateSR(scaleX: any, scaleY: any, rotation: any): this;
+        $updateRST(rotation: any, scaleX: any, scaleY: any, tx: any, ty: any): this;
+        $transformRectangle(rect: any): this;
+        concat(other: any): this;
+        reconcat(other: any): this;
         readonly deformation: boolean;
-        save(): void;
-        restore(): void;
+        save(): this;
+        restore(): this;
         static $matrix: Matrix;
         static matrixPool: any[];
         static release(matrix: any): void;
@@ -437,7 +437,7 @@ declare namespace ecs {
         onRemoveComponent(entity: Entity, component: Component): void;
         addSystem<T extends IdObject>(systemClass: {
             new (): System<T>;
-        }, initArgs?: string | IComponentClass<any>[]): void;
+        }, initArgs?: string | IComponentClass<any>[], reverseIndex?: number): void;
         removeSystem<T extends IdObject>(system: System<T> | {
             new (): System<T>;
         }): void;
@@ -509,7 +509,7 @@ declare namespace ecs {
 declare namespace ecs {
     class Scene extends Entity {
         constructor();
-        $setParent(val: Entity): void;
+        $setParent(val: Entity, index?: number): void;
         destroy(): void;
     }
 }

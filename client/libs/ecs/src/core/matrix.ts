@@ -20,6 +20,7 @@ namespace ecs {
             this.d = 1;
             this.tx = 0;
             this.ty = 0;
+            return this;
         }
 
         setTo(a, b, c, d, tx, ty) {
@@ -29,11 +30,13 @@ namespace ecs {
             this.d = d;
             this.tx = tx;
             this.ty = ty;
+            return this;
         }
 
         translate(x, y) {
             this.tx += x;
             this.ty += y;
+            return this;
         }
 
         rotate(angle) {
@@ -42,6 +45,7 @@ namespace ecs {
             this.setTo(this.a * cos - this.c * sin, this.a * sin + this.c * cos,
                 this.b * cos - this.d * sin, this.b * sin + this.d * cos,
                 this.tx * cos - this.ty * sin, this.tx * sin + this.ty * cos);
+                return this;
         }
 
         scale(scaleX, scaleY) {
@@ -49,6 +53,7 @@ namespace ecs {
             this.d *= scaleY;
             this.tx *= scaleX;
             this.ty *= scaleY;
+            return this;
         }
 
         // transformPoint(pointX, pointY, resultPoint) {
@@ -72,6 +77,7 @@ namespace ecs {
             this.b = sin * scaleY;
             this.c = -sin * scaleX;
             this.d = cos * scaleY;
+            return this;
         }
 
         $updateRST(rotation, scaleX, scaleY, tx, ty) {
@@ -87,6 +93,7 @@ namespace ecs {
             this.d = cos * scaleY;
             this.tx = cos * scaleX * tx - sin * scaleY * ty;
             this.ty = sin * scaleX * tx + cos * scaleY * ty;
+            return this;
         }
 
         $transformRectangle(rect) {
@@ -133,6 +140,7 @@ namespace ecs {
             }
             rect.y = Math.floor(y0 < y2 ? y0 : y2);
             rect.height = Math.ceil((y1 > y3 ? y1 : y3) - rect.y);
+            return this;
         }
 
         concat(other) {
@@ -156,6 +164,7 @@ namespace ecs {
             this.d = d;
             this.tx = tx;
             this.ty = ty;
+            return this;
         }
 
         reconcat(other) {
@@ -181,6 +190,7 @@ namespace ecs {
             this.d = d;
             this.tx = tx;
             this.ty = ty;
+            return this;
         }
 
         get deformation() {
@@ -198,12 +208,14 @@ namespace ecs {
             matrix.tx = this.tx;
             matrix.ty = this.ty;
             this._storeList.push(matrix);
+            return this;
         }
 
         restore() {
             var matrix = this._storeList.pop();
             this.setTo(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
             Matrix.release(matrix);
+            return this;
         }
 
         static $matrix = new Matrix();

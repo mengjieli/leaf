@@ -66,6 +66,10 @@ namespace leaf {
 
         abstract addTask(...args);
 
+        startNewTask() {
+
+        }
+
         abstract render();
     }
 

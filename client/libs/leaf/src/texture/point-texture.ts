@@ -15,12 +15,12 @@ namespace leaf {
     /**
      * @internal
      */
-    private size = 1;
+    private extend = 1;
 
     /**
      * @internal
      */
-    private gap = 1;
+    private gap = 0;
 
     /**
      * @internal
@@ -32,10 +32,9 @@ namespace leaf {
      */
     private y = 1;
 
-
     getColor(color: number) {
       if (this.colors[color]) return this.colors[color];
-      let size = this.size;
+      let size = 1 + this.extend * 2;
       let gap = this.gap;
       let x = this.x;
       let y = this.y;
@@ -46,11 +45,16 @@ namespace leaf {
       }
       this.context2d.fillStyle = `rgb(${color >> 16},${color >> 8 & 0xFF},${color & 0xFF})`;
       this.context2d.fillRect(x, y, size, size);
-      let txt = this.colors[color] = new Texture(this.texture, this.width, this.height, x, y, size, size);
+      let txt = this.colors[color] = new Texture(this.texture, this.width, this.height, x + 1, y + 1, 1, 1);
       txt.dirty = true;
       txt.update = this.updateTexture.bind(this);
       this.dirtyTextures.push(txt);
       return txt;
+    }
+
+    get isFull(): boolean {
+      if (this.x >= this.width || this.y >= this.height) return true;
+      return false;
     }
 
     /**
@@ -66,13 +70,19 @@ namespace leaf {
     /**
      * @internal
      */
-    static _ist: PointTexture;
+    private static curTexture: PointTexture;
 
-    static get ist(): PointTexture {
-      if (!this._ist) {
-        this._ist = new PointTexture(256, 256);
+    /**
+     * @internal
+     */
+    private static colors: { [index: number]: Texture } = {};
+
+    static getTexture(color: number) {
+      let txt = this.curTexture;
+      if (!txt || txt.isFull) {
+        txt = this.curTexture = new PointTexture(256, 256);
       }
-      return this._ist;
+      return txt.getColor(color);
     }
 
   }

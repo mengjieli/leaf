@@ -1,0 +1,45 @@
+{
+	"file": "test.png",
+	"frames": {
+		"block": {
+			"x": 10,
+			"y": 10,
+			"w": 1,
+			"h": 1,
+			"offX": 0,
+			"offY": 0,
+			"sourceW": 1,
+			"sourceH": 1
+		},
+		"block2": {
+			"x": 3,
+			"y": 10,
+			"w": 1,
+			"h": 1,
+			"offX": 0,
+			"offY": 0,
+			"sourceW": 1,
+			"sourceH": 1
+		},
+		"block3": {
+			"x": 10,
+			"y": 3,
+			"w": 1,
+			"h": 1,
+			"offX": 0,
+			"offY": 0,
+			"sourceW": 1,
+			"sourceH": 1
+		},
+		"block4": {
+			"x": 3,
+			"y": 3,
+			"w": 1,
+			"h": 1,
+			"offX": 0,
+			"offY": 0,
+			"sourceW": 1,
+			"sourceH": 1
+		}
+	}
+}

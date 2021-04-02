@@ -163,7 +163,7 @@ var Main = /** @class */ (function () {
                         _a.label = 2;
                     case 2:
                         leaf.init();
-                        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 480;
+                        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 256;
                         console.error(leaf.GLCore.width, leaf.world.root.transform.scaleX);
                         leaf.Res.loadResources().then(function () {
                             leaf.Res.getRes("block_png").load().then(function () {
@@ -213,14 +213,29 @@ var LinkGame = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     LinkGame.prototype.awake = function () {
-        var bm = this.addComponent(leaf.Bitmap);
-        bm.resource = "block_png";
-        this.entity.transform.scaleX = 470;
-        this.entity.transform.scaleY = 100;
-        bm.tint = 0x550000;
-        bm.addComponent(leaf.TouchComponent).onTouchEnd.on(function (e) {
-            console.error(e.localX, e.localY, e.stageX, e.stageY);
-        });
+        for (var x = 0; x < 96; x++) {
+            for (var y = 0; y < 96; y++) {
+                var bm = ecs.Entity.create().addComponent(leaf.Bitmap);
+                bm.texture = leaf.PointTexture.getTexture(0xff0000);
+                bm.transform.x = x;
+                bm.transform.y = y;
+                bm.entity.parent = this.entity;
+            }
+        }
+        for (var x = 0; x < 96; x++) {
+            for (var y = 0; y < 96; y++) {
+                var bm = ecs.Entity.create().addComponent(leaf.Bitmap);
+                bm.texture = leaf.PointTexture.getTexture(0x0000ff);
+                bm.transform.x = x + 96;
+                bm.transform.y = y + 96;
+                bm.entity.parent = this.entity;
+            }
+        }
+        this.addComponent(leaf.BatchRender);
+        this.entity.transform.x = 30;
+        this.entity.transform.y = 30;
+        this.entity.transform.angle = 0.1;
+        leaf.StateWin.show();
     };
     return LinkGame;
 }(ecs.Component));

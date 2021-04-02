@@ -8,10 +8,16 @@ namespace leaf {
 
         blendMode: BlendMode = BlendMode.NONE;
 
+        renderChildren: boolean = true;
+
         onDestroy() {
         }
 
         preRender() {
+
+        }
+
+        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader) {
 
         }
 

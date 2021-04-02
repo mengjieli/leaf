@@ -2,7 +2,7 @@ namespace leaf {
 
     export class Label extends Render {
 
-        shader = Bitmap.shader;
+        shader = NormalShaderTask.shader;
 
         /**
          * @internal
@@ -85,10 +85,17 @@ namespace leaf {
         private _textHeight = 0;
 
         preRender() {
+            this.preRenderReal(this.entity.transform.worldMatrix, this.entity.transform.worldAlpha);
+        }
+
+        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader) {
+            this.preRenderReal(matrix.reconcat(this.entity.transform.local), alpha * this.entity.transform.alpha, shader)
+        }
+
+        private preRenderReal(w: ecs.Matrix, alpha: number, shader?: Shader) {
             let x = 0;
             let y = 0;
             let m = ecs.Matrix.$matrix;
-            let w = this.entity.transform.worldMatrix;
             let scale = Label.useScaleFont ? GLCore.scale : 1;
             let rScale = 1 / scale;
             let toSize = Math.ceil(this._fontSize * scale);
@@ -101,7 +108,7 @@ namespace leaf {
                 let char = this._text.charAt(i);
                 if (char == "\n" || char == "\r") {
                     x = 0;
-                    y += (this.fontSize + this._lineSpacing) * rScale;
+                    y += (this.fontSize + this._lineSpacing);
                     continue;
                 }
                 let txt = TextAtlas.getChar(`rgb(${r},${g},${b})`, this._fontFamily, toSize, this._bold, this._italic, char, false);
@@ -109,7 +116,7 @@ namespace leaf {
                 m.scale(rScale, rScale);
                 m.translate(x, y);
                 m.concat(w);
-                (this.shader as BitmapShaderTask).addTask(txt.texture, m, this.entity.transform.worldAlpha, this.blendMode, 0xffffff);
+                (shader || this.shader).addTask(txt.texture, m, alpha, this.blendMode, 0xffffff);
                 x += txt.width * rScale;
                 if (x > this._textWidth) this._textWidth = x;
             }

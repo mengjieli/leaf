@@ -26,7 +26,7 @@ export class Main {
             });
         }
         leaf.init();
-        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 480;
+        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 256;
         console.error(leaf.GLCore.width, leaf.world.root.transform.scaleX);
         leaf.Res.loadResources().then(() => {
             leaf.Res.getRes("block_png").load().then(

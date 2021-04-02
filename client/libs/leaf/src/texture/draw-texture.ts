@@ -17,6 +17,8 @@ namespace leaf {
       this.context2d = this.canvas.getContext("2d");
       this.context2d.clearRect(0, 0, width, height);
       this.context2d.scale(1, 1);
+      this.context2d.lineCap = 'square';
+      this.context2d.lineJoin = 'miter';
       this.texture = GLCore.createTexture(this.canvas);
     }
 
