@@ -56,11 +56,11 @@ namespace leaf {
         }
 
         get width() {
-            return this._texture ? this._texture.width : 0;
+            return this._texture ? this._texture.sourceWidth : 0;
         }
 
         get height() {
-            return this._texture ? this._texture.height : 0;
+            return this._texture ? this._texture.sourceHeight : 0;
         }
 
         preRender() {

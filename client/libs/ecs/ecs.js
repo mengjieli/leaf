@@ -356,6 +356,10 @@ var ecs;
              * 在整个世界中是否有效，依赖自身和 requireComponents 的 enable 属性
              */
             this.enableInWorld = true;
+            /**
+             * @internal
+             */
+            this.$hasAwake = false;
             ecs.$newComponent = true;
         }
         Object.defineProperty(Component.prototype, "enabled", {
@@ -982,6 +986,7 @@ var ecs;
             createComponent && component.afterInit && component.afterInit();
             if (component.id != id || !component.isAlive)
                 return;
+            component.$hasAwake = false;
             this.world && this.world.onAddComponent(this, component);
             if (component.id != id || !component.isAlive)
                 return;
@@ -2205,6 +2210,7 @@ var ecs;
                     local.tx = tx;
                     local.ty = ty;
                 }
+                this._local.id = this.entity.id;
                 return this._local;
             },
             enumerable: true,
@@ -3090,6 +3096,7 @@ var ecs;
         AwakeSystem.prototype.update = function (dt) {
             for (var node = this.query.head; node; node = node.next) {
                 node.value.awake();
+                node.value.$hasAwake = true;
                 node.value && this.query.remove(node.value);
             }
         };
@@ -3112,6 +3119,8 @@ var ecs;
         };
         LateUpdateSystem.prototype.lateUpdate = function (dt, ut) {
             for (var node = this.query.head; node; node = node.next) {
+                if (node.value.awake && !node.value.$hasAwake)
+                    continue;
                 node.value.lateUpdate(dt, ut);
             }
         };
@@ -3135,6 +3144,8 @@ var ecs;
         StartSystem.prototype.update = function (dt) {
             for (var node = this.query.head; node; node = node.next) {
                 var value = node.value;
+                if (value.awake && !value.$hasAwake)
+                    continue;
                 this.query.remove(node.value);
                 value.start();
             }
@@ -3158,6 +3169,8 @@ var ecs;
         };
         UpdateSystem.prototype.update = function (dt) {
             for (var node = this.query.head; node; node = node.next) {
+                if (node.value.awake && !node.value.$hasAwake)
+                    continue;
                 node.value.update(dt);
             }
         };

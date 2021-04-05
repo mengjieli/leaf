@@ -68,16 +68,23 @@ namespace leaf {
 
         private static findTarget(touchX: number, touchY: number, checkEntity: ecs.Entity): ecs.Entity {
             let m = checkEntity.transform.reverse;
-            let x = m.a * touchX + m.c * touchY + m.tx;
-            let y = m.b * touchX + m.d * touchY + m.ty;
-            for (let i = 0; i < checkEntity.children.length; i++) {
-                let target = this.findTarget(x, y, checkEntity.children[i]);
-                if (target) return target;
+            let x = m.a * (touchX + m.tx) + m.c * touchY;
+            let y = m.b * touchX + m.d * (touchY + m.ty);
+            let t = checkEntity.getComponent(TouchComponent);
+            if (!t || t.touchChildrenEnabled) {
+                for (let i = checkEntity.children.length - 1; i >= 0; i--) {
+                    let target = this.findTarget(x, y, checkEntity.children[i]);
+                    if (target) {
+                        return target;
+                    }
+                }
             }
-            let render = checkEntity.getComponent(Render);
-            if (render && render.width && render.height &&
-                x >= 0 && x < render.width && y >= 0 && y < render.height) {
-                return checkEntity;
+            if (!t || t.touchEnabled) {
+                let render = checkEntity.getComponent(Render);
+                if (render && render.width && render.height &&
+                    x >= 0 && x < render.width && y >= 0 && y < render.height) {
+                    return checkEntity;
+                }
             }
         }
 

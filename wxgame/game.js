@@ -23,6 +23,9 @@ window.wxloadText = function(url,onComplete) {
     encoding:"utf-8",
     success:function(a) {
       onComplete(a.data)
+    },
+    fail:function(a) {
+      console.error(a)
     }
   })
 }

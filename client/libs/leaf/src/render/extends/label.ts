@@ -104,20 +104,24 @@ namespace leaf {
             let g = this._fontColor >> 8 & 0xFF;
             let b = this._fontColor & 0xFF;
             this._textHeight = 0;
-            for (let i = 0; i < this._text.length; i++) {
+            for (let i = 0; this._text && i < this._text.length; i++) {
                 let char = this._text.charAt(i);
                 if (char == "\n" || char == "\r") {
                     x = 0;
                     y += (this.fontSize + this._lineSpacing);
                     continue;
                 }
-                let txt = TextAtlas.getChar(`rgb(${r},${g},${b})`, this._fontFamily, toSize, this._bold, this._italic, char, false);
-                m.identity();
-                m.scale(rScale, rScale);
-                m.translate(x, y);
-                m.concat(w);
-                (shader || this.shader).addTask(txt.texture, m, alpha, this.blendMode, 0xffffff);
-                x += txt.width * rScale;
+                if (char === ' ') {
+                    x += this.fontSize * rScale;
+                } else {
+                    let txt = TextAtlas.getChar(`rgb(${r},${g},${b})`, this._fontFamily, toSize, this._bold, this._italic, char, false);
+                    m.identity();
+                    m.scale(rScale, rScale);
+                    m.translate(x, y);
+                    m.concat(w);
+                    (shader || this.shader).addTask(txt.texture, m, alpha, this.blendMode, 0xffffff);
+                    x += txt.width * rScale;
+                }
                 if (x > this._textWidth) this._textWidth = x;
             }
             this._textHeight = y + this.fontSize;
@@ -128,6 +132,73 @@ namespace leaf {
         }
 
         get height() {
+            return this._textHeight;
+        }
+
+        get textWidth(): number {
+            let x = 0;
+            let y = 0;
+            let m = ecs.Matrix.$matrix;
+            let scale = 1;
+            let rScale = 1 / scale;
+            let toSize = Math.ceil(this._fontSize * scale);
+            scale = toSize / this._fontSize;
+            let r = this._fontColor >> 16;
+            let g = this._fontColor >> 8 & 0xFF;
+            let b = this._fontColor & 0xFF;
+            this._textHeight = 0;
+            for (let i = 0; this._text && i < this._text.length; i++) {
+                let char = this._text.charAt(i);
+                if (char == "\n" || char == "\r") {
+                    x = 0;
+                    y += (this.fontSize + this._lineSpacing);
+                    continue;
+                }
+                if (char === ' ') {
+                    x += this.fontSize * rScale;
+                } else {
+                    let txt = TextAtlas.getChar(`rgb(${r},${g},${b})`, this._fontFamily, toSize, this._bold, this._italic, char, false);
+                    m.identity();
+                    m.scale(rScale, rScale);
+                    m.translate(x, y);
+                    x += txt.width * rScale;
+                }
+                if (x > this._textWidth) this._textWidth = x;
+            }
+            return this._textWidth;
+        }
+
+        get textHeight(): number {
+            let x = 0;
+            let y = 0;
+            let m = ecs.Matrix.$matrix;
+            let scale = 1;
+            let rScale = 1 / scale;
+            let toSize = Math.ceil(this._fontSize * scale);
+            scale = toSize / this._fontSize;
+            let r = this._fontColor >> 16;
+            let g = this._fontColor >> 8 & 0xFF;
+            let b = this._fontColor & 0xFF;
+            this._textHeight = 0;
+            for (let i = 0; this._text && i < this._text.length; i++) {
+                let char = this._text.charAt(i);
+                if (char == "\n" || char == "\r") {
+                    x = 0;
+                    y += (this.fontSize + this._lineSpacing);
+                    continue;
+                }
+                if (char === ' ') {
+                    x += this.fontSize * rScale;
+                } else {
+                    let txt = TextAtlas.getChar(`rgb(${r},${g},${b})`, this._fontFamily, toSize, this._bold, this._italic, char, false);
+                    m.identity();
+                    m.scale(rScale, rScale);
+                    m.translate(x, y);
+                    x += txt.width * rScale;
+                }
+                if (x > this._textWidth) this._textWidth = x;
+            }
+            this._textHeight = y + this.fontSize;
             return this._textHeight;
         }
 

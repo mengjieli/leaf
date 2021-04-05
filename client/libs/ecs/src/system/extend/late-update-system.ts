@@ -11,6 +11,7 @@ namespace ecs {
 
         lateUpdate(dt: number, ut: number) {
             for (let node = this.query.head; node; node = node.next) {
+                if (node.value.awake && !node.value.$hasAwake) continue;
                 node.value.lateUpdate(dt, ut);
             }
         }

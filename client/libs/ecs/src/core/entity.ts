@@ -122,6 +122,7 @@ namespace ecs {
             if (component.id != id || !component.isAlive) return;
             createComponent && component.afterInit && component.afterInit();
             if (component.id != id || !component.isAlive) return;
+            component.$hasAwake = false;
             this.world && this.world.onAddComponent(this, component);
             if (component.id != id || !component.isAlive) return;
             return component;

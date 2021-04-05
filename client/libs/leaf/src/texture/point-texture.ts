@@ -45,7 +45,7 @@ namespace leaf {
       }
       this.context2d.fillStyle = `rgb(${color >> 16},${color >> 8 & 0xFF},${color & 0xFF})`;
       this.context2d.fillRect(x, y, size, size);
-      let txt = this.colors[color] = new Texture(this.texture, this.width, this.height, x + 1, y + 1, 1, 1);
+      let txt = this.colors[color] = new Texture(this.texture, this.width, this.height, x + this.extend, y + this.extend, 1, 1);
       txt.dirty = true;
       txt.update = this.updateTexture.bind(this);
       this.dirtyTextures.push(txt);

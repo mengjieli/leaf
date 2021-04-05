@@ -217,6 +217,7 @@ declare namespace ecs {
         tx: number;
         ty: number;
         _storeList: any[];
+        id: number;
         constructor();
         identity(): this;
         setTo(a: any, b: any, c: any, d: any, tx: any, ty: any): this;

@@ -17,6 +17,16 @@
       "type": 5
     },
     {
+      "name": "game1-1_txt",
+      "path": "assets/game/game1/game1-1.txt",
+      "type": 4
+    },
+    {
+      "name": "game1-2_txt",
+      "path": "assets/game/game1/game1-2.txt",
+      "type": 4
+    },
+    {
       "name": "block_png",
       "path": "assets/block.png",
       "type": 1

@@ -4,11 +4,6 @@ namespace leaf {
 
         shader = BatchShaderTask.shader;
 
-        /**
-         * @internal
-         */
-        old = true;
-
         renderChildren = false;
 
         private matrix = new ecs.Matrix();
@@ -22,10 +17,10 @@ namespace leaf {
             projectionMatrix[5] = matrix.d;
             projectionMatrix[7] = matrix.ty;
 
-            if (this.old) {
-                this.old = false;
+            if (this.entity.children.length && !this.count.length) {
                 this.refresh();
             }
+
             this.shader.batchs.push(this);
         }
 
@@ -82,6 +77,7 @@ namespace leaf {
 
 
         onDestroy() {
+            this.reset();
         }
     }
 

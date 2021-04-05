@@ -1,6 +1,5 @@
-import { ImageLoader } from "./ImageLoader";
-import { EliminationScene } from "./modules/elimination/elimination-scene";
-import { LinkScene } from "./modules/link-game/link-scene";
+import { FaceScene } from "./modules/puzzle/face/face-scene";
+import { PuzzleScene } from "./modules/puzzle/puzzle-scene";
 
 export class Main {
 
@@ -31,7 +30,8 @@ export class Main {
         leaf.Res.loadResources().then(() => {
             leaf.Res.getRes("block_png").load().then(
                 () => {
-                    new LinkScene();
+                    new PuzzleScene();
+                    // new FaceScene();
                 }
             )
         })

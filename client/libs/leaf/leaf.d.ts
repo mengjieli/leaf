@@ -27,6 +27,8 @@ declare namespace leaf {
      * 继续播放
      */
     function play(): void;
+    function getStageWidth(): number;
+    function getStageHeight(): number;
     /**
      * 初始化
      * @returns
@@ -138,6 +140,8 @@ declare namespace leaf {
         private preRenderReal;
         readonly width: number;
         readonly height: number;
+        readonly textWidth: number;
+        readonly textHeight: number;
         onDestroy(): void;
         static useScaleFont: boolean;
     }
@@ -480,6 +484,24 @@ declare namespace leaf {
     }
 }
 declare namespace leaf {
+    class RectTexture extends DrawTexture {
+        getColor(colors: number[][], id: string): any;
+        readonly isFull: boolean;
+        static getTexture(colors: number[][], id?: string): any;
+        /**
+         * 格式化颜色，例如
+         * 16711680,65280
+         * 000
+         * 010
+         * 000
+         * 第一排定义颜色，以,(英文逗号)分割
+         * 下面是颜色矩阵，01代表颜色序列
+         * @param str
+         */
+        static formatColors(str: string): number[][];
+    }
+}
+declare namespace leaf {
     /**
      * 单个文字信息比如字母 a 就对应一个 TextAtlasInfo，字母 b 又是另外一个 TextAtlasInfo
      */
@@ -586,9 +608,12 @@ declare namespace leaf {
 }
 declare namespace leaf {
     class TouchComponent extends ecs.Component {
+        static allowMultiply: boolean;
         readonly onTouchStart: ecs.Broadcast<TouchEvent>;
         readonly onTouchMove: ecs.Broadcast<TouchEvent>;
         readonly onTouchEnd: ecs.Broadcast<TouchEvent>;
+        touchEnabled: boolean;
+        touchChildrenEnabled: boolean;
         onDestroy(): void;
     }
 }

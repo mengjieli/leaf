@@ -1,13 +1,39 @@
 {
   "files": [
     {
+      "name": "test_json",
+      "path": "assets/test/test.json",
+      "type": 2,
+      "frames": [
+        "block",
+        "block2",
+        "block3",
+        "block4"
+      ]
+    },
+    {
       "name": "default_res_json",
       "path": "default.res.json",
       "type": 5
     },
     {
+      "name": "game1-1_txt",
+      "path": "assets/game/game1/game1-1.txt",
+      "type": 4
+    },
+    {
+      "name": "game1-2_txt",
+      "path": "assets/game/game1/game1-2.txt",
+      "type": 4
+    },
+    {
       "name": "block_png",
       "path": "assets/block.png",
+      "type": 1
+    },
+    {
+      "name": "block_merge_png",
+      "path": "assets/block_merge.png",
       "type": 1
     }
   ]

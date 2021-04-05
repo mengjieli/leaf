@@ -10,6 +10,8 @@ namespace ecs {
         ty = 0;
         _storeList = [];
 
+        id: number;
+
         constructor() {
         }
 
@@ -45,7 +47,7 @@ namespace ecs {
             this.setTo(this.a * cos - this.c * sin, this.a * sin + this.c * cos,
                 this.b * cos - this.d * sin, this.b * sin + this.d * cos,
                 this.tx * cos - this.ty * sin, this.tx * sin + this.ty * cos);
-                return this;
+            return this;
         }
 
         scale(scaleX, scaleY) {

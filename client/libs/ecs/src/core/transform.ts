@@ -107,7 +107,7 @@ namespace ecs {
             this._scaleX = val;
         }
 
-        get scaleY() { return this._scaleY; }
+    get scaleY() { return this._scaleY; }
         set scaleY(val: number) {
             if (this._scaleY === val) return;
             this.dirty = this.reverseDirty = true;
@@ -166,6 +166,7 @@ namespace ecs {
                 local.tx = tx;
                 local.ty = ty;
             }
+            this._local.id = this.entity.id;
             return this._local;
         }
 

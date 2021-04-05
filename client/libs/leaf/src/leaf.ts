@@ -61,6 +61,14 @@ namespace leaf {
      */
     export var loaderEntity: ecs.Entity;
 
+    export function getStageWidth() {
+        return GLCore.width / GLCore.scale;
+    }
+
+    export function getStageHeight() {
+        return GLCore.height / GLCore.scale;
+    }
+
     var onTick: Function;
 
     /**

@@ -57,6 +57,14 @@ var leaf;
         runFlag = true;
     }
     leaf.play = play;
+    function getStageWidth() {
+        return leaf.GLCore.width / leaf.GLCore.scale;
+    }
+    leaf.getStageWidth = getStageWidth;
+    function getStageHeight() {
+        return leaf.GLCore.height / leaf.GLCore.scale;
+    }
+    leaf.getStageHeight = getStageHeight;
     var onTick;
     /**
      * 初始化
@@ -587,10 +595,6 @@ var leaf;
         function BatchRender() {
             var _this_1 = _super !== null && _super.apply(this, arguments) || this;
             _this_1.shader = leaf.BatchShaderTask.shader;
-            /**
-             * @internal
-             */
-            _this_1.old = true;
             _this_1.renderChildren = false;
             _this_1.matrix = new ecs.Matrix();
             _this_1.projectionMatrix = new Float32Array([
@@ -615,8 +619,7 @@ var leaf;
             projectionMatrix[4] = matrix.b;
             projectionMatrix[5] = matrix.d;
             projectionMatrix[7] = matrix.ty;
-            if (this.old) {
-                this.old = false;
+            if (this.entity.children.length && !this.count.length) {
                 this.refresh();
             }
             this.shader.batchs.push(this);
@@ -666,6 +669,7 @@ var leaf;
             _this.tints = [];
         };
         BatchRender.prototype.onDestroy = function () {
+            this.reset();
         };
         return BatchRender;
     }(leaf.Render));
@@ -735,14 +739,14 @@ var leaf;
         });
         Object.defineProperty(Bitmap.prototype, "width", {
             get: function () {
-                return this._texture ? this._texture.width : 0;
+                return this._texture ? this._texture.sourceWidth : 0;
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(Bitmap.prototype, "height", {
             get: function () {
-                return this._texture ? this._texture.height : 0;
+                return this._texture ? this._texture.sourceHeight : 0;
             },
             enumerable: true,
             configurable: true
@@ -876,20 +880,25 @@ var leaf;
             var g = this._fontColor >> 8 & 0xFF;
             var b = this._fontColor & 0xFF;
             this._textHeight = 0;
-            for (var i = 0; i < this._text.length; i++) {
+            for (var i = 0; this._text && i < this._text.length; i++) {
                 var char = this._text.charAt(i);
                 if (char == "\n" || char == "\r") {
                     x = 0;
                     y += (this.fontSize + this._lineSpacing);
                     continue;
                 }
-                var txt = leaf.TextAtlas.getChar("rgb(" + r + "," + g + "," + b + ")", this._fontFamily, toSize, this._bold, this._italic, char, false);
-                m.identity();
-                m.scale(rScale, rScale);
-                m.translate(x, y);
-                m.concat(w);
-                (shader || this.shader).addTask(txt.texture, m, alpha, this.blendMode, 0xffffff);
-                x += txt.width * rScale;
+                if (char === ' ') {
+                    x += this.fontSize * rScale;
+                }
+                else {
+                    var txt = leaf.TextAtlas.getChar("rgb(" + r + "," + g + "," + b + ")", this._fontFamily, toSize, this._bold, this._italic, char, false);
+                    m.identity();
+                    m.scale(rScale, rScale);
+                    m.translate(x, y);
+                    m.concat(w);
+                    (shader || this.shader).addTask(txt.texture, m, alpha, this.blendMode, 0xffffff);
+                    x += txt.width * rScale;
+                }
                 if (x > this._textWidth)
                     this._textWidth = x;
             }
@@ -904,6 +913,83 @@ var leaf;
         });
         Object.defineProperty(Label.prototype, "height", {
             get: function () {
+                return this._textHeight;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Label.prototype, "textWidth", {
+            get: function () {
+                var x = 0;
+                var y = 0;
+                var m = ecs.Matrix.$matrix;
+                var scale = 1;
+                var rScale = 1 / scale;
+                var toSize = Math.ceil(this._fontSize * scale);
+                scale = toSize / this._fontSize;
+                var r = this._fontColor >> 16;
+                var g = this._fontColor >> 8 & 0xFF;
+                var b = this._fontColor & 0xFF;
+                this._textHeight = 0;
+                for (var i = 0; this._text && i < this._text.length; i++) {
+                    var char = this._text.charAt(i);
+                    if (char == "\n" || char == "\r") {
+                        x = 0;
+                        y += (this.fontSize + this._lineSpacing);
+                        continue;
+                    }
+                    if (char === ' ') {
+                        x += this.fontSize * rScale;
+                    }
+                    else {
+                        var txt = leaf.TextAtlas.getChar("rgb(" + r + "," + g + "," + b + ")", this._fontFamily, toSize, this._bold, this._italic, char, false);
+                        m.identity();
+                        m.scale(rScale, rScale);
+                        m.translate(x, y);
+                        x += txt.width * rScale;
+                    }
+                    if (x > this._textWidth)
+                        this._textWidth = x;
+                }
+                return this._textWidth;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Label.prototype, "textHeight", {
+            get: function () {
+                var x = 0;
+                var y = 0;
+                var m = ecs.Matrix.$matrix;
+                var scale = 1;
+                var rScale = 1 / scale;
+                var toSize = Math.ceil(this._fontSize * scale);
+                scale = toSize / this._fontSize;
+                var r = this._fontColor >> 16;
+                var g = this._fontColor >> 8 & 0xFF;
+                var b = this._fontColor & 0xFF;
+                this._textHeight = 0;
+                for (var i = 0; this._text && i < this._text.length; i++) {
+                    var char = this._text.charAt(i);
+                    if (char == "\n" || char == "\r") {
+                        x = 0;
+                        y += (this.fontSize + this._lineSpacing);
+                        continue;
+                    }
+                    if (char === ' ') {
+                        x += this.fontSize * rScale;
+                    }
+                    else {
+                        var txt = leaf.TextAtlas.getChar("rgb(" + r + "," + g + "," + b + ")", this._fontFamily, toSize, this._bold, this._italic, char, false);
+                        m.identity();
+                        m.scale(rScale, rScale);
+                        m.translate(x, y);
+                        x += txt.width * rScale;
+                    }
+                    if (x > this._textWidth)
+                        this._textWidth = x;
+                }
+                this._textHeight = y + this.fontSize;
                 return this._textHeight;
             },
             enumerable: true,
@@ -2697,7 +2783,7 @@ var leaf;
             }
             this.context2d.fillStyle = "rgb(" + (color >> 16) + "," + (color >> 8 & 0xFF) + "," + (color & 0xFF) + ")";
             this.context2d.fillRect(x, y, size, size);
-            var txt = this.colors[color] = new leaf.Texture(this.texture, this.width, this.height, x + 1, y + 1, 1, 1);
+            var txt = this.colors[color] = new leaf.Texture(this.texture, this.width, this.height, x + this.extend, y + this.extend, 1, 1);
             txt.dirty = true;
             txt.update = this.updateTexture.bind(this);
             this.dirtyTextures.push(txt);
@@ -2735,6 +2821,143 @@ var leaf;
         return PointTexture;
     }(leaf.DrawTexture));
     leaf.PointTexture = PointTexture;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var RectTexture = /** @class */ (function (_super) {
+        __extends(RectTexture, _super);
+        function RectTexture() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            /**
+             * @internal
+             */
+            _this.colors = {};
+            /**
+             * @internal
+             */
+            _this.dirtyTextures = [];
+            /**
+             * @internal
+             */
+            _this.extend = 1;
+            /**
+             * @internal
+             */
+            _this.gap = 0;
+            /**
+             * @internal
+             */
+            _this.x = 0;
+            /**
+             * @internal
+             */
+            _this.y = 0;
+            return _this;
+        }
+        RectTexture.prototype.getColor = function (colors, id) {
+            if (this.colors[id])
+                return this.colors[id];
+            var w = colors[0].length;
+            var h = colors.length;
+            var addW = w + this.extend * 2;
+            var addH = h + this.extend * 2;
+            var gap = this.gap;
+            var x = this.x;
+            var y = this.y;
+            this.x += addW + gap;
+            if (this.x > this.width + addW + gap) {
+                this.x = 0;
+                this.y += addH + gap;
+            }
+            for (var y2 = -1; y2 < h + 1; y2++) {
+                for (var x2 = -1; x2 < w + 1; x2++) {
+                    var cx = x2 < 0 ? 0 : x2 >= w ? w - 1 : x2;
+                    var cy = y2 < 0 ? 0 : y2 >= h ? h - 1 : y2;
+                    var color = colors[cy][cx];
+                    if (color == null)
+                        continue;
+                    this.context2d.fillStyle = "rgb(" + (color >> 16) + "," + (color >> 8 & 0xFF) + "," + (color & 0xFF) + ")";
+                    this.context2d.fillRect(x + x2 + 1, y + y2 + 1, 1, 1);
+                }
+            }
+            var txt = this.colors[id] = new leaf.Texture(this.texture, this.width, this.height, x + this.extend, y + this.extend, w, h);
+            txt.dirty = true;
+            txt.update = this.updateTexture.bind(this);
+            this.dirtyTextures.push(txt);
+            return txt;
+        };
+        Object.defineProperty(RectTexture.prototype, "isFull", {
+            get: function () {
+                if (this.x >= this.width || this.y >= this.height)
+                    return true;
+                return false;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * @internal
+         */
+        RectTexture.prototype.updateTexture = function () {
+            this.update();
+            while (this.dirtyTextures.length) {
+                this.dirtyTextures.pop().dirty = false;
+            }
+        };
+        RectTexture.getTexture = function (colors, id) {
+            if (id == null) {
+                id = '';
+                for (var y = 0; y < colors.length; y++) {
+                    for (var x = 0; x < colors[y].length; x++) {
+                        id += (colors[y][x] || '0') + '_';
+                    }
+                    id += '|';
+                }
+            }
+            var size = colors.length + '_' + colors[0].length;
+            var txt = this.curTextures[size];
+            if (!txt || txt.isFull) {
+                txt = this.curTextures[size] = new RectTexture(256, 256);
+            }
+            return txt.getColor(colors, id);
+        };
+        /**
+         * 格式化颜色，例如
+         * 16711680,65280
+         * 000
+         * 010
+         * 000
+         * 第一排定义颜色，以,(英文逗号)分割
+         * 下面是颜色矩阵，01代表颜色序列
+         * @param str
+         */
+        RectTexture.formatColors = function (str) {
+            var lines = str.split('\n');
+            var colorsStr = lines[0].split(",");
+            var colors = [];
+            for (var i = 0; i < colorsStr.length; i++) {
+                colors[i] = +colorsStr[i];
+            }
+            var blocks = [];
+            for (var i = 1; i < lines.length; i++) {
+                blocks[i - 1] = [];
+                for (var c = 0; c < lines[i].length; c++) {
+                    blocks[i - 1][c] = colors[+lines[i][c]];
+                }
+            }
+            return blocks;
+        };
+        /**
+         * @internal
+         */
+        RectTexture.curTextures = {};
+        /**
+         * @internal
+         */
+        RectTexture.colors = {};
+        return RectTexture;
+    }(leaf.DrawTexture));
+    leaf.RectTexture = RectTexture;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {
@@ -3119,13 +3342,17 @@ var leaf;
             _this.onTouchStart = new ecs.Broadcast();
             _this.onTouchMove = new ecs.Broadcast();
             _this.onTouchEnd = new ecs.Broadcast();
+            _this.touchEnabled = true;
+            _this.touchChildrenEnabled = true;
             return _this;
         }
         TouchComponent.prototype.onDestroy = function () {
+            this.touchEnabled = this.touchChildrenEnabled = true;
             this.onTouchStart.removeAll();
             this.onTouchMove.removeAll();
             this.onTouchEnd.removeAll();
         };
+        TouchComponent.allowMultiply = false;
         return TouchComponent;
     }(ecs.Component));
     leaf.TouchComponent = TouchComponent;
@@ -3212,17 +3439,23 @@ var leaf;
         };
         TouchManager.findTarget = function (touchX, touchY, checkEntity) {
             var m = checkEntity.transform.reverse;
-            var x = m.a * touchX + m.c * touchY + m.tx;
-            var y = m.b * touchX + m.d * touchY + m.ty;
-            for (var i = 0; i < checkEntity.children.length; i++) {
-                var target = this.findTarget(x, y, checkEntity.children[i]);
-                if (target)
-                    return target;
+            var x = m.a * (touchX + m.tx) + m.c * touchY;
+            var y = m.b * touchX + m.d * (touchY + m.ty);
+            var t = checkEntity.getComponent(leaf.TouchComponent);
+            if (!t || t.touchChildrenEnabled) {
+                for (var i = checkEntity.children.length - 1; i >= 0; i--) {
+                    var target = this.findTarget(x, y, checkEntity.children[i]);
+                    if (target) {
+                        return target;
+                    }
+                }
             }
-            var render = checkEntity.getComponent(leaf.Render);
-            if (render && render.width && render.height &&
-                x >= 0 && x < render.width && y >= 0 && y < render.height) {
-                return checkEntity;
+            if (!t || t.touchEnabled) {
+                var render = checkEntity.getComponent(leaf.Render);
+                if (render && render.width && render.height &&
+                    x >= 0 && x < render.width && y >= 0 && y < render.height) {
+                    return checkEntity;
+                }
             }
         };
         return TouchManager;
@@ -3241,18 +3474,19 @@ var leaf;
             this.addComponent(leaf.Label).fontSize = 16;
             this.getComponent(leaf.Label).lineSpacing = 3;
             this.transform.scaleX = this.transform.scaleY = 1 / leaf.GLCore.scale;
+            this.addComponent(leaf.TouchComponent).touchChildrenEnabled = false;
         };
         StateWin.prototype.lateUpdate = function () {
             var txt = "fps          " + leaf.runInfo.fps + "\n";
             txt += "draw call  " + leaf.runInfo.frameDrawCall + "\n";
-            // txt += `disCount:${runInfo.frameDrawCount}\n`;
+            txt += "count       " + leaf.runInfo.frameDrawCount + "\n";
             // txt += `frameTime:${runInfo.frameTime}\n`;
             txt += "logic        " + leaf.runInfo.frameLogicTime + "\n";
             // txt += `renderTime:${runInfo.frameRenderTime}\n`;
             txt += "render      " + leaf.runInfo.framePreRenderTime + "\n";
             txt += "webgl       " + leaf.runInfo.frameGlRenderTime + "\n";
             this.getComponent(leaf.Label).text = txt;
-            this.transform.y = (leaf.GLCore.height - 92) / leaf.GLCore.scale;
+            this.transform.y = (leaf.GLCore.height - 111) / leaf.GLCore.scale;
         };
         StateWin.show = function () {
             if (this.ist)

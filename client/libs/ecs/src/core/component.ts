@@ -112,6 +112,10 @@ namespace ecs {
 
         init?(...args);
         afterInit?();
+        /**
+         * @internal
+         */
+        $hasAwake: boolean = false;
         awake?();
         start?();
         update?(dt?: number);
