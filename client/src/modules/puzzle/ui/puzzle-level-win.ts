@@ -41,7 +41,7 @@ export class PuzzleLevelWin extends ecs.Component {
 
         GameStorage.getStorage(`${name}_maxStage`).then((v) => {
             let maxLevel = v || 0;
-            console.error('关卡', `${name}_maxStage`, v);
+            // console.error('关卡', `${name}_maxStage`, v);
             PuzzleGameConfig.loadGameConfig(name, (cfg) => {
                 // for (let i = cfg.levels.length; i < 40; i++) {
                 //     cfg.levels[i] = cfg.levels[~~(Math.random() * cfg.levels.length)];

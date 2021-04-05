@@ -16,6 +16,7 @@ export class PuzzleGameConfig {
     levels: PuzzleGameLevelConfig[] = [];
     messages: string[][] = [];
     face: PuzzleGameLevelConfig;
+    ruleLayers: { [index: number]: boolean } = {};
 
     constructor(txt: string) {
         txt = txt.toLocaleLowerCase();
@@ -42,7 +43,12 @@ export class PuzzleGameConfig {
                 for (let name in this.objects) this.objects[name].game = this;
             }
         }
+        let index = 0;
         for (let name in this.objects) {
+            this.objects[name].id = index++;
+            if (this.groups[EMPuzzleConst.PLAYER].indexOf(this.objects[name]) != -1) {
+                this.objects[name].isPlayer = true;
+            }
             if (this.blockWidth < this.objects[name].width) this.blockWidth = this.objects[name].width;
             if (this.blockHeight < this.objects[name].height) this.blockHeight = this.objects[name].height;
         }
@@ -54,6 +60,50 @@ export class PuzzleGameConfig {
                     for (let x = 0; x < this.blockWidth; x++) {
                         obj.blocks[y][x] = obj.colors[0];
                     }
+                }
+            }
+        }
+        for (let obj of this.ruleObjects) {
+            this.ruleLayers[obj.layer] = true;
+        }
+        for (let level of this.levels) {
+            if (false) {
+                if (level.width > level.height) {
+                    level.layers.forEach((layer, index) => {
+                        let blocks = [];
+                        for (let y = 0; y < level.width; y++) {
+                            blocks[y] = []
+                            for (let x = 0; x < level.height; x++) {
+                                if (layer[x]) {
+                                    blocks[y][x] = layer[x][y];
+                                }
+                            }
+                        }
+                        level.layers[index] = blocks;
+                    })
+                    let w = level.width;
+                    level.width = level.height;
+                    level.height = w;
+                } else {
+                    level.layers.forEach((layer, index) => {
+                        let blocks = [];
+                        for (let y = 0; y < level.height; y++) {
+                            blocks[y] = []
+                            for (let x = 0; x < level.width; x++) {
+                                if (layer[y]) {
+                                    blocks[y][x] = layer[y][level.width - 1 - x];
+                                }
+                            }
+                        }
+                        level.layers[index] = blocks;
+                    })
+                }
+            }
+            level.blocks = [];
+            for (let y = 0; y < level.height; y++) {
+                level.blocks[y] = [];
+                for (let x = 0; x < level.width; x++) {
+                    level.blocks[y][x] = null;
                 }
             }
         }
@@ -125,7 +175,7 @@ export class PuzzleGameConfig {
                 if (level) {
                     this.levels.push(level);
                 }
-                console.error(this.levels);
+                // console.error(this.levels);
                 return i - 1;
             }
             line = this.deleteSpace(line);
@@ -164,7 +214,7 @@ export class PuzzleGameConfig {
         if (level) {
             this.levels.push(level);
         }
-        console.error(this.levels);
+        // console.error(this.levels);
         return lines.length;
     }
 
@@ -172,7 +222,7 @@ export class PuzzleGameConfig {
         for (let i = index; i < lines.length; i++) {
             let line = lines[i];
             if (this.isBlockDevice(line)) {
-                console.error(this.winConditions);
+                // console.error(this.winConditions);
                 return i - 1;
             }
             line = this.mergeSpace(line);
@@ -192,10 +242,10 @@ export class PuzzleGameConfig {
                     }
                     cond.other = this.groups[strs[3]];
                     for (let c of cond.master) {
-                        if (this.ruleObjects.indexOf(c) === -1) this.ruleObjects.push(c);
+                        if (c && this.ruleObjects.indexOf(c) === -1) this.ruleObjects.push(c);
                     }
                     for (let c of cond.other) {
-                        if (this.ruleObjects.indexOf(c) === -1) this.ruleObjects.push(c);
+                        if (c && this.ruleObjects.indexOf(c) === -1) this.ruleObjects.push(c);
                     }
                 } else if (strs.length === 2) {
                     cond.limit = strs[0] as any;
@@ -204,7 +254,7 @@ export class PuzzleGameConfig {
                     }
                     cond.master = this.groups[strs[0]];
                     for (let c of cond.master) {
-                        if (this.ruleObjects.indexOf(c) === -1) this.ruleObjects.push(c);
+                        if (c && this.ruleObjects.indexOf(c) === -1) this.ruleObjects.push(c);
                     }
                 }
                 this.winConditions.push(cond);
@@ -216,7 +266,7 @@ export class PuzzleGameConfig {
         for (let i = index; i < lines.length; i++) {
             let line = lines[i];
             if (this.isBlockDevice(line)) {
-                console.error(this.rules);
+                // console.error(this.rules);
                 return i - 1;
             }
             if (i === index && !this.rules.length) {
@@ -295,7 +345,7 @@ export class PuzzleGameConfig {
                                         console.error("parse error rule, no object:", subStr, '\n', line);
                                     }
                                     for (let objCfg of this.groups[subStr]) {
-                                        if (this.ruleObjects.indexOf(objCfg) === -1) {
+                                        if (objCfg && this.ruleObjects.indexOf(objCfg) === -1) {
                                             this.ruleObjects.push(objCfg);
                                         }
                                     }
@@ -307,6 +357,14 @@ export class PuzzleGameConfig {
                     }
                 }
                 if (!rule.force) rule.force = EMPuzzleForce.NONE;
+                if (rule.force != EMPuzzleForce.NONE && !(rule.ranks[0]
+                    && rule.ranks[0][0] && rule.ranks[0][0][0]
+                    && this.groups[EMPuzzleConst.PLAYER].indexOf(rule.ranks[0][0][0][0]) != -1)) {
+                    continue;
+                }
+                if (rule.force != EMPuzzleForce.NONE) {
+                    rule.isPlayerMoved = true;
+                }
                 rules = ends.match(/\[[a-zA-Z0-9><\| \t]+\]/g)
                 rule.index = this.rules.length;
                 this.rules.push(rule);
@@ -352,7 +410,7 @@ export class PuzzleGameConfig {
                                         console.error("parse error rule, no object:", legend, '\n', line);
                                     }
                                     for (let objCfg of this.groups[str]) {
-                                        if (this.ruleObjects.indexOf(objCfg) === -1) {
+                                        if (objCfg && this.ruleObjects.indexOf(objCfg) === -1) {
                                             this.ruleObjects.push(objCfg);
                                         }
                                     }
@@ -400,7 +458,7 @@ export class PuzzleGameConfig {
         for (let i = index; i < lines.length; i++) {
             let line = lines[i];
             if (this.isBlockDevice(line)) {
-                console.error(this.legends);
+                // console.error(this.legends);
                 return i - 1;
             }
             if (line.indexOf("=") != -1) {
@@ -431,7 +489,7 @@ export class PuzzleGameConfig {
         for (let i = index; i < lines.length; i++) {
             let line = lines[i];
             if (this.isBlockDevice(line)) {
-                console.error(this.objects);
+                // console.error(this.objects);
                 return i - 1;
             }
             let name = line.match(/[a-zA-Z0-9]+/) && line.match(/[a-zA-Z0-9]+/).length ? line.match(/[a-zA-Z0-9]+/)[0] : "";
@@ -555,6 +613,8 @@ export class PuzzleGameLevelConfig {
     layers: PuzzleGameObjectConfig[][][] = [];
 
     layerObjects: PuzzleGameObjectConfig[][] = [];
+
+    blocks: any[][];
 }
 
 export enum EMPuzzleKey {
@@ -622,6 +682,7 @@ export enum EMPuzzleGameModel {
 }
 
 export class PuzzleGameObjectConfig {
+    id: number;
     name: string;
     width: number;
     height: number;
@@ -630,6 +691,7 @@ export class PuzzleGameObjectConfig {
     blocks: number[][];
     layer: number = 0;
     game: PuzzleGameConfig;
+    isPlayer: boolean = false;
 }
 
 export class PuzzleRule {
@@ -642,6 +704,7 @@ export class PuzzleRule {
     toForces: EMPuzzleForce[][][];
     source: string;
     directions: EMPuzzleDirection[];
+    isPlayerMoved: boolean; //是否为角色移动的规则，角色移动规则需要从 short cut 中获取角色的位置
 }
 
 export enum EMPuzzleConditionLimit {

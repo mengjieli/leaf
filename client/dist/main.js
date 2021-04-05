@@ -132,7 +132,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var puzzle_scene_1 = __webpack_require__(/*! ./modules/puzzle/puzzle-scene */ "../src/modules/puzzle/puzzle-scene.ts");
+var face_scene_1 = __webpack_require__(/*! ./modules/puzzle/face/face-scene */ "../src/modules/puzzle/face/face-scene.ts");
 var Main = /** @class */ (function () {
     function Main() {
         this.init();
@@ -167,8 +167,8 @@ var Main = /** @class */ (function () {
                         console.error(leaf.GLCore.width, leaf.world.root.transform.scaleX);
                         leaf.Res.loadResources().then(function () {
                             leaf.Res.getRes("block_png").load().then(function () {
-                                new puzzle_scene_1.PuzzleScene();
-                                // new FaceScene();
+                                // new PuzzleScene();
+                                new face_scene_1.FaceScene();
                             });
                         });
                         return [2 /*return*/];
@@ -216,6 +216,7 @@ var PuzzleGameDebug = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     PuzzleGameDebug.prototype.awake = function () {
+        return;
         var level = this.getComponent(puzzle_game_level_1.PuzzleGameLevel);
         for (var y = 0; y < level.config.height; y++) {
             for (var x = 0; x < level.config.width; x++) {
@@ -279,6 +280,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var puzzle_game_loop_1 = __webpack_require__(/*! ./puzzle-game-loop */ "../src/modules/puzzle/component/puzzle-game-loop.ts");
 var puzzle_game_config_1 = __webpack_require__(/*! ../config/puzzle-game-config */ "../src/modules/puzzle/config/puzzle-game-config.ts");
+var puzzle_game_1 = __webpack_require__(/*! ./puzzle-game */ "../src/modules/puzzle/component/puzzle-game.ts");
 var PuzzleGameKeyBoard = /** @class */ (function (_super) {
     __extends(PuzzleGameKeyBoard, _super);
     function PuzzleGameKeyBoard() {
@@ -287,7 +289,7 @@ var PuzzleGameKeyBoard = /** @class */ (function (_super) {
     PuzzleGameKeyBoard.prototype.awake = function () {
         var _this = this;
         window.onkeydown = function (e) {
-            // console.error(e.keyCode);
+            console.error(e.keyCode);
             if (e.keyCode === 87 || e.keyCode === 38) {
                 _this.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(puzzle_game_config_1.EMPuzzleMove.UP);
             }
@@ -299,6 +301,12 @@ var PuzzleGameKeyBoard = /** @class */ (function (_super) {
             }
             else if (e.keyCode === 68 || e.keyCode === 39) {
                 _this.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(puzzle_game_config_1.EMPuzzleMove.RIGHT);
+            }
+            else if (e.keyCode === 90) {
+                _this.getComponent(puzzle_game_loop_1.PuzzleGameLoop).back();
+            }
+            else if (e.keyCode === 82) {
+                _this.getComponent(puzzle_game_1.PuzzleGame).reload();
             }
         };
     };
@@ -626,6 +634,7 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
     __extends(PuzzleGameLoop, _super);
     function PuzzleGameLoop() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.shortCuts = [];
         _this.moveOffset = {
             'none': { x: 0, y: 0 },
             'right': { x: 1, y: 0 },
@@ -698,6 +707,35 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
             // this.run(EMPuzzleMove.RIGHT);
         }, 1000);
     };
+    PuzzleGameLoop.prototype.createShortCut = function () {
+        var sc = new GameShortCut();
+        sc.layers = [];
+        var level = this.getComponent(puzzle_game_level_1.PuzzleGameLevel);
+        for (var i = 0; i < level.layers.length; i++) {
+            var layer = new GameShortCutLayer();
+            layer.layer = i;
+            layer.objects = level.config.blocks;
+            layer.types = {};
+            if (level.config.game.ruleLayers[i]) {
+                layer.objects = [];
+                for (var y = 0; y < level.config.height; y++) {
+                    layer.objects[y] = [];
+                    for (var x = 0; x < level.config.width; x++) {
+                        var obj = level.layers[layer.layer].objects[y][x];
+                        layer.objects[y][x] = obj ? { config: obj.config, x: x, y: y } : null;
+                        if (obj) {
+                            if (!layer.types[obj.config.id])
+                                layer.types[obj.config.id] = [];
+                            layer.types[obj.config.id].push(layer.objects[y][x]);
+                        }
+                    }
+                }
+            }
+            sc.layers[layer.layer] = layer;
+        }
+        this.shortCuts.push(sc);
+        return sc;
+    };
     /**
      * 运行一次
      * 后面的运动会把前面的运动覆盖，即先还原位置，再进行相应的移动，
@@ -713,6 +751,7 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
      */
     PuzzleGameLoop.prototype.run = function (move) {
         var e_1, _a, e_2, _b, e_3, _c, e_4, _d, e_5, _e, e_6, _f, e_7, _g, e_8, _h, e_9, _j, e_10, _k, e_11, _l, e_12, _m;
+        var shortCut = this.createShortCut();
         var level = this.getComponent(puzzle_game_level_1.PuzzleGameLevel);
         if (level.state === 'win' || level.state === 'lose')
             return;
@@ -735,7 +774,15 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                             try {
                                 for (var overlapObjCfg_1 = (e_3 = void 0, __values(overlapObjCfg)), overlapObjCfg_1_1 = overlapObjCfg_1.next(); !overlapObjCfg_1_1.done; overlapObjCfg_1_1 = overlapObjCfg_1.next()) {
                                     var objCfg = overlapObjCfg_1_1.value;
-                                    var objs = level.getObjectsByType(objCfg);
+                                    var objs = void 0;
+                                    if (objCfg.isPlayer) {
+                                        objs = shortCut.layers[objCfg.layer] ? shortCut.layers[objCfg.layer].types[objCfg.id] : null;
+                                    }
+                                    else {
+                                        objs = level.getObjectsByType(objCfg);
+                                    }
+                                    if (!objs)
+                                        continue;
                                     try {
                                         for (var objs_1 = (e_4 = void 0, __values(objs)), objs_1_1 = objs_1.next(); !objs_1_1.done; objs_1_1 = objs_1.next()) {
                                             var obj = objs_1_1.value;
@@ -762,11 +809,14 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                                                             }
                                                             else {
                                                                 for (var o = !m && !n && successfull ? 1 : 0; o < rule.ranks[m][n].length; o++) {
+                                                                    if (!rule.ranks[m][n][o].length)
+                                                                        continue;
+                                                                    var levelInstance = rule.ranks[m][n][o][0].isPlayer && rule.isPlayerMoved ? shortCut : level;
                                                                     if (rule.limits[m][n][o] === puzzle_game_config_1.EMPuzzleConditionLimit.NO) {
                                                                         var find = false;
                                                                         try {
                                                                             //计算 p k 是否符合规则
-                                                                            for (var _s = (e_6 = void 0, __values(level.layers)), _t = _s.next(); !_t.done; _t = _s.next()) {
+                                                                            for (var _s = (e_6 = void 0, __values(levelInstance.layers)), _t = _s.next(); !_t.done; _t = _s.next()) {
                                                                                 var layer = _t.value;
                                                                                 var check = layer.objects[y][x];
                                                                                 if (check && rule.ranks[m][n][o].indexOf(check.config) != -1) {
@@ -790,7 +840,7 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                                                                         var find = false;
                                                                         try {
                                                                             //计算 p k 是否符合规则
-                                                                            for (var _u = (e_7 = void 0, __values(level.layers)), _v = _u.next(); !_v.done; _v = _u.next()) {
+                                                                            for (var _u = (e_7 = void 0, __values(levelInstance.layers)), _v = _u.next(); !_v.done; _v = _u.next()) {
                                                                                 var layer = _v.value;
                                                                                 var check = layer.objects[y][x];
                                                                                 if (check && rule.ranks[m][n][o].indexOf(check.config) != -1) {
@@ -819,8 +869,9 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                                                             break;
                                                     }
                                                     if (flag) { //成功了，开始执行
-                                                        if (rule.force === puzzle_game_config_1.EMPuzzleForce.NONE)
+                                                        if (rule.force === puzzle_game_config_1.EMPuzzleForce.NONE && rule.ranks[0] && rule.ranks[0][0] && rule.ranks[0][0].length > 1) {
                                                             ruleExecuteOK = true;
+                                                        }
                                                         var deleteConfigs = [];
                                                         var deleteObjects = [];
                                                         anyPosistion = false;
@@ -889,6 +940,16 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                                                                         if (!rule.toRanks[m][n][o])
                                                                             continue;
                                                                         var toRankConfigs = rule.toRanks[m][n][o];
+                                                                        // if (rule.ranks[m][n] && rule.ranks[m][n][o]) {
+                                                                        //     let isPlayer = false;
+                                                                        //     for (let ck of rule.ranks[m][n][o]) {
+                                                                        //         if (ck.isPlayer) {
+                                                                        //             isPlayer = true;
+                                                                        //             break;
+                                                                        //         }
+                                                                        //     }
+                                                                        //     if (isPlayer) continue;
+                                                                        // }
                                                                         var newObjCfg = void 0;
                                                                         if (toRankConfigs.indexOf(deleteObjects[m][n][o]) != -1) {
                                                                             newObjCfg = deleteObjects[m][n][o];
@@ -945,8 +1006,11 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                                                                         else if (toFroce === puzzle_game_config_1.EMPuzzleForce.DOWN) {
                                                                             toY++;
                                                                         }
-                                                                        //要移动的位置有东西了
-                                                                        if (level.layers[newObjCfg.layer].objects[toY][toX]) {
+                                                                        if (toX < 0 || toX >= level.config.width || toY < 0 || toY >= level.config.height) {
+                                                                            toX = x;
+                                                                            toY = y;
+                                                                        }
+                                                                        else if (level.layers[newObjCfg.layer].objects[toY][toX]) { //要移动的位置有东西了
                                                                             toX = x;
                                                                             toY = y;
                                                                         }
@@ -1061,10 +1125,49 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
             }
             finally { if (e_1) throw e_1.error; }
         }
-        // this.checkState();
+        this.checkState();
+    };
+    PuzzleGameLoop.prototype.back = function () {
+        var e_13, _a;
+        var level = this.getComponent(puzzle_game_level_1.PuzzleGameLevel);
+        if (this.shortCuts.length) {
+            var shortCut = this.shortCuts.pop();
+            try {
+                for (var _b = __values(shortCut.layers), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var layer = _c.value;
+                    if (!level.config.game.ruleLayers[layer.layer])
+                        continue;
+                    var realLayer = level.layers[layer.layer];
+                    for (var y = 0; y < level.config.height; y++) {
+                        for (var x = 0; x < level.config.width; x++) {
+                            var obj = realLayer.objects[y][x];
+                            if (obj) {
+                                obj.removeFromLayer();
+                                obj.entity.destroy();
+                            }
+                        }
+                    }
+                    for (var y = 0; y < level.config.height; y++) {
+                        for (var x = 0; x < level.config.width; x++) {
+                            var obj = layer.objects[y][x];
+                            if (obj) {
+                                ecs.Entity.create().addComponent(puzzle_game_object_1.PuzzleGameObject, realLayer, obj.config, x, y);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (e_13_1) { e_13 = { error: e_13_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                }
+                finally { if (e_13) throw e_13.error; }
+            }
+        }
     };
     PuzzleGameLoop.prototype.checkState = function () {
-        var e_13, _a, e_14, _b, e_15, _c, e_16, _d, e_17, _e, e_18, _f, e_19, _g, e_20, _h;
+        var e_14, _a, e_15, _b, e_16, _c, e_17, _d, e_18, _e, e_19, _f, e_20, _g, e_21, _h;
         var level = this.getComponent(puzzle_game_level_1.PuzzleGameLevel);
         var win = true;
         try {
@@ -1072,7 +1175,7 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                 var item = _k.value;
                 if (item.limit === puzzle_game_config_1.EMPuzzleConditionLimit.NO) {
                     try {
-                        for (var _l = (e_14 = void 0, __values(item.master)), _m = _l.next(); !_m.done; _m = _l.next()) {
+                        for (var _l = (e_15 = void 0, __values(item.master)), _m = _l.next(); !_m.done; _m = _l.next()) {
                             var type = _m.value;
                             if (level.layers[type.layer].getObjectByType(type)) {
                                 win = false;
@@ -1080,25 +1183,25 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                             }
                         }
                     }
-                    catch (e_14_1) { e_14 = { error: e_14_1 }; }
+                    catch (e_15_1) { e_15 = { error: e_15_1 }; }
                     finally {
                         try {
                             if (_m && !_m.done && (_b = _l.return)) _b.call(_l);
                         }
-                        finally { if (e_14) throw e_14.error; }
+                        finally { if (e_15) throw e_15.error; }
                     }
                 }
                 else if (item.limit === puzzle_game_config_1.EMPuzzleConditionLimit.ALL) {
                     try {
-                        for (var _o = (e_15 = void 0, __values(item.master)), _p = _o.next(); !_p.done; _p = _o.next()) {
+                        for (var _o = (e_16 = void 0, __values(item.master)), _p = _o.next(); !_p.done; _p = _o.next()) {
                             var type = _p.value;
                             var masters = level.layers[type.layer].getObjectsByType(type);
                             try {
-                                for (var masters_1 = (e_16 = void 0, __values(masters)), masters_1_1 = masters_1.next(); !masters_1_1.done; masters_1_1 = masters_1.next()) {
+                                for (var masters_1 = (e_17 = void 0, __values(masters)), masters_1_1 = masters_1.next(); !masters_1_1.done; masters_1_1 = masters_1.next()) {
                                     var master = masters_1_1.value;
                                     var has_1 = false;
                                     try {
-                                        for (var _q = (e_17 = void 0, __values(level.layers)), _r = _q.next(); !_r.done; _r = _q.next()) {
+                                        for (var _q = (e_18 = void 0, __values(level.layers)), _r = _q.next(); !_r.done; _r = _q.next()) {
                                             var layer = _r.value;
                                             if (layer.objects[master.y][master.x] && item.other.indexOf(layer.objects[master.y][master.x].config) != -1) {
                                                 has_1 = true;
@@ -1106,12 +1209,12 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                                             }
                                         }
                                     }
-                                    catch (e_17_1) { e_17 = { error: e_17_1 }; }
+                                    catch (e_18_1) { e_18 = { error: e_18_1 }; }
                                     finally {
                                         try {
                                             if (_r && !_r.done && (_e = _q.return)) _e.call(_q);
                                         }
-                                        finally { if (e_17) throw e_17.error; }
+                                        finally { if (e_18) throw e_18.error; }
                                     }
                                     if (!has_1) {
                                         win = false;
@@ -1119,36 +1222,36 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                                     }
                                 }
                             }
-                            catch (e_16_1) { e_16 = { error: e_16_1 }; }
+                            catch (e_17_1) { e_17 = { error: e_17_1 }; }
                             finally {
                                 try {
                                     if (masters_1_1 && !masters_1_1.done && (_d = masters_1.return)) _d.call(masters_1);
                                 }
-                                finally { if (e_16) throw e_16.error; }
+                                finally { if (e_17) throw e_17.error; }
                             }
                             if (!win)
                                 break;
                         }
                     }
-                    catch (e_15_1) { e_15 = { error: e_15_1 }; }
+                    catch (e_16_1) { e_16 = { error: e_16_1 }; }
                     finally {
                         try {
                             if (_p && !_p.done && (_c = _o.return)) _c.call(_o);
                         }
-                        finally { if (e_15) throw e_15.error; }
+                        finally { if (e_16) throw e_16.error; }
                     }
                 }
                 else if (item.limit === puzzle_game_config_1.EMPuzzleConditionLimit.SOME) {
                     var has_2 = false;
                     try {
-                        for (var _s = (e_18 = void 0, __values(item.master)), _t = _s.next(); !_t.done; _t = _s.next()) {
+                        for (var _s = (e_19 = void 0, __values(item.master)), _t = _s.next(); !_t.done; _t = _s.next()) {
                             var type = _t.value;
                             var masters = level.layers[type.layer].getObjectsByType(type);
                             try {
-                                for (var masters_2 = (e_19 = void 0, __values(masters)), masters_2_1 = masters_2.next(); !masters_2_1.done; masters_2_1 = masters_2.next()) {
+                                for (var masters_2 = (e_20 = void 0, __values(masters)), masters_2_1 = masters_2.next(); !masters_2_1.done; masters_2_1 = masters_2.next()) {
                                     var master = masters_2_1.value;
                                     try {
-                                        for (var _u = (e_20 = void 0, __values(level.layers)), _v = _u.next(); !_v.done; _v = _u.next()) {
+                                        for (var _u = (e_21 = void 0, __values(level.layers)), _v = _u.next(); !_v.done; _v = _u.next()) {
                                             var layer = _v.value;
                                             if (layer.objects[master.y][master.x] && item.other.indexOf(layer.objects[master.y][master.x].config) != -1) {
                                                 has_2 = true;
@@ -1156,32 +1259,32 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                                             }
                                         }
                                     }
-                                    catch (e_20_1) { e_20 = { error: e_20_1 }; }
+                                    catch (e_21_1) { e_21 = { error: e_21_1 }; }
                                     finally {
                                         try {
                                             if (_v && !_v.done && (_h = _u.return)) _h.call(_u);
                                         }
-                                        finally { if (e_20) throw e_20.error; }
+                                        finally { if (e_21) throw e_21.error; }
                                     }
                                     if (has_2)
                                         break;
                                 }
                             }
-                            catch (e_19_1) { e_19 = { error: e_19_1 }; }
+                            catch (e_20_1) { e_20 = { error: e_20_1 }; }
                             finally {
                                 try {
                                     if (masters_2_1 && !masters_2_1.done && (_g = masters_2.return)) _g.call(masters_2);
                                 }
-                                finally { if (e_19) throw e_19.error; }
+                                finally { if (e_20) throw e_20.error; }
                             }
                         }
                     }
-                    catch (e_18_1) { e_18 = { error: e_18_1 }; }
+                    catch (e_19_1) { e_19 = { error: e_19_1 }; }
                     finally {
                         try {
                             if (_t && !_t.done && (_f = _s.return)) _f.call(_s);
                         }
-                        finally { if (e_18) throw e_18.error; }
+                        finally { if (e_19) throw e_19.error; }
                     }
                     if (!has_2)
                         win = false;
@@ -1190,12 +1293,12 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                     break;
             }
         }
-        catch (e_13_1) { e_13 = { error: e_13_1 }; }
+        catch (e_14_1) { e_14 = { error: e_14_1 }; }
         finally {
             try {
                 if (_k && !_k.done && (_a = _j.return)) _a.call(_j);
             }
-            finally { if (e_13) throw e_13.error; }
+            finally { if (e_14) throw e_14.error; }
         }
         if (win) {
             level.state = 'win';
@@ -1206,6 +1309,16 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
     return PuzzleGameLoop;
 }(ecs.Component));
 exports.PuzzleGameLoop = PuzzleGameLoop;
+var GameShortCut = /** @class */ (function () {
+    function GameShortCut() {
+    }
+    return GameShortCut;
+}());
+var GameShortCutLayer = /** @class */ (function () {
+    function GameShortCutLayer() {
+    }
+    return GameShortCutLayer;
+}());
 
 
 /***/ }),
@@ -1489,6 +1602,51 @@ var PuzzleGameUI = /** @class */ (function (_super) {
         downBtn.transform.x = 16;
         downBtn.transform.y = 26;
         downBtn.parent = arrGroup;
+        var rect = ecs.Entity.create().addComponent(leaf.Bitmap);
+        rect.texture = leaf.PointTexture.getTexture(0xff0000);
+        rect.transform.scaleX = rect.transform.scaleY = 33;
+        rect.parent = arrGroup;
+        rect.transform.x = -4;
+        rect.transform.alpha = 0.1;
+        rect.transform.y = -4;
+        rect.addComponent(leaf.TouchComponent).onTouchStart.on(function (e) {
+            var rot = Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI;
+            leftBtn.transform.alpha = rightBtn.transform.alpha
+                = upBtn.transform.alpha = downBtn.transform.alpha = 1;
+            if (rot <= 45 && rot >= -45) {
+                rightBtn.transform.alpha = 0.5;
+            }
+            else if (rot >= -135 && rot < -45) {
+                upBtn.transform.alpha = 0.5;
+            }
+            else if (rot >= 45 && rot <= 135) {
+                downBtn.transform.alpha = 0.5;
+            }
+            else {
+                leftBtn.transform.alpha = 0.5;
+            }
+        });
+        rect.getComponent(leaf.TouchComponent).onTouchEnd.on(function (e) {
+            leftBtn.transform.alpha = rightBtn.transform.alpha
+                = upBtn.transform.alpha = downBtn.transform.alpha = 1;
+            var rot = Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI;
+            var dir = puzzle_game_config_1.EMPuzzleMove.RIGHT;
+            if (rot <= 45 && rot >= -45) {
+                dir = puzzle_game_config_1.EMPuzzleMove.RIGHT;
+            }
+            else if (rot >= -135 && rot < -45) {
+                dir = puzzle_game_config_1.EMPuzzleMove.UP;
+            }
+            else if (rot >= 45 && rot <= 135) {
+                dir = puzzle_game_config_1.EMPuzzleMove.DOWN;
+            }
+            else {
+                dir = puzzle_game_config_1.EMPuzzleMove.LEFT;
+            }
+            _this.game.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(dir);
+            console.error(dir);
+            // console.error(e.localX, e.localY, Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI);
+        });
         arrGroup.transform.x = 5;
         arrGroup.transform.y = 0;
         dirGroup.transform.x = 2;
@@ -1519,17 +1677,20 @@ var PuzzleGameUI = /** @class */ (function (_super) {
         this.entity.name = 'w';
         this.uiRoot.transform.y = leaf.getStageHeight() - 100;
         this.uiRoot.transform.scaleX = this.uiRoot.transform.scaleY = 3;
-        this.addClick(upBtn, function () {
-            _this.game.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(puzzle_game_config_1.EMPuzzleMove.UP);
-        });
-        this.addClick(downBtn, function () {
-            _this.game.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(puzzle_game_config_1.EMPuzzleMove.DOWN);
-        });
-        this.addClick(leftBtn, function () {
-            _this.game.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(puzzle_game_config_1.EMPuzzleMove.LEFT);
-        });
-        this.addClick(rightBtn, function () {
-            _this.game.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(puzzle_game_config_1.EMPuzzleMove.RIGHT);
+        // this.addClick(upBtn, () => {
+        //     this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.UP);
+        // })
+        // this.addClick(downBtn, () => {
+        //     this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.DOWN);
+        // })
+        // this.addClick(leftBtn, () => {
+        //     this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.LEFT);
+        // })
+        // this.addClick(rightBtn, () => {
+        //     this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.RIGHT);
+        // })
+        this.addClick(xBtn, function () {
+            _this.game.getComponent(puzzle_game_loop_1.PuzzleGameLoop).back();
         });
         this.addClick(zBtn, function () {
             _this.game.getComponent(puzzle_game_1.PuzzleGame).reload();
@@ -1597,7 +1758,7 @@ var PuzzleGame = /** @class */ (function (_super) {
         this.scaleToStage = scaleToStage;
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
-        leaf.StateWin.show();
+        // leaf.StateWin.show();
     };
     PuzzleGame.prototype.awake = function () {
         var _this = this;
@@ -1684,6 +1845,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 orange.autoloadLink("PuzzleScene");
 var PuzzleGameConfig = /** @class */ (function () {
     function PuzzleGameConfig(txt) {
+        var e_1, _a, e_2, _b;
         this.blockWidth = 0;
         this.blockHeight = 0;
         this.objects = {};
@@ -1695,6 +1857,7 @@ var PuzzleGameConfig = /** @class */ (function () {
         this.winConditions = [];
         this.levels = [];
         this.messages = [];
+        this.ruleLayers = {};
         txt = txt.toLocaleLowerCase();
         txt = this.mergeSpace(txt);
         // while (txt.indexOf('(') != -1) {
@@ -1727,7 +1890,12 @@ var PuzzleGameConfig = /** @class */ (function () {
                     this.objects[name_2].game = this;
             }
         }
+        var index = 0;
         for (var name_3 in this.objects) {
+            this.objects[name_3].id = index++;
+            if (this.groups[EMPuzzleConst.PLAYER].indexOf(this.objects[name_3]) != -1) {
+                this.objects[name_3].isPlayer = true;
+            }
             if (this.blockWidth < this.objects[name_3].width)
                 this.blockWidth = this.objects[name_3].width;
             if (this.blockHeight < this.objects[name_3].height)
@@ -1744,9 +1912,45 @@ var PuzzleGameConfig = /** @class */ (function () {
                 }
             }
         }
+        try {
+            for (var _c = __values(this.ruleObjects), _d = _c.next(); !_d.done; _d = _c.next()) {
+                var obj = _d.value;
+                this.ruleLayers[obj.layer] = true;
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        var _loop_1 = function (level) {
+            if (false) { var w; }
+            level.blocks = [];
+            for (var y = 0; y < level.height; y++) {
+                level.blocks[y] = [];
+                for (var x = 0; x < level.width; x++) {
+                    level.blocks[y][x] = null;
+                }
+            }
+        };
+        try {
+            for (var _e = __values(this.levels), _f = _e.next(); !_f.done; _f = _e.next()) {
+                var level = _f.value;
+                _loop_1(level);
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
     }
     PuzzleGameConfig.prototype.parseFace = function (lines, index) {
-        var e_1, _a;
+        var e_3, _a;
         var level;
         var y = 0;
         for (var i = index; i < lines.length; i++) {
@@ -1775,7 +1979,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                     }
                     var x = i_1;
                     try {
-                        for (var _b = (e_1 = void 0, __values(this.legends[c])), _c = _b.next(); !_c.done; _c = _b.next()) {
+                        for (var _b = (e_3 = void 0, __values(this.legends[c])), _c = _b.next(); !_c.done; _c = _b.next()) {
                             var obj = _c.value;
                             if (!level.layerObjects[obj.layer])
                                 level.layerObjects[obj.layer] = [];
@@ -1788,12 +1992,12 @@ var PuzzleGameConfig = /** @class */ (function () {
                             level.layers[obj.layer][y][x] = obj;
                         }
                     }
-                    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                    catch (e_3_1) { e_3 = { error: e_3_1 }; }
                     finally {
                         try {
                             if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                         }
-                        finally { if (e_1) throw e_1.error; }
+                        finally { if (e_3) throw e_3.error; }
                     }
                 }
                 level.height++;
@@ -1812,7 +2016,7 @@ var PuzzleGameConfig = /** @class */ (function () {
         return lines.length;
     };
     PuzzleGameConfig.prototype.parseLevels = function (lines, index) {
-        var e_2, _a;
+        var e_4, _a;
         var level;
         var y = 0;
         for (var i = index; i < lines.length; i++) {
@@ -1828,7 +2032,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                 if (level) {
                     this.levels.push(level);
                 }
-                console.error(this.levels);
+                // console.error(this.levels);
                 return i - 1;
             }
             line = this.deleteSpace(line);
@@ -1849,7 +2053,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                     }
                     var x = i_2;
                     try {
-                        for (var _b = (e_2 = void 0, __values(this.legends[c])), _c = _b.next(); !_c.done; _c = _b.next()) {
+                        for (var _b = (e_4 = void 0, __values(this.legends[c])), _c = _b.next(); !_c.done; _c = _b.next()) {
                             var obj = _c.value;
                             if (!level.layerObjects[obj.layer])
                                 level.layerObjects[obj.layer] = [];
@@ -1862,12 +2066,12 @@ var PuzzleGameConfig = /** @class */ (function () {
                             level.layers[obj.layer][y][x] = obj;
                         }
                     }
-                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    catch (e_4_1) { e_4 = { error: e_4_1 }; }
                     finally {
                         try {
                             if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                         }
-                        finally { if (e_2) throw e_2.error; }
+                        finally { if (e_4) throw e_4.error; }
                     }
                 }
                 level.height++;
@@ -1883,15 +2087,15 @@ var PuzzleGameConfig = /** @class */ (function () {
         if (level) {
             this.levels.push(level);
         }
-        console.error(this.levels);
+        // console.error(this.levels);
         return lines.length;
     };
     PuzzleGameConfig.prototype.parseWinConditions = function (lines, index) {
-        var e_3, _a, e_4, _b, e_5, _c;
+        var e_5, _a, e_6, _b, e_7, _c;
         for (var i = index; i < lines.length; i++) {
             var line = lines[i];
             if (this.isBlockDevice(line)) {
-                console.error(this.winConditions);
+                // console.error(this.winConditions);
                 return i - 1;
             }
             line = this.mergeSpace(line);
@@ -1911,32 +2115,32 @@ var PuzzleGameConfig = /** @class */ (function () {
                     }
                     cond.other = this.groups[strs[3]];
                     try {
-                        for (var _d = (e_3 = void 0, __values(cond.master)), _e = _d.next(); !_e.done; _e = _d.next()) {
+                        for (var _d = (e_5 = void 0, __values(cond.master)), _e = _d.next(); !_e.done; _e = _d.next()) {
                             var c = _e.value;
-                            if (this.ruleObjects.indexOf(c) === -1)
+                            if (c && this.ruleObjects.indexOf(c) === -1)
                                 this.ruleObjects.push(c);
                         }
                     }
-                    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                    catch (e_5_1) { e_5 = { error: e_5_1 }; }
                     finally {
                         try {
                             if (_e && !_e.done && (_a = _d.return)) _a.call(_d);
                         }
-                        finally { if (e_3) throw e_3.error; }
+                        finally { if (e_5) throw e_5.error; }
                     }
                     try {
-                        for (var _f = (e_4 = void 0, __values(cond.other)), _g = _f.next(); !_g.done; _g = _f.next()) {
+                        for (var _f = (e_6 = void 0, __values(cond.other)), _g = _f.next(); !_g.done; _g = _f.next()) {
                             var c = _g.value;
-                            if (this.ruleObjects.indexOf(c) === -1)
+                            if (c && this.ruleObjects.indexOf(c) === -1)
                                 this.ruleObjects.push(c);
                         }
                     }
-                    catch (e_4_1) { e_4 = { error: e_4_1 }; }
+                    catch (e_6_1) { e_6 = { error: e_6_1 }; }
                     finally {
                         try {
                             if (_g && !_g.done && (_b = _f.return)) _b.call(_f);
                         }
-                        finally { if (e_4) throw e_4.error; }
+                        finally { if (e_6) throw e_6.error; }
                     }
                 }
                 else if (strs.length === 2) {
@@ -1946,18 +2150,18 @@ var PuzzleGameConfig = /** @class */ (function () {
                     }
                     cond.master = this.groups[strs[0]];
                     try {
-                        for (var _h = (e_5 = void 0, __values(cond.master)), _j = _h.next(); !_j.done; _j = _h.next()) {
+                        for (var _h = (e_7 = void 0, __values(cond.master)), _j = _h.next(); !_j.done; _j = _h.next()) {
                             var c = _j.value;
-                            if (this.ruleObjects.indexOf(c) === -1)
+                            if (c && this.ruleObjects.indexOf(c) === -1)
                                 this.ruleObjects.push(c);
                         }
                     }
-                    catch (e_5_1) { e_5 = { error: e_5_1 }; }
+                    catch (e_7_1) { e_7 = { error: e_7_1 }; }
                     finally {
                         try {
                             if (_j && !_j.done && (_c = _h.return)) _c.call(_h);
                         }
-                        finally { if (e_5) throw e_5.error; }
+                        finally { if (e_7) throw e_7.error; }
                     }
                 }
                 this.winConditions.push(cond);
@@ -1965,11 +2169,11 @@ var PuzzleGameConfig = /** @class */ (function () {
         }
     };
     PuzzleGameConfig.prototype.parseRules = function (lines, index) {
-        var e_6, _a, e_7, _b, e_8, _c, e_9, _d, e_10, _e, e_11, _f, e_12, _g, e_13, _h, e_14, _j;
+        var e_8, _a, e_9, _b, e_10, _c, e_11, _d, e_12, _e, e_13, _f, e_14, _g, e_15, _h, e_16, _j;
         for (var i = index; i < lines.length; i++) {
             var line = lines[i];
             if (this.isBlockDevice(line)) {
-                console.error(this.rules);
+                // console.error(this.rules);
                 return i - 1;
             }
             if (i === index && !this.rules.length) {
@@ -2003,19 +2207,19 @@ var PuzzleGameConfig = /** @class */ (function () {
                 if (lets.length) {
                     var words = lets.split(" ");
                     try {
-                        for (var words_1 = (e_6 = void 0, __values(words)), words_1_1 = words_1.next(); !words_1_1.done; words_1_1 = words_1.next()) {
+                        for (var words_1 = (e_8 = void 0, __values(words)), words_1_1 = words_1.next(); !words_1_1.done; words_1_1 = words_1.next()) {
                             var word = words_1_1.value;
                             if (exports.puzzleDirections.indexOf(word) != -1) {
                                 rule.directions = exports.puzzleDirection[word];
                             }
                         }
                     }
-                    catch (e_6_1) { e_6 = { error: e_6_1 }; }
+                    catch (e_8_1) { e_8 = { error: e_8_1 }; }
                     finally {
                         try {
                             if (words_1_1 && !words_1_1.done && (_a = words_1.return)) _a.call(words_1);
                         }
-                        finally { if (e_6) throw e_6.error; }
+                        finally { if (e_8) throw e_8.error; }
                     }
                 }
                 //解析前半部分
@@ -2024,7 +2228,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                     console.error("parse error rule:", line);
                 }
                 try {
-                    for (var rules_1 = (e_7 = void 0, __values(rules)), rules_1_1 = rules_1.next(); !rules_1_1.done; rules_1_1 = rules_1.next()) {
+                    for (var rules_1 = (e_9 = void 0, __values(rules)), rules_1_1 = rules_1.next(); !rules_1_1.done; rules_1_1 = rules_1.next()) {
                         var str = rules_1_1.value;
                         var rank = [];
                         var limit = [];
@@ -2033,7 +2237,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                         str = str.slice(1, str.length - 1);
                         var legends = str.split("|");
                         try {
-                            for (var legends_1 = (e_8 = void 0, __values(legends)), legends_1_1 = legends_1.next(); !legends_1_1.done; legends_1_1 = legends_1.next()) {
+                            for (var legends_1 = (e_10 = void 0, __values(legends)), legends_1_1 = legends_1.next(); !legends_1_1.done; legends_1_1 = legends_1.next()) {
                                 var legend = legends_1_1.value;
                                 var limit2 = [];
                                 var isFirst = legends.indexOf(legend) === 0;
@@ -2055,7 +2259,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                                     }
                                     var index_1 = 0;
                                     try {
-                                        for (var strs_1 = (e_9 = void 0, __values(strs)), strs_1_1 = strs_1.next(); !strs_1_1.done; strs_1_1 = strs_1.next()) {
+                                        for (var strs_1 = (e_11 = void 0, __values(strs)), strs_1_1 = strs_1.next(); !strs_1_1.done; strs_1_1 = strs_1.next()) {
                                             var subStr = strs_1_1.value;
                                             if (exports.puzzleConditionLimits.indexOf(subStr) != -1) {
                                                 limit2[index_1] = subStr;
@@ -2065,58 +2269,66 @@ var PuzzleGameConfig = /** @class */ (function () {
                                                     console.error("parse error rule, no object:", subStr, '\n', line);
                                                 }
                                                 try {
-                                                    for (var _k = (e_10 = void 0, __values(this.groups[subStr])), _l = _k.next(); !_l.done; _l = _k.next()) {
+                                                    for (var _k = (e_12 = void 0, __values(this.groups[subStr])), _l = _k.next(); !_l.done; _l = _k.next()) {
                                                         var objCfg = _l.value;
-                                                        if (this.ruleObjects.indexOf(objCfg) === -1) {
+                                                        if (objCfg && this.ruleObjects.indexOf(objCfg) === -1) {
                                                             this.ruleObjects.push(objCfg);
                                                         }
                                                     }
                                                 }
-                                                catch (e_10_1) { e_10 = { error: e_10_1 }; }
+                                                catch (e_12_1) { e_12 = { error: e_12_1 }; }
                                                 finally {
                                                     try {
                                                         if (_l && !_l.done && (_e = _k.return)) _e.call(_k);
                                                     }
-                                                    finally { if (e_10) throw e_10.error; }
+                                                    finally { if (e_12) throw e_12.error; }
                                                 }
                                                 limit2[index_1] = limit2[index_1] || null;
                                                 rank2[index_1++] = this.groups[subStr];
                                             }
                                         }
                                     }
-                                    catch (e_9_1) { e_9 = { error: e_9_1 }; }
+                                    catch (e_11_1) { e_11 = { error: e_11_1 }; }
                                     finally {
                                         try {
                                             if (strs_1_1 && !strs_1_1.done && (_d = strs_1.return)) _d.call(strs_1);
                                         }
-                                        finally { if (e_9) throw e_9.error; }
+                                        finally { if (e_11) throw e_11.error; }
                                     }
                                 }
                             }
                         }
-                        catch (e_8_1) { e_8 = { error: e_8_1 }; }
+                        catch (e_10_1) { e_10 = { error: e_10_1 }; }
                         finally {
                             try {
                                 if (legends_1_1 && !legends_1_1.done && (_c = legends_1.return)) _c.call(legends_1);
                             }
-                            finally { if (e_8) throw e_8.error; }
+                            finally { if (e_10) throw e_10.error; }
                         }
                     }
                 }
-                catch (e_7_1) { e_7 = { error: e_7_1 }; }
+                catch (e_9_1) { e_9 = { error: e_9_1 }; }
                 finally {
                     try {
                         if (rules_1_1 && !rules_1_1.done && (_b = rules_1.return)) _b.call(rules_1);
                     }
-                    finally { if (e_7) throw e_7.error; }
+                    finally { if (e_9) throw e_9.error; }
                 }
                 if (!rule.force)
                     rule.force = EMPuzzleForce.NONE;
+                if (rule.force != EMPuzzleForce.NONE && !(rule.ranks[0]
+                    && rule.ranks[0][0] && rule.ranks[0][0][0]
+                    && this.groups[EMPuzzleConst.PLAYER].indexOf(rule.ranks[0][0][0][0]) != -1)) {
+                    continue;
+                }
+                if (rule.force != EMPuzzleForce.NONE) {
+                    rule.isPlayerMoved = true;
+                }
                 rules = ends.match(/\[[a-zA-Z0-9><\| \t]+\]/g);
                 rule.index = this.rules.length;
                 this.rules.push(rule);
                 try {
-                    for (var rules_2 = (e_11 = void 0, __values(rules)), rules_2_1 = rules_2.next(); !rules_2_1.done; rules_2_1 = rules_2.next()) {
+                    for (var rules_2 = (e_13 = void 0, __values(rules)), rules_2_1 = rules_2.next(); !rules_2_1.done; rules_2_1 = rules_2.next()) {
                         var str = rules_2_1.value;
                         var toRank = [];
                         var toForce = [];
@@ -2127,7 +2339,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                         str = str.slice(1, str.length - 1);
                         var legends = str.split("|");
                         try {
-                            for (var legends_2 = (e_12 = void 0, __values(legends)), legends_2_1 = legends_2.next(); !legends_2_1.done; legends_2_1 = legends_2.next()) {
+                            for (var legends_2 = (e_14 = void 0, __values(legends)), legends_2_1 = legends_2.next(); !legends_2_1.done; legends_2_1 = legends_2.next()) {
                                 var legend = legends_2_1.value;
                                 var froceIndex = 0;
                                 var toRank2 = [];
@@ -2143,7 +2355,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                                 var strs = legend.split(' ');
                                 var index_2 = 0;
                                 try {
-                                    for (var strs_2 = (e_13 = void 0, __values(strs)), strs_2_1 = strs_2.next(); !strs_2_1.done; strs_2_1 = strs_2.next()) {
+                                    for (var strs_2 = (e_15 = void 0, __values(strs)), strs_2_1 = strs_2.next(); !strs_2_1.done; strs_2_1 = strs_2.next()) {
                                         var str_1 = strs_2_1.value;
                                         if (legend === '...') {
                                             toForce2[froceIndex] = null;
@@ -2166,19 +2378,19 @@ var PuzzleGameConfig = /** @class */ (function () {
                                                     console.error("parse error rule, no object:", legend, '\n', line);
                                                 }
                                                 try {
-                                                    for (var _m = (e_14 = void 0, __values(this.groups[str_1])), _o = _m.next(); !_o.done; _o = _m.next()) {
+                                                    for (var _m = (e_16 = void 0, __values(this.groups[str_1])), _o = _m.next(); !_o.done; _o = _m.next()) {
                                                         var objCfg = _o.value;
-                                                        if (this.ruleObjects.indexOf(objCfg) === -1) {
+                                                        if (objCfg && this.ruleObjects.indexOf(objCfg) === -1) {
                                                             this.ruleObjects.push(objCfg);
                                                         }
                                                     }
                                                 }
-                                                catch (e_14_1) { e_14 = { error: e_14_1 }; }
+                                                catch (e_16_1) { e_16 = { error: e_16_1 }; }
                                                 finally {
                                                     try {
                                                         if (_o && !_o.done && (_j = _m.return)) _j.call(_m);
                                                     }
-                                                    finally { if (e_14) throw e_14.error; }
+                                                    finally { if (e_16) throw e_16.error; }
                                                 }
                                                 toLimit2[index_2] = toLimit2[index_2] || null;
                                                 toRank2[index_2++] = this.groups[str_1];
@@ -2186,30 +2398,30 @@ var PuzzleGameConfig = /** @class */ (function () {
                                         }
                                     }
                                 }
-                                catch (e_13_1) { e_13 = { error: e_13_1 }; }
+                                catch (e_15_1) { e_15 = { error: e_15_1 }; }
                                 finally {
                                     try {
                                         if (strs_2_1 && !strs_2_1.done && (_h = strs_2.return)) _h.call(strs_2);
                                     }
-                                    finally { if (e_13) throw e_13.error; }
+                                    finally { if (e_15) throw e_15.error; }
                                 }
                             }
                         }
-                        catch (e_12_1) { e_12 = { error: e_12_1 }; }
+                        catch (e_14_1) { e_14 = { error: e_14_1 }; }
                         finally {
                             try {
                                 if (legends_2_1 && !legends_2_1.done && (_g = legends_2.return)) _g.call(legends_2);
                             }
-                            finally { if (e_12) throw e_12.error; }
+                            finally { if (e_14) throw e_14.error; }
                         }
                     }
                 }
-                catch (e_11_1) { e_11 = { error: e_11_1 }; }
+                catch (e_13_1) { e_13 = { error: e_13_1 }; }
                 finally {
                     try {
                         if (rules_2_1 && !rules_2_1.done && (_f = rules_2.return)) _f.call(rules_2);
                     }
-                    finally { if (e_11) throw e_11.error; }
+                    finally { if (e_13) throw e_13.error; }
                 }
                 //解析后半部分
                 // if (rank.length) {
@@ -2223,7 +2435,7 @@ var PuzzleGameConfig = /** @class */ (function () {
         return lines.length;
     };
     PuzzleGameConfig.prototype.parseCollisionLayers = function (lines, index) {
-        var e_15, _a, e_16, _b;
+        var e_17, _a, e_18, _b;
         for (var i = index; i < lines.length; i++) {
             var line = lines[i];
             if (this.isBlockDevice(line)) {
@@ -2233,30 +2445,30 @@ var PuzzleGameConfig = /** @class */ (function () {
             if (line.length) {
                 var names = line.split(",");
                 try {
-                    for (var names_1 = (e_15 = void 0, __values(names)), names_1_1 = names_1.next(); !names_1_1.done; names_1_1 = names_1.next()) {
+                    for (var names_1 = (e_17 = void 0, __values(names)), names_1_1 = names_1.next(); !names_1_1.done; names_1_1 = names_1.next()) {
                         var name_5 = names_1_1.value;
                         name_5 = this.deleteSpace(name_5);
                         try {
-                            for (var _c = (e_16 = void 0, __values(this.groups[name_5])), _d = _c.next(); !_d.done; _d = _c.next()) {
+                            for (var _c = (e_18 = void 0, __values(this.groups[name_5])), _d = _c.next(); !_d.done; _d = _c.next()) {
                                 var obj = _d.value;
                                 obj.layer = this.maxLayer;
                             }
                         }
-                        catch (e_16_1) { e_16 = { error: e_16_1 }; }
+                        catch (e_18_1) { e_18 = { error: e_18_1 }; }
                         finally {
                             try {
                                 if (_d && !_d.done && (_b = _c.return)) _b.call(_c);
                             }
-                            finally { if (e_16) throw e_16.error; }
+                            finally { if (e_18) throw e_18.error; }
                         }
                     }
                 }
-                catch (e_15_1) { e_15 = { error: e_15_1 }; }
+                catch (e_17_1) { e_17 = { error: e_17_1 }; }
                 finally {
                     try {
                         if (names_1_1 && !names_1_1.done && (_a = names_1.return)) _a.call(names_1);
                     }
-                    finally { if (e_15) throw e_15.error; }
+                    finally { if (e_17) throw e_17.error; }
                 }
                 this.maxLayer++;
             }
@@ -2264,11 +2476,11 @@ var PuzzleGameConfig = /** @class */ (function () {
         return lines.length;
     };
     PuzzleGameConfig.prototype.parseLegend = function (lines, index) {
-        var e_17, _a, e_18, _b;
+        var e_19, _a, e_20, _b;
         for (var i = index; i < lines.length; i++) {
             var line = lines[i];
             if (this.isBlockDevice(line)) {
-                console.error(this.legends);
+                // console.error(this.legends);
                 return i - 1;
             }
             if (line.indexOf("=") != -1) {
@@ -2280,35 +2492,35 @@ var PuzzleGameConfig = /** @class */ (function () {
                     this.legends[legend] = [];
                     var names = name_6.split("and");
                     try {
-                        for (var names_2 = (e_17 = void 0, __values(names)), names_2_1 = names_2.next(); !names_2_1.done; names_2_1 = names_2.next()) {
+                        for (var names_2 = (e_19 = void 0, __values(names)), names_2_1 = names_2.next(); !names_2_1.done; names_2_1 = names_2.next()) {
                             var n = names_2_1.value;
                             n = this.deleteSpace(n);
                             this.legends[legend].push(this.objects[n]);
                         }
                     }
-                    catch (e_17_1) { e_17 = { error: e_17_1 }; }
+                    catch (e_19_1) { e_19 = { error: e_19_1 }; }
                     finally {
                         try {
                             if (names_2_1 && !names_2_1.done && (_a = names_2.return)) _a.call(names_2);
                         }
-                        finally { if (e_17) throw e_17.error; }
+                        finally { if (e_19) throw e_19.error; }
                     }
                 }
                 else {
                     this.groups[legend] = [];
                     var names = name_6.split("or");
                     try {
-                        for (var names_3 = (e_18 = void 0, __values(names)), names_3_1 = names_3.next(); !names_3_1.done; names_3_1 = names_3.next()) {
+                        for (var names_3 = (e_20 = void 0, __values(names)), names_3_1 = names_3.next(); !names_3_1.done; names_3_1 = names_3.next()) {
                             var n = names_3_1.value;
                             this.groups[legend].push(this.objects[n]);
                         }
                     }
-                    catch (e_18_1) { e_18 = { error: e_18_1 }; }
+                    catch (e_20_1) { e_20 = { error: e_20_1 }; }
                     finally {
                         try {
                             if (names_3_1 && !names_3_1.done && (_b = names_3.return)) _b.call(names_3);
                         }
-                        finally { if (e_18) throw e_18.error; }
+                        finally { if (e_20) throw e_20.error; }
                     }
                 }
             }
@@ -2319,7 +2531,7 @@ var PuzzleGameConfig = /** @class */ (function () {
         for (var i = index; i < lines.length; i++) {
             var line = lines[i];
             if (this.isBlockDevice(line)) {
-                console.error(this.objects);
+                // console.error(this.objects);
                 return i - 1;
             }
             var name_7 = line.match(/[a-zA-Z0-9]+/) && line.match(/[a-zA-Z0-9]+/).length ? line.match(/[a-zA-Z0-9]+/)[0] : "";
@@ -2507,6 +2719,7 @@ var EMPuzzleGameModel;
 var PuzzleGameObjectConfig = /** @class */ (function () {
     function PuzzleGameObjectConfig() {
         this.layer = 0;
+        this.isPlayer = false;
     }
     return PuzzleGameObjectConfig;
 }());
@@ -2563,7 +2776,7 @@ var colorDefines = {
     "PINK": 0xe06f8b
 };
 function parseColorDefines(txt) {
-    var e_19, _a;
+    var e_21, _a;
     txt = "\n    .cm-s-midnight span.cm-COLOR-TRANSPARENT {\n        color: #777;\n        font-weight: normal\n    }\n    \n    .cm-s-midnight span.cm-COLOR-BLACK {\n        color: #555\n    }\n    \n    .cm-s-midnight span.cm-COLOR-WHITE {\n        color: #fff\n    }\n    ";
     var lines = txt.split("\n");
     var name;
@@ -2582,12 +2795,12 @@ function parseColorDefines(txt) {
             }
         }
     }
-    catch (e_19_1) { e_19 = { error: e_19_1 }; }
+    catch (e_21_1) { e_21 = { error: e_21_1 }; }
     finally {
         try {
             if (lines_1_1 && !lines_1_1.done && (_a = lines_1.return)) _a.call(lines_1);
         }
-        finally { if (e_19) throw e_19.error; }
+        finally { if (e_21) throw e_21.error; }
     }
     console.error(JSON.stringify(colors, null, 2));
 }
@@ -2668,23 +2881,27 @@ var FaceScene = /** @class */ (function (_super) {
         var gameList = [
             'game1-1_txt',
             'game1-2_txt',
+            'game1-3_txt'
         ];
         var nameList = [
-            '推箱子',
+            '经典推箱子',
             '走迷宫',
+            '初级推箱子'
         ];
         var _loop_1 = function (i) {
             var levelui = ecs.Entity.create();
             levelui.parent = levelList;
             levelui.transform.x = [30, 140][i % 2];
             levelui.transform.y = 130 * (~~(i / 2));
-            var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, gameList[i], 0, false, false, 100, 100);
+            var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, gameList[i], 1, false, false, 100, 100);
             level.parent = levelui;
             var label = ecs.Entity.create().addComponent(leaf.Label);
             label.text = nameList[i];
             label.parent = levelui;
             label.fontSize = 20;
             level.transform.y = 20;
+            if (window["lv"] == null)
+                window["lv"] = level;
             levelui.addComponent(leaf.TouchComponent).onTouchEnd.on(function () {
                 new puzzle_scene_1.PuzzleScene(gameList[i]);
             });
@@ -2716,7 +2933,7 @@ var FaceScene = /** @class */ (function (_super) {
             }
         });
         return _this;
-        // new PuzzleScene('game1-1_txt')
+        // ui.addComponent(HPComponent);
     }
     FaceScene = __decorate([
         orange.autoload("FaceScene")
@@ -2758,7 +2975,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var module_scene_1 = __webpack_require__(/*! ../../utils/ui/module-scene */ "../src/utils/ui/module-scene.ts");
-var puzzle_game_1 = __webpack_require__(/*! ./component/puzzle-game */ "../src/modules/puzzle/component/puzzle-game.ts");
+var puzzle_level_win_1 = __webpack_require__(/*! ./ui/puzzle-level-win */ "../src/modules/puzzle/ui/puzzle-level-win.ts");
 var face_scene_1 = __webpack_require__(/*! ./face/face-scene */ "../src/modules/puzzle/face/face-scene.ts");
 var PuzzleScene = /** @class */ (function (_super) {
     __extends(PuzzleScene, _super);
@@ -2767,8 +2984,8 @@ var PuzzleScene = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         var child = ecs.Entity.create();
         child.parent = _this.scene;
-        ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, 'game1-1_txt', 1).parent = child;
-        // ecs.Entity.create().addComponent(PuzzleLevelWin, game).parent = child;
+        // ecs.Entity.create().addComponent(PuzzleGame, 'game1-1_txt', 10).parent = child;
+        ecs.Entity.create().addComponent(puzzle_level_win_1.PuzzleLevelWin, game).parent = child;
         var zBtn = ecs.Entity.create().addComponent(leaf.Bitmap);
         zBtn.texture = leaf.RectTexture.getTexture(leaf.RectTexture.formatColors(0xffffff + "," + 0xaa0000 + "\n" +
             '0.....0\n' +
@@ -2778,7 +2995,7 @@ var PuzzleScene = /** @class */ (function (_super) {
             '..0.0..\n' +
             '.0...0.\n' +
             '0.....0'));
-        zBtn.transform.y = 10;
+        zBtn.transform.y = 15;
         zBtn.transform.x = 10;
         zBtn.transform.scaleX = zBtn.transform.scaleY = 3;
         zBtn.parent = _this.scene;
@@ -2809,6 +3026,220 @@ var PuzzleScene = /** @class */ (function (_super) {
     return PuzzleScene;
 }(module_scene_1.ModuleScene));
 exports.PuzzleScene = PuzzleScene;
+
+
+/***/ }),
+
+/***/ "../src/modules/puzzle/ui/puzzle-level-win.ts":
+/*!****************************************************!*\
+  !*** ../src/modules/puzzle/ui/puzzle-level-win.ts ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var puzzle_game_config_1 = __webpack_require__(/*! ../config/puzzle-game-config */ "../src/modules/puzzle/config/puzzle-game-config.ts");
+var puzzle_game_1 = __webpack_require__(/*! ../component/puzzle-game */ "../src/modules/puzzle/component/puzzle-game.ts");
+var game_storage_1 = __webpack_require__(/*! ../../../utils/storage/game-storage */ "../src/utils/storage/game-storage.ts");
+var puzzle_tip_1 = __webpack_require__(/*! ./puzzle-tip */ "../src/modules/puzzle/ui/puzzle-tip.ts");
+orange.autoloadLink("PuzzleScene");
+var PuzzleLevelWin = /** @class */ (function (_super) {
+    __extends(PuzzleLevelWin, _super);
+    function PuzzleLevelWin() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    PuzzleLevelWin.prototype.init = function (name) {
+        var _this = this;
+        if (name === void 0) { name = 'game1-1_txt'; }
+        var root = ecs.Entity.create();
+        root.parent = this.entity;
+        root.transform.y = 40;
+        var listScroller = ecs.Entity.create();
+        listScroller.parent = root;
+        var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
+        bg.parent = listScroller;
+        bg.texture = leaf.PointTexture.getTexture(0x00ff00);
+        bg.transform.scaleX = leaf.getStageWidth();
+        bg.transform.scaleY = leaf.getStageHeight() - 40 - 60;
+        bg.transform.alpha = 0;
+        var levelList = ecs.Entity.create();
+        levelList.parent = listScroller;
+        var mask = ecs.Entity.create().addComponent(leaf.Bitmap);
+        mask.texture = leaf.PointTexture.getTexture(0);
+        mask.parent = this.entity;
+        mask.transform.scaleX = leaf.getStageWidth();
+        mask.transform.scaleY = 40;
+        mask = ecs.Entity.create().addComponent(leaf.Bitmap);
+        mask.texture = leaf.PointTexture.getTexture(0);
+        mask.parent = this.entity;
+        mask.transform.scaleX = leaf.getStageWidth();
+        mask.transform.scaleY = 60;
+        mask.transform.y = leaf.getStageHeight() - mask.transform.scaleY;
+        var listHeight = leaf.getStageHeight() - 60 - 40;
+        game_storage_1.GameStorage.getStorage(name + "_maxStage").then(function (v) {
+            var maxLevel = v || 0;
+            // console.error('关卡', `${name}_maxStage`, v);
+            puzzle_game_config_1.PuzzleGameConfig.loadGameConfig(name, function (cfg) {
+                var _loop_1 = function (i) {
+                    var levelui = ecs.Entity.create();
+                    levelui.parent = levelList;
+                    levelui.transform.x = [30, 140][i % 2];
+                    levelui.transform.y = 130 * (~~(i / 2));
+                    var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, name, cfg.levels[i].level, false, false, 100, 100);
+                    level.parent = levelui;
+                    var label = ecs.Entity.create().addComponent(leaf.Label);
+                    label.text = "\u7B2C" + (i + 1) + "\u5173";
+                    label.parent = levelui;
+                    label.fontSize = 20;
+                    level.transform.y = 20;
+                    if (i > maxLevel) {
+                        var levelMask = ecs.Entity.create().addComponent(leaf.Bitmap);
+                        levelMask.texture = leaf.PointTexture.getTexture(0);
+                        levelMask.transform.alpha = Math.min(0.96, 0.7 + 0.02 * (i - maxLevel));
+                        levelMask.transform.scaleX = 100;
+                        levelMask.transform.scaleY = 100;
+                        levelMask.transform.y = 20;
+                        label.transform.alpha = 0.8;
+                        levelMask.parent = levelui;
+                    }
+                    levelui.addComponent(leaf.TouchComponent).onTouchEnd.on(function () {
+                        if (startScroll)
+                            return;
+                        if (i + 1 > maxLevel + 1) {
+                            puzzle_tip_1.PuzzleTip.show("完成上一关即可解锁，加油～");
+                            return;
+                        }
+                        _this.entity.destroy();
+                        ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, name, i + 1).parent = leaf.world.scene;
+                    });
+                };
+                // for (let i = cfg.levels.length; i < 40; i++) {
+                //     cfg.levels[i] = cfg.levels[~~(Math.random() * cfg.levels.length)];
+                // }
+                for (var i = 0; i < cfg.levels.length; i++) {
+                    _loop_1(i);
+                }
+                var startX = 0;
+                var startY = 0;
+                var levelY = levelList.transform.y;
+                var startScroll = false;
+                listScroller.addComponent(leaf.TouchComponent).onTouchStart.on(function (e) {
+                    startScroll = false;
+                    startX = e.stageX;
+                    startY = e.stageY;
+                    levelY = levelList.transform.y;
+                });
+                listScroller.getComponent(leaf.TouchComponent).onTouchMove.on(function (e) {
+                    if (Math.abs(e.stageX - startX) > 10 || Math.abs(e.stageY - startY) > 10) {
+                        startScroll = true;
+                    }
+                    if (startScroll) {
+                        levelList.transform.y = levelY - startY + e.stageY;
+                        if (levelList.transform.y < listHeight - 130 * (~~(cfg.levels.length / 2))) {
+                            levelList.transform.y = listHeight - 130 * (~~(cfg.levels.length / 2));
+                        }
+                        if (levelList.transform.y > 0)
+                            levelList.transform.y = 0;
+                    }
+                });
+            });
+        });
+    };
+    return PuzzleLevelWin;
+}(ecs.Component));
+exports.PuzzleLevelWin = PuzzleLevelWin;
+
+
+/***/ }),
+
+/***/ "../src/modules/puzzle/ui/puzzle-tip.ts":
+/*!**********************************************!*\
+  !*** ../src/modules/puzzle/ui/puzzle-tip.ts ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+orange.autoloadLink("PuzzleScene");
+var PuzzleTip = /** @class */ (function (_super) {
+    __extends(PuzzleTip, _super);
+    function PuzzleTip() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    PuzzleTip.prototype.init = function (text, color, time) {
+        var _this = this;
+        if (text === void 0) { text = ''; }
+        if (color === void 0) { color = 0xff8888; }
+        if (time === void 0) { time = 2000; }
+        this.parent = leaf.world.scene;
+        var label = ecs.Entity.create().addComponent(leaf.Label);
+        label.text = text;
+        label.fontSize = 10;
+        label.fontColor = color;
+        var rect = ecs.Entity.create().addComponent(leaf.Bitmap);
+        rect.parent = this.entity;
+        rect.transform.alpha = 0.8;
+        rect.texture = leaf.PointTexture.getTexture(0);
+        rect.transform.scaleX = label.textWidth + 20;
+        rect.transform.scaleY = label.textHeight + 10;
+        label.parent = this.entity;
+        label.transform.x = (leaf.getStageWidth() - label.textWidth) / 2;
+        label.transform.y = (leaf.getStageHeight() - label.textHeight) / 2;
+        rect.transform.x = label.transform.x - 10;
+        rect.transform.y = label.transform.y - 5;
+        this.transform.alpha = 0;
+        this.transform.y += 30;
+        this.addComponent(tween.Tween, this.transform, 300, {
+            alpha: 1,
+            y: this.transform.y - 30
+        }, tween.EaseFunction.QuadEaseOut);
+        setTimeout(function () {
+            _this.addComponent(tween.Tween, _this.transform, 300, {
+                alpha: 0,
+                y: _this.transform.y - 30
+            }, tween.EaseFunction.QuadEaseIn).onComplete = function () {
+                _this.entity.destroy();
+            };
+        }, time);
+    };
+    PuzzleTip.show = function (txt, color, time) {
+        if (color === void 0) { color = 0xff8888; }
+        if (time === void 0) { time = 2000; }
+        ecs.Entity.create().addComponent(PuzzleTip, txt);
+    };
+    return PuzzleTip;
+}(ecs.Component));
+exports.PuzzleTip = PuzzleTip;
 
 
 /***/ }),

@@ -1,4 +1,4 @@
-import { EMPuzzleMove, EMPuzzleForce, EMPuzzleConst, EMPuzzleConditionLimit, PuzzleGameObjectConfig } from "../config/puzzle-game-config";
+import { EMPuzzleMove, EMPuzzleForce, EMPuzzleConst, EMPuzzleConditionLimit, PuzzleGameObjectConfig, PuzzleGameConfig } from "../config/puzzle-game-config";
 import { PuzzleGame } from "./puzzle-game";
 import { PuzzleGameLevel } from "./puzzle-game-level";
 import { PuzzleGameObject } from "./puzzle-game-object";
@@ -12,6 +12,37 @@ export class PuzzleGameLoop extends ecs.Component {
         setTimeout(() => {
             // this.run(EMPuzzleMove.RIGHT);
         }, 1000);
+    }
+
+    shortCuts: GameShortCut[] = [];
+
+    createShortCut() {
+        let sc = new GameShortCut();
+        sc.layers = [];
+        let level = this.getComponent(PuzzleGameLevel);
+        for (let i = 0; i < level.layers.length; i++) {
+            let layer = new GameShortCutLayer();
+            layer.layer = i;
+            layer.objects = level.config.blocks;
+            layer.types = {};
+            if (level.config.game.ruleLayers[i]) {
+                layer.objects = [];
+                for (let y = 0; y < level.config.height; y++) {
+                    layer.objects[y] = [];
+                    for (let x = 0; x < level.config.width; x++) {
+                        let obj = level.layers[layer.layer].objects[y][x];
+                        layer.objects[y][x] = obj ? { config: obj.config, x, y } : null;
+                        if (obj) {
+                            if (!layer.types[obj.config.id]) layer.types[obj.config.id] = [];
+                            layer.types[obj.config.id].push(layer.objects[y][x]);
+                        }
+                    }
+                }
+            }
+            sc.layers[layer.layer] = layer;
+        }
+        this.shortCuts.push(sc);
+        return sc;
     }
 
     /**
@@ -28,6 +59,7 @@ export class PuzzleGameLoop extends ecs.Component {
      * 
      */
     run(move: EMPuzzleMove) {
+        let shortCut = this.createShortCut();
         let level = this.getComponent(PuzzleGameLevel);
         if (level.state === 'win' || level.state === 'lose') return;
         let gameConfig = this.getComponent(PuzzleGame).config;
@@ -42,7 +74,13 @@ export class PuzzleGameLoop extends ecs.Component {
                 ruleExecuteOK = false;
                 for (let overlapObjCfg of rule.ranks[0][0]) {
                     for (let objCfg of overlapObjCfg) {
-                        let objs = level.getObjectsByType(objCfg);
+                        let objs: { x: number, y: number, config: PuzzleGameObjectConfig }[];
+                        if (objCfg.isPlayer) {
+                            objs = shortCut.layers[objCfg.layer] ? shortCut.layers[objCfg.layer].types[objCfg.id] : null;
+                        } else {
+                            objs = level.getObjectsByType(objCfg);
+                        }
+                        if (!objs) continue;
                         for (let obj of objs) {
                             let startX = obj.x;
                             let startY = obj.y;
@@ -63,10 +101,12 @@ export class PuzzleGameLoop extends ecs.Component {
                                             anyPosistion = true;
                                         } else {
                                             for (let o = !m && !n && successfull ? 1 : 0; o < rule.ranks[m][n].length; o++) {
+                                                if (!rule.ranks[m][n][o].length) continue;
+                                                let levelInstance = rule.ranks[m][n][o][0].isPlayer && rule.isPlayerMoved ? shortCut : level;
                                                 if (rule.limits[m][n][o] === EMPuzzleConditionLimit.NO) {
                                                     let find = false;
                                                     //计算 p k 是否符合规则
-                                                    for (let layer of level.layers) {
+                                                    for (let layer of levelInstance.layers) {
                                                         let check = layer.objects[y][x];
                                                         if (check && rule.ranks[m][n][o].indexOf(check.config) != -1) {
                                                             find = true;
@@ -79,7 +119,7 @@ export class PuzzleGameLoop extends ecs.Component {
                                                 } else {
                                                     let find = false;
                                                     //计算 p k 是否符合规则
-                                                    for (let layer of level.layers) {
+                                                    for (let layer of levelInstance.layers) {
                                                         let check = layer.objects[y][x];
                                                         if (check && rule.ranks[m][n][o].indexOf(check.config) != -1) {
                                                             find = true;
@@ -97,7 +137,9 @@ export class PuzzleGameLoop extends ecs.Component {
                                     if (!flag) break;
                                 }
                                 if (flag) { //成功了，开始执行
-                                    if (rule.force === EMPuzzleForce.NONE) ruleExecuteOK = true;
+                                    if (rule.force === EMPuzzleForce.NONE && rule.ranks[0] && rule.ranks[0][0] && rule.ranks[0][0].length > 1) {
+                                        ruleExecuteOK = true;
+                                    }
                                     let deleteConfigs: PuzzleGameObjectConfig[] = [];
                                     let deleteObjects: PuzzleGameObjectConfig[][][] = [];
                                     anyPosistion = false;
@@ -152,8 +194,17 @@ export class PuzzleGameLoop extends ecs.Component {
 
                                                     //如果是空表示删除对象
                                                     if (!rule.toRanks[m][n][o]) continue;
-
                                                     let toRankConfigs = rule.toRanks[m][n][o];
+                                                    // if (rule.ranks[m][n] && rule.ranks[m][n][o]) {
+                                                    //     let isPlayer = false;
+                                                    //     for (let ck of rule.ranks[m][n][o]) {
+                                                    //         if (ck.isPlayer) {
+                                                    //             isPlayer = true;
+                                                    //             break;
+                                                    //         }
+                                                    //     }
+                                                    //     if (isPlayer) continue;
+                                                    // }
                                                     let newObjCfg: PuzzleGameObjectConfig;
                                                     if (toRankConfigs.indexOf(deleteObjects[m][n][o]) != -1) {
                                                         newObjCfg = deleteObjects[m][n][o];
@@ -194,8 +245,10 @@ export class PuzzleGameLoop extends ecs.Component {
                                                     } else if (toFroce === EMPuzzleForce.DOWN) {
                                                         toY++;
                                                     }
-                                                    //要移动的位置有东西了
-                                                    if (level.layers[newObjCfg.layer].objects[toY][toX]) {
+                                                    if (toX < 0 || toX >= level.config.width || toY < 0 || toY >= level.config.height) {
+                                                        toX = x;
+                                                        toY = y;
+                                                    } else if (level.layers[newObjCfg.layer].objects[toY][toX]) {  //要移动的位置有东西了
                                                         toX = x;
                                                         toY = y;
                                                     }
@@ -223,7 +276,6 @@ export class PuzzleGameLoop extends ecs.Component {
                                                             check.setCoord(changeObjecteSource[check.id].x, changeObjecteSource[check.id].y);
                                                             check.addToLayer();
                                                         }
-
                                                     }
                                                     //开始移动
                                                     changedObjects[posIndex] = ecs.Entity.create().addComponent(PuzzleGameObject, level.layers[newObjCfg.layer], newObjCfg, toX, toY);
@@ -240,7 +292,35 @@ export class PuzzleGameLoop extends ecs.Component {
                 }
             }
         }
-        // this.checkState();
+        this.checkState();
+    }
+
+    back() {
+        let level = this.getComponent(PuzzleGameLevel);
+        if (this.shortCuts.length) {
+            let shortCut = this.shortCuts.pop();
+            for (let layer of shortCut.layers) {
+                if (!level.config.game.ruleLayers[layer.layer]) continue;
+                let realLayer = level.layers[layer.layer];
+                for (let y = 0; y < level.config.height; y++) {
+                    for (let x = 0; x < level.config.width; x++) {
+                        let obj = realLayer.objects[y][x];
+                        if (obj) {
+                            obj.removeFromLayer();
+                            obj.entity.destroy();
+                        }
+                    }
+                }
+                for (let y = 0; y < level.config.height; y++) {
+                    for (let x = 0; x < level.config.width; x++) {
+                        let obj = layer.objects[y][x];
+                        if (obj) {
+                            ecs.Entity.create().addComponent(PuzzleGameObject, realLayer, obj.config, x, y);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     checkState() {
@@ -364,4 +444,15 @@ export class PuzzleGameLoop extends ecs.Component {
         }
     };
 
+}
+
+
+class GameShortCut {
+    layers: GameShortCutLayer[];
+}
+
+class GameShortCutLayer {
+    layer: number;
+    objects: { x: number, y: number, config: PuzzleGameObjectConfig }[][];
+    types: { [index: number]: { x: number, y: number, config: PuzzleGameObjectConfig }[] };
 }

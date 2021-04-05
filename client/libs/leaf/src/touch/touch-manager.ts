@@ -47,8 +47,8 @@ namespace leaf {
             }
             for (let i = list.length - 1, x = 0, y = 0; i >= 0; i--) {
                 let m = list[i].transform.reverse;
-                x = m.a * touchX + m.c * touchY + m.tx;
-                y = m.b * touchX + m.d * touchY + m.ty;
+                x = m.a * (touchX + m.tx) + m.c * touchY;
+                y = m.b * touchX + m.d * (touchY + m.ty);
                 touchX = x;
                 touchY = y;
                 locals.push([x, y]);

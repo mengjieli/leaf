@@ -1,11 +1,12 @@
 import { PuzzleGameLoop } from "./puzzle-game-loop";
 import { EMPuzzleMove } from "../config/puzzle-game-config";
+import { PuzzleGame } from "./puzzle-game";
 
 export class PuzzleGameKeyBoard extends ecs.Component {
 
     awake() {
         window.onkeydown = (e) => {
-            // console.error(e.keyCode);
+            console.error(e.keyCode);
             if (e.keyCode === 87 || e.keyCode === 38) {
                 this.getComponent(PuzzleGameLoop).run(EMPuzzleMove.UP);
             } else if (e.keyCode === 83 || e.keyCode === 40) {
@@ -14,6 +15,10 @@ export class PuzzleGameKeyBoard extends ecs.Component {
                 this.getComponent(PuzzleGameLoop).run(EMPuzzleMove.LEFT);
             } else if (e.keyCode === 68 || e.keyCode === 39) {
                 this.getComponent(PuzzleGameLoop).run(EMPuzzleMove.RIGHT);
+            } else if (e.keyCode === 90) {
+                this.getComponent(PuzzleGameLoop).back();
+            } else if (e.keyCode === 82) {
+                this.getComponent(PuzzleGame).reload();
             }
         }
     }

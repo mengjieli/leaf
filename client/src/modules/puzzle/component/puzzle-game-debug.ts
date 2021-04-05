@@ -7,6 +7,7 @@ orange.autoloadLink("PuzzleScene");
 export class PuzzleGameDebug extends ecs.Component {
 
     awake() {
+        return;
         let level = this.getComponent(PuzzleGameLevel);
         for (let y = 0; y < level.config.height; y++) {
             for (let x = 0; x < level.config.width; x++) {

@@ -280,6 +280,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var puzzle_game_loop_1 = __webpack_require__(/*! ./puzzle-game-loop */ "../src/modules/puzzle/component/puzzle-game-loop.ts");
 var puzzle_game_config_1 = __webpack_require__(/*! ../config/puzzle-game-config */ "../src/modules/puzzle/config/puzzle-game-config.ts");
+var puzzle_game_1 = __webpack_require__(/*! ./puzzle-game */ "../src/modules/puzzle/component/puzzle-game.ts");
 var PuzzleGameKeyBoard = /** @class */ (function (_super) {
     __extends(PuzzleGameKeyBoard, _super);
     function PuzzleGameKeyBoard() {
@@ -288,7 +289,7 @@ var PuzzleGameKeyBoard = /** @class */ (function (_super) {
     PuzzleGameKeyBoard.prototype.awake = function () {
         var _this = this;
         window.onkeydown = function (e) {
-            // console.error(e.keyCode);
+            console.error(e.keyCode);
             if (e.keyCode === 87 || e.keyCode === 38) {
                 _this.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(puzzle_game_config_1.EMPuzzleMove.UP);
             }
@@ -300,6 +301,12 @@ var PuzzleGameKeyBoard = /** @class */ (function (_super) {
             }
             else if (e.keyCode === 68 || e.keyCode === 39) {
                 _this.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(puzzle_game_config_1.EMPuzzleMove.RIGHT);
+            }
+            else if (e.keyCode === 90) {
+                _this.getComponent(puzzle_game_loop_1.PuzzleGameLoop).back();
+            }
+            else if (e.keyCode === 82) {
+                _this.getComponent(puzzle_game_1.PuzzleGame).reload();
             }
         };
     };
@@ -362,6 +369,8 @@ var PuzzleGameLayer = /** @class */ (function (_super) {
             this.objects[y] = [];
             for (var x = 0; x < levelConfig.width; x++) {
                 this.objects[y][x] = null;
+                if (!cfg)
+                    continue;
                 var objCfg = cfg[y] && cfg[y][x];
                 if (!objCfg) {
                     if (layerIndex === 0) {
@@ -618,12 +627,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var puzzle_game_config_1 = __webpack_require__(/*! ../config/puzzle-game-config */ "../src/modules/puzzle/config/puzzle-game-config.ts");
 var puzzle_game_1 = __webpack_require__(/*! ./puzzle-game */ "../src/modules/puzzle/component/puzzle-game.ts");
 var puzzle_game_level_1 = __webpack_require__(/*! ./puzzle-game-level */ "../src/modules/puzzle/component/puzzle-game-level.ts");
+var puzzle_game_object_1 = __webpack_require__(/*! ./puzzle-game-object */ "../src/modules/puzzle/component/puzzle-game-object.ts");
 var puzzle_game_result_1 = __webpack_require__(/*! ./puzzle-game-result */ "../src/modules/puzzle/component/puzzle-game-result.ts");
 orange.autoloadLink("PuzzleScene");
 var PuzzleGameLoop = /** @class */ (function (_super) {
     __extends(PuzzleGameLoop, _super);
     function PuzzleGameLoop() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.shortCuts = [];
         _this.moveOffset = {
             'none': { x: 0, y: 0 },
             'right': { x: 1, y: 0 },
@@ -633,29 +644,29 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
         };
         _this.forceMoveOffsets = {
             'none': {
-                'none': [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }],
-                'right': [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }],
-                'left': [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }],
-                'up': [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }],
-                'down': [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }]
+                'none': [{ x: 1, y: 0, dir: 'right' }, { x: -1, y: 0, dir: 'left' }, { x: 0, y: -1, dir: 'up' }, { x: 0, y: 1, dir: 'down' }],
+                'right': [{ x: 1, y: 0, dir: 'right' }, { x: -1, y: 0, dir: 'left' }, { x: 0, y: -1, dir: 'up' }, { x: 0, y: 1, dir: 'down' }],
+                'left': [{ x: 1, y: 0, dir: 'right' }, { x: -1, y: 0, dir: 'left' }, { x: 0, y: -1, dir: 'up' }, { x: 0, y: 1, dir: 'down' }],
+                'up': [{ x: 1, y: 0, dir: 'right' }, { x: -1, y: 0, dir: 'left' }, { x: 0, y: -1, dir: 'up' }, { x: 0, y: 1, dir: 'down' }],
+                'down': [{ x: 1, y: 0, dir: 'right' }, { x: -1, y: 0, dir: 'left' }, { x: 0, y: -1, dir: 'up' }, { x: 0, y: 1, dir: 'down' }]
             },
             '>': {
                 'none': [],
-                'right': [{ x: 1, y: 0 }],
-                'left': [{ x: -1, y: 0 }],
-                'up': [{ x: 0, y: -1 }],
-                'down': [{ x: 0, y: 1 }]
+                'right': [{ x: 1, y: 0, dir: 'right' }],
+                'left': [{ x: -1, y: 0, dir: 'left' }],
+                'up': [{ x: 0, y: -1, dir: 'up' }],
+                'down': [{ x: 0, y: 1, dir: 'down' }]
             },
             '<': {
                 'none': [],
-                'right': [{ x: -1, y: 0 }],
-                'left': [{ x: 1, y: 0 }],
-                'up': [{ x: 0, y: 1 }],
-                'down': [{ x: 0, y: -1 }]
+                'right': [{ x: -1, y: 0, dir: 'left' }],
+                'left': [{ x: 1, y: 0, dir: 'right' }],
+                'up': [{ x: 0, y: 1, dir: 'down' }],
+                'down': [{ x: 0, y: -1, dir: 'up' }]
             },
             'right': {
                 'none': [],
-                'right': [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }],
+                'right': [{ x: 1, y: 0, dir: 'right' }, { x: -1, y: 0, dir: 'left' }, { x: 0, y: -1, dir: 'up' }, { x: 0, y: 1, dir: 'down' }],
                 'left': [],
                 'up': [],
                 'down': []
@@ -663,7 +674,7 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
             'left': {
                 'none': [],
                 'right': [],
-                'left': [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }],
+                'left': [{ x: 1, y: 0, dir: 'right' }, { x: -1, y: 0, dir: 'left' }, { x: 0, y: -1, dir: 'up' }, { x: 0, y: 1, dir: 'down' }],
                 'up': [],
                 'down': []
             },
@@ -671,7 +682,7 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                 'none': [],
                 'right': [],
                 'left': [],
-                'up': [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }],
+                'up': [{ x: 1, y: 0, dir: 'right' }, { x: -1, y: 0, dir: 'left' }, { x: 0, y: -1, dir: 'up' }, { x: 0, y: 1, dir: 'down' }],
                 'down': []
             },
             'down': {
@@ -679,14 +690,14 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                 'right': [],
                 'left': [],
                 'up': [],
-                'down': [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }]
+                'down': [{ x: 1, y: 0, dir: 'right' }, { x: -1, y: 0, dir: 'left' }, { x: 0, y: -1, dir: 'up' }, { x: 0, y: 1, dir: 'down' }]
             },
             'moving': {
                 'none': [],
-                'right': [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }],
-                'left': [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }],
-                'up': [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }],
-                'down': [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }]
+                'right': [{ x: 1, y: 0, dir: 'right' }, { x: -1, y: 0, dir: 'left' }, { x: 0, y: -1, dir: 'up' }, { x: 0, y: 1, dir: 'down' }],
+                'left': [{ x: 1, y: 0, dir: 'right' }, { x: -1, y: 0, dir: 'left' }, { x: 0, y: -1, dir: 'up' }, { x: 0, y: 1, dir: 'down' }],
+                'up': [{ x: 1, y: 0, dir: 'right' }, { x: -1, y: 0, dir: 'left' }, { x: 0, y: -1, dir: 'up' }, { x: 0, y: 1, dir: 'down' }],
+                'down': [{ x: 1, y: 0, dir: 'right' }, { x: -1, y: 0, dir: 'left' }, { x: 0, y: -1, dir: 'up' }, { x: 0, y: 1, dir: 'down' }]
             }
         };
         return _this;
@@ -695,6 +706,35 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
         setTimeout(function () {
             // this.run(EMPuzzleMove.RIGHT);
         }, 1000);
+    };
+    PuzzleGameLoop.prototype.createShortCut = function () {
+        var sc = new GameShortCut();
+        sc.layers = [];
+        var level = this.getComponent(puzzle_game_level_1.PuzzleGameLevel);
+        for (var i = 0; i < level.layers.length; i++) {
+            var layer = new GameShortCutLayer();
+            layer.layer = i;
+            layer.objects = level.config.blocks;
+            layer.types = {};
+            if (level.config.game.ruleLayers[i]) {
+                layer.objects = [];
+                for (var y = 0; y < level.config.height; y++) {
+                    layer.objects[y] = [];
+                    for (var x = 0; x < level.config.width; x++) {
+                        var obj = level.layers[layer.layer].objects[y][x];
+                        layer.objects[y][x] = obj ? { config: obj.config, x: x, y: y } : null;
+                        if (obj) {
+                            if (!layer.types[obj.config.id])
+                                layer.types[obj.config.id] = [];
+                            layer.types[obj.config.id].push(layer.objects[y][x]);
+                        }
+                    }
+                }
+            }
+            sc.layers[layer.layer] = layer;
+        }
+        this.shortCuts.push(sc);
+        return sc;
     };
     /**
      * 运行一次
@@ -711,210 +751,370 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
      */
     PuzzleGameLoop.prototype.run = function (move) {
         var e_1, _a, e_2, _b, e_3, _c, e_4, _d, e_5, _e, e_6, _f, e_7, _g, e_8, _h, e_9, _j, e_10, _k, e_11, _l, e_12, _m;
+        var shortCut = this.createShortCut();
         var level = this.getComponent(puzzle_game_level_1.PuzzleGameLevel);
         if (level.state === 'win' || level.state === 'lose')
             return;
         var gameConfig = this.getComponent(puzzle_game_1.PuzzleGame).config;
-        var objMap = {};
         var moveOffset = this.moveOffset[move];
         //记录移动过的元素初始位置
-        var movedObject = {};
+        var changedObjects = {};
+        var changeObjecteSource = {};
         try {
             for (var _o = __values(gameConfig.rules), _p = _o.next(); !_p.done; _p = _o.next()) {
                 var rule = _p.value;
-                var ruleMovedObject = [];
-                var offset = void 0;
-                if (!rule.ranks.length || !rule.ranks[0].length || !rule.ranks[0][0].length)
+                if (!rule.ranks.length || !rule.ranks[0].length || !rule.ranks[0][0].length || !rule.ranks[0][0][0].length)
                     continue;
-                try {
-                    for (var _q = (e_2 = void 0, __values(rule.ranks[0][0])), _r = _q.next(); !_r.done; _r = _q.next()) {
-                        var objCfg = _r.value;
-                        var objs = level.getObjectsByType(objCfg);
-                        try {
-                            for (var objs_1 = (e_3 = void 0, __values(objs)), objs_1_1 = objs_1.next(); !objs_1_1.done; objs_1_1 = objs_1.next()) {
-                                var obj = objs_1_1.value;
-                                var startX = obj.x;
-                                var startY = obj.y;
-                                objMap[obj.id] = obj;
-                                //obj.id
-                                var poses = [];
-                                var offsets = this.forceMoveOffsets[rule.force][move];
-                                try {
-                                    for (var offsets_1 = (e_4 = void 0, __values(offsets)), offsets_1_1 = offsets_1.next(); !offsets_1_1.done; offsets_1_1 = offsets_1.next()) {
-                                        var offset_1 = offsets_1_1.value;
-                                        //开始匹配某个方向是否符合规则
-                                        var flag = true;
-                                        var anyPosistion = false;
-                                        var checkPos = [obj.id];
-                                        for (var j = 1; j < rule.ranks[0].length; j++) {
-                                            if (rule.ranks[0][j] == null) {
-                                                anyPosistion = true;
-                                            }
-                                            else {
-                                                if (anyPosistion) { //前面出现过任意位置
-                                                }
-                                                else { //判断特定的位置是否有满足条件的对象
-                                                    var x = startX + offset_1.x * j;
-                                                    var y = startY + offset_1.y * j;
-                                                    try {
-                                                        for (var _s = (e_5 = void 0, __values(level.layers)), _t = _s.next(); !_t.done; _t = _s.next()) {
-                                                            var layer = _t.value;
-                                                            var check = layer.objects[y][x];
-                                                            if (check && rule.ranks[0][j].indexOf(check.config) != -1) {
-                                                                if (ruleMovedObject.indexOf(check.id) != -1) {
-                                                                    flag = false;
-                                                                    break;
-                                                                }
-                                                                if (poses.indexOf(check.id) != -1) { //某个对象已经用过
-                                                                    flag = false;
-                                                                    break;
-                                                                }
-                                                                objMap[check.id] = check;
-                                                                checkPos.push(check.id);
-                                                                break;
+                var ruleExecuteOK = true;
+                while (ruleExecuteOK) {
+                    ruleExecuteOK = false;
+                    try {
+                        for (var _q = (e_2 = void 0, __values(rule.ranks[0][0])), _r = _q.next(); !_r.done; _r = _q.next()) {
+                            var overlapObjCfg = _r.value;
+                            try {
+                                for (var overlapObjCfg_1 = (e_3 = void 0, __values(overlapObjCfg)), overlapObjCfg_1_1 = overlapObjCfg_1.next(); !overlapObjCfg_1_1.done; overlapObjCfg_1_1 = overlapObjCfg_1.next()) {
+                                    var objCfg = overlapObjCfg_1_1.value;
+                                    var objs = void 0;
+                                    if (objCfg.isPlayer) {
+                                        objs = shortCut.layers[objCfg.layer] ? shortCut.layers[objCfg.layer].types[objCfg.id] : null;
+                                    }
+                                    else {
+                                        objs = level.getObjectsByType(objCfg);
+                                    }
+                                    if (!objs)
+                                        continue;
+                                    try {
+                                        for (var objs_1 = (e_4 = void 0, __values(objs)), objs_1_1 = objs_1.next(); !objs_1_1.done; objs_1_1 = objs_1.next()) {
+                                            var obj = objs_1_1.value;
+                                            var startX = obj.x;
+                                            var startY = obj.y;
+                                            var offsets = this.forceMoveOffsets[rule.force][move];
+                                            var successfull = false;
+                                            try {
+                                                for (var offsets_1 = (e_5 = void 0, __values(offsets)), offsets_1_1 = offsets_1.next(); !offsets_1_1.done; offsets_1_1 = offsets_1.next()) {
+                                                    var offset = offsets_1_1.value;
+                                                    if (rule.directions && rule.directions.length && rule.directions.indexOf(offset.dir) === -1)
+                                                        continue;
+                                                    //开始匹配某个方向是否符合规则
+                                                    var flag = true;
+                                                    var anyPosistion = false;
+                                                    for (var m = 0; m < rule.ranks.length; m++) {
+                                                        //计算 [> p k | c][ m ]
+                                                        for (var n = 0; n < rule.ranks[m].length; n++) {
+                                                            //计算 > p k | c
+                                                            var x = startX + offset.x * n;
+                                                            var y = startY + offset.y * n;
+                                                            if (!rule.ranks[m][n]) {
+                                                                anyPosistion = true;
                                                             }
                                                             else {
-                                                                if (layer.layerIndex === level.layers.length - 1) {
-                                                                    flag = false;
+                                                                for (var o = !m && !n && successfull ? 1 : 0; o < rule.ranks[m][n].length; o++) {
+                                                                    if (!rule.ranks[m][n][o].length)
+                                                                        continue;
+                                                                    var levelInstance = rule.ranks[m][n][o][0].isPlayer && rule.isPlayerMoved ? shortCut : level;
+                                                                    if (rule.limits[m][n][o] === puzzle_game_config_1.EMPuzzleConditionLimit.NO) {
+                                                                        var find = false;
+                                                                        try {
+                                                                            //计算 p k 是否符合规则
+                                                                            for (var _s = (e_6 = void 0, __values(levelInstance.layers)), _t = _s.next(); !_t.done; _t = _s.next()) {
+                                                                                var layer = _t.value;
+                                                                                var check = layer.objects[y][x];
+                                                                                if (check && rule.ranks[m][n][o].indexOf(check.config) != -1) {
+                                                                                    find = true;
+                                                                                    break;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        catch (e_6_1) { e_6 = { error: e_6_1 }; }
+                                                                        finally {
+                                                                            try {
+                                                                                if (_t && !_t.done && (_f = _s.return)) _f.call(_s);
+                                                                            }
+                                                                            finally { if (e_6) throw e_6.error; }
+                                                                        }
+                                                                        if (find) {
+                                                                            flag = false;
+                                                                        }
+                                                                    }
+                                                                    else {
+                                                                        var find = false;
+                                                                        try {
+                                                                            //计算 p k 是否符合规则
+                                                                            for (var _u = (e_7 = void 0, __values(levelInstance.layers)), _v = _u.next(); !_v.done; _v = _u.next()) {
+                                                                                var layer = _v.value;
+                                                                                var check = layer.objects[y][x];
+                                                                                if (check && rule.ranks[m][n][o].indexOf(check.config) != -1) {
+                                                                                    find = true;
+                                                                                    break;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        catch (e_7_1) { e_7 = { error: e_7_1 }; }
+                                                                        finally {
+                                                                            try {
+                                                                                if (_v && !_v.done && (_g = _u.return)) _g.call(_u);
+                                                                            }
+                                                                            finally { if (e_7) throw e_7.error; }
+                                                                        }
+                                                                        if (!find) {
+                                                                            flag = false;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            if (!flag)
+                                                                break;
+                                                        }
+                                                        if (!flag)
+                                                            break;
+                                                    }
+                                                    if (flag) { //成功了，开始执行
+                                                        if (rule.force === puzzle_game_config_1.EMPuzzleForce.NONE && rule.ranks[0] && rule.ranks[0][0] && rule.ranks[0][0].length > 1) {
+                                                            ruleExecuteOK = true;
+                                                        }
+                                                        var deleteConfigs = [];
+                                                        var deleteObjects = [];
+                                                        anyPosistion = false;
+                                                        for (var m = 0; m < rule.ranks.length; m++) {
+                                                            deleteObjects[m] = [];
+                                                            for (var n = 0; n < rule.ranks[m].length; n++) {
+                                                                //计算 > p k | c
+                                                                var x = startX + offset.x * n;
+                                                                var y = startY + offset.y * n;
+                                                                deleteObjects[m][n] = [];
+                                                                if (!rule.ranks[m][n]) {
+                                                                    anyPosistion = true;
+                                                                }
+                                                                else {
+                                                                    for (var o = !m && !n && successfull ? 1 : 0; o < rule.ranks[m][n].length; o++) {
+                                                                        try {
+                                                                            //计算 p k 
+                                                                            for (var _w = (e_8 = void 0, __values(level.layers)), _x = _w.next(); !_x.done; _x = _w.next()) {
+                                                                                var layer = _x.value;
+                                                                                var check = layer.objects[y][x];
+                                                                                if (check && rule.ranks[m][n][o].indexOf(check.config) != -1) {
+                                                                                    //找到了，删除对象
+                                                                                    if (changedObjects[(x + y * level.config.width) * 1000 + check.config.layer]) {
+                                                                                        changedObjects[(x + y * level.config.width) * 1000 + check.config.layer] = null;
+                                                                                    }
+                                                                                    deleteObjects[m][n][o] = check.config;
+                                                                                    if (deleteConfigs.indexOf(check.config) === -1) {
+                                                                                        deleteConfigs.push(check.config);
+                                                                                    }
+                                                                                    check.removeFromLayer();
+                                                                                    check.entity.destroy();
+                                                                                    break;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        catch (e_8_1) { e_8 = { error: e_8_1 }; }
+                                                                        finally {
+                                                                            try {
+                                                                                if (_x && !_x.done && (_h = _w.return)) _h.call(_w);
+                                                                            }
+                                                                            finally { if (e_8) throw e_8.error; }
+                                                                        }
+                                                                    }
                                                                 }
                                                             }
                                                         }
-                                                    }
-                                                    catch (e_5_1) { e_5 = { error: e_5_1 }; }
-                                                    finally {
-                                                        try {
-                                                            if (_t && !_t.done && (_e = _s.return)) _e.call(_s);
+                                                        anyPosistion = false;
+                                                        for (var m = 0; m < rule.toRanks.length; m++) {
+                                                            for (var n = 0; n < rule.toRanks[m].length; n++) {
+                                                                //计算 > p k | c
+                                                                var x = startX + offset.x * n;
+                                                                var y = startY + offset.y * n;
+                                                                if (!rule.toRanks[m][n]) {
+                                                                    anyPosistion = true;
+                                                                }
+                                                                else {
+                                                                    for (var o = !m && !n && successfull ? 1 : 0; o < rule.toRanks[m][n].length; o++) {
+                                                                        if (rule.toLimits[m][n][o] === puzzle_game_config_1.EMPuzzleConditionLimit.NO)
+                                                                            continue;
+                                                                        //计算 p k 
+                                                                        //生成对象
+                                                                        //1. 优先查找原先位置是否和现在位置的属性相符，如果相符就生成这个
+                                                                        //2. 查找其他位置的元素是否有相符的，有就生成
+                                                                        //3. 使用组里第一个
+                                                                        //如果是空表示删除对象
+                                                                        if (!rule.toRanks[m][n][o])
+                                                                            continue;
+                                                                        var toRankConfigs = rule.toRanks[m][n][o];
+                                                                        // if (rule.ranks[m][n] && rule.ranks[m][n][o]) {
+                                                                        //     let isPlayer = false;
+                                                                        //     for (let ck of rule.ranks[m][n][o]) {
+                                                                        //         if (ck.isPlayer) {
+                                                                        //             isPlayer = true;
+                                                                        //             break;
+                                                                        //         }
+                                                                        //     }
+                                                                        //     if (isPlayer) continue;
+                                                                        // }
+                                                                        var newObjCfg = void 0;
+                                                                        if (toRankConfigs.indexOf(deleteObjects[m][n][o]) != -1) {
+                                                                            newObjCfg = deleteObjects[m][n][o];
+                                                                        }
+                                                                        if (!newObjCfg) {
+                                                                            try {
+                                                                                for (var deleteConfigs_1 = (e_9 = void 0, __values(deleteConfigs)), deleteConfigs_1_1 = deleteConfigs_1.next(); !deleteConfigs_1_1.done; deleteConfigs_1_1 = deleteConfigs_1.next()) {
+                                                                                    var checkDeleteCfg = deleteConfigs_1_1.value;
+                                                                                    if (toRankConfigs.indexOf(checkDeleteCfg) != -1) {
+                                                                                        newObjCfg = checkDeleteCfg;
+                                                                                        break;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            catch (e_9_1) { e_9 = { error: e_9_1 }; }
+                                                                            finally {
+                                                                                try {
+                                                                                    if (deleteConfigs_1_1 && !deleteConfigs_1_1.done && (_j = deleteConfigs_1.return)) _j.call(deleteConfigs_1);
+                                                                                }
+                                                                                finally { if (e_9) throw e_9.error; }
+                                                                            }
+                                                                        }
+                                                                        if (!newObjCfg) {
+                                                                            newObjCfg = toRankConfigs[0];
+                                                                        }
+                                                                        var posIndex = (x + y * level.config.width) * 1000 + newObjCfg.layer;
+                                                                        //这个位置的元素生成过就删除掉
+                                                                        if (changedObjects[posIndex]) {
+                                                                            changedObjects[posIndex].removeFromLayer();
+                                                                            changedObjects[posIndex].entity.destroy();
+                                                                        }
+                                                                        var toX = x;
+                                                                        var toY = y;
+                                                                        var toFroce = rule.toForces[m][n][o];
+                                                                        if (toFroce === null) {
+                                                                        }
+                                                                        else if (toFroce === puzzle_game_config_1.EMPuzzleForce.PUSH || toFroce === puzzle_game_config_1.EMPuzzleForce.MOVING) { //推
+                                                                            toX += moveOffset.x;
+                                                                            toY += moveOffset.y;
+                                                                        }
+                                                                        else if (toFroce === puzzle_game_config_1.EMPuzzleForce.PULL) { //拉
+                                                                            toX -= moveOffset.x;
+                                                                            toY -= moveOffset.y;
+                                                                        }
+                                                                        else if (toFroce === puzzle_game_config_1.EMPuzzleForce.RIGHT) {
+                                                                            toX++;
+                                                                        }
+                                                                        else if (toFroce === puzzle_game_config_1.EMPuzzleForce.LEFT) {
+                                                                            toX--;
+                                                                        }
+                                                                        else if (toFroce === puzzle_game_config_1.EMPuzzleForce.UP) {
+                                                                            toY--;
+                                                                        }
+                                                                        else if (toFroce === puzzle_game_config_1.EMPuzzleForce.DOWN) {
+                                                                            toY++;
+                                                                        }
+                                                                        if (toX < 0 || toX >= level.config.width || toY < 0 || toY >= level.config.height) {
+                                                                            toX = x;
+                                                                            toY = y;
+                                                                        }
+                                                                        else if (level.layers[newObjCfg.layer].objects[toY][toX]) { //要移动的位置有东西了
+                                                                            toX = x;
+                                                                            toY = y;
+                                                                        }
+                                                                        //原来的位置也有对象，即开始递归还原
+                                                                        if (level.layers[newObjCfg.layer].objects[toY][toX]) {
+                                                                            var list = [level.layers[newObjCfg.layer].objects[toY][toX]];
+                                                                            while (true) {
+                                                                                var hasNew = false;
+                                                                                try {
+                                                                                    for (var list_1 = (e_10 = void 0, __values(list)), list_1_1 = list_1.next(); !list_1_1.done; list_1_1 = list_1.next()) {
+                                                                                        var check = list_1_1.value;
+                                                                                        var checkSource = changeObjecteSource[check.id];
+                                                                                        var sourceObject = level.layers[check.config.layer].objects[checkSource.y][checkSource.x];
+                                                                                        if (sourceObject && sourceObject != check && list.indexOf(sourceObject) === -1) {
+                                                                                            list.push(sourceObject);
+                                                                                            hasNew = true;
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                                catch (e_10_1) { e_10 = { error: e_10_1 }; }
+                                                                                finally {
+                                                                                    try {
+                                                                                        if (list_1_1 && !list_1_1.done && (_k = list_1.return)) _k.call(list_1);
+                                                                                    }
+                                                                                    finally { if (e_10) throw e_10.error; }
+                                                                                }
+                                                                                if (!hasNew)
+                                                                                    break;
+                                                                            }
+                                                                            try {
+                                                                                //把列表上的元素全部移除
+                                                                                for (var list_2 = (e_11 = void 0, __values(list)), list_2_1 = list_2.next(); !list_2_1.done; list_2_1 = list_2.next()) {
+                                                                                    var check = list_2_1.value;
+                                                                                    check.removeFromLayer();
+                                                                                }
+                                                                            }
+                                                                            catch (e_11_1) { e_11 = { error: e_11_1 }; }
+                                                                            finally {
+                                                                                try {
+                                                                                    if (list_2_1 && !list_2_1.done && (_l = list_2.return)) _l.call(list_2);
+                                                                                }
+                                                                                finally { if (e_11) throw e_11.error; }
+                                                                            }
+                                                                            try {
+                                                                                //全部还原
+                                                                                for (var list_3 = (e_12 = void 0, __values(list)), list_3_1 = list_3.next(); !list_3_1.done; list_3_1 = list_3.next()) {
+                                                                                    var check = list_3_1.value;
+                                                                                    check.setCoord(changeObjecteSource[check.id].x, changeObjecteSource[check.id].y);
+                                                                                    check.addToLayer();
+                                                                                }
+                                                                            }
+                                                                            catch (e_12_1) { e_12 = { error: e_12_1 }; }
+                                                                            finally {
+                                                                                try {
+                                                                                    if (list_3_1 && !list_3_1.done && (_m = list_3.return)) _m.call(list_3);
+                                                                                }
+                                                                                finally { if (e_12) throw e_12.error; }
+                                                                            }
+                                                                        }
+                                                                        //开始移动
+                                                                        changedObjects[posIndex] = ecs.Entity.create().addComponent(puzzle_game_object_1.PuzzleGameObject, level.layers[newObjCfg.layer], newObjCfg, toX, toY);
+                                                                        changeObjecteSource[changedObjects[posIndex].id] = { x: x, y: y };
+                                                                    }
+                                                                }
+                                                            }
                                                         }
-                                                        finally { if (e_5) throw e_5.error; }
+                                                        successfull = true;
                                                     }
-                                                    if (!flag)
-                                                        break;
                                                 }
                                             }
-                                        }
-                                        if (flag) { //匹配成功，把对象加入操作队列中
-                                            poses.push(checkPos);
-                                        }
-                                    }
-                                }
-                                catch (e_4_1) { e_4 = { error: e_4_1 }; }
-                                finally {
-                                    try {
-                                        if (offsets_1_1 && !offsets_1_1.done && (_d = offsets_1.return)) _d.call(offsets_1);
-                                    }
-                                    finally { if (e_4) throw e_4.error; }
-                                }
-                                for (var p = 0; p < poses.length; p++) {
-                                    try {
-                                        for (var _u = (e_6 = void 0, __values(poses[p])), _v = _u.next(); !_v.done; _v = _u.next()) {
-                                            var id = _v.value;
-                                            objMap[id].removeFromLayer();
-                                            if (!movedObject[id]) {
-                                                movedObject[id] = { x: objMap[id].x, y: objMap[id].y };
-                                            }
-                                            else {
-                                                objMap[id].setCoord(movedObject[id].x, movedObject[id].y);
-                                            }
-                                            ruleMovedObject.push(id);
-                                        }
-                                    }
-                                    catch (e_6_1) { e_6 = { error: e_6_1 }; }
-                                    finally {
-                                        try {
-                                            if (_v && !_v.done && (_f = _u.return)) _f.call(_u);
-                                        }
-                                        finally { if (e_6) throw e_6.error; }
-                                    }
-                                }
-                                var errorStack_3 = [];
-                                for (var p = 0; p < poses.length; p++) {
-                                    try {
-                                        for (var _w = (e_7 = void 0, __values(poses[p])), _x = _w.next(); !_x.done; _x = _w.next()) {
-                                            var id = _x.value;
-                                            var toFroce = rule.toForces[0][p];
-                                            var moveSuccess = true;
-                                            if (toFroce === null) {
-                                                moveSuccess = objMap[id].addToLayer();
-                                            }
-                                            else if (toFroce === puzzle_game_config_1.EMPuzzleForce.PUSH || toFroce === puzzle_game_config_1.EMPuzzleForce.MOVING) { //推
-                                                objMap[id].setCoord(objMap[id].x + moveOffset.x, objMap[id].y + moveOffset.y);
-                                                moveSuccess = objMap[id].addToLayer();
-                                            }
-                                            else if (toFroce === puzzle_game_config_1.EMPuzzleForce.PULL) { //拉
-                                                objMap[id].setCoord(objMap[id].x - moveOffset.x, objMap[id].y - moveOffset.y);
-                                                moveSuccess = objMap[id].addToLayer();
-                                            }
-                                            else if (toFroce === puzzle_game_config_1.EMPuzzleForce.RIGHT) {
-                                                objMap[id].setCoord(objMap[id].x + 1, objMap[id].y);
-                                                moveSuccess = objMap[id].addToLayer();
-                                            }
-                                            else if (toFroce === puzzle_game_config_1.EMPuzzleForce.LEFT) {
-                                                objMap[id].setCoord(objMap[id].x - 1, objMap[id].y);
-                                                moveSuccess = objMap[id].addToLayer();
-                                            }
-                                            else if (toFroce === puzzle_game_config_1.EMPuzzleForce.UP) {
-                                                objMap[id].setCoord(objMap[id].x, objMap[id].y - 1);
-                                                moveSuccess = objMap[id].addToLayer();
-                                            }
-                                            else if (toFroce === puzzle_game_config_1.EMPuzzleForce.DOWN) {
-                                                objMap[id].setCoord(objMap[id].x, objMap[id].y + 1);
-                                                moveSuccess = objMap[id].addToLayer();
-                                            }
-                                            if (!moveSuccess) { //移动失败，还原位置
-                                                errorStack_3.push(objMap[id]);
-                                            }
-                                        }
-                                    }
-                                    catch (e_7_1) { e_7 = { error: e_7_1 }; }
-                                    finally {
-                                        try {
-                                            if (_x && !_x.done && (_g = _w.return)) _g.call(_w);
-                                        }
-                                        finally { if (e_7) throw e_7.error; }
-                                    }
-                                }
-                                while (errorStack_3.length) {
-                                    try {
-                                        for (var errorStack_1 = (e_8 = void 0, __values(errorStack_3)), errorStack_1_1 = errorStack_1.next(); !errorStack_1_1.done; errorStack_1_1 = errorStack_1.next()) {
-                                            var p = errorStack_1_1.value;
-                                            p.setCoord(movedObject[p.id].x, movedObject[p.id].y);
-                                            if (p.addToLayer()) {
-                                                errorStack_3.splice(errorStack_3.indexOf(p), 1);
-                                                break;
-                                            }
-                                            else {
-                                                if (p.layer.objects[p.y][p.x] && errorStack_3.indexOf(p.layer.objects[p.y][p.x]) == -1) {
-                                                    errorStack_3.push(p.layer.objects[p.y][p.x]);
-                                                    p.layer.objects[p.y][p.x].removeFromLayer();
+                                            catch (e_5_1) { e_5 = { error: e_5_1 }; }
+                                            finally {
+                                                try {
+                                                    if (offsets_1_1 && !offsets_1_1.done && (_e = offsets_1.return)) _e.call(offsets_1);
                                                 }
+                                                finally { if (e_5) throw e_5.error; }
                                             }
                                         }
                                     }
-                                    catch (e_8_1) { e_8 = { error: e_8_1 }; }
+                                    catch (e_4_1) { e_4 = { error: e_4_1 }; }
                                     finally {
                                         try {
-                                            if (errorStack_1_1 && !errorStack_1_1.done && (_h = errorStack_1.return)) _h.call(errorStack_1);
+                                            if (objs_1_1 && !objs_1_1.done && (_d = objs_1.return)) _d.call(objs_1);
                                         }
-                                        finally { if (e_8) throw e_8.error; }
+                                        finally { if (e_4) throw e_4.error; }
                                     }
                                 }
                             }
-                        }
-                        catch (e_3_1) { e_3 = { error: e_3_1 }; }
-                        finally {
-                            try {
-                                if (objs_1_1 && !objs_1_1.done && (_c = objs_1.return)) _c.call(objs_1);
+                            catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                            finally {
+                                try {
+                                    if (overlapObjCfg_1_1 && !overlapObjCfg_1_1.done && (_c = overlapObjCfg_1.return)) _c.call(overlapObjCfg_1);
+                                }
+                                finally { if (e_3) throw e_3.error; }
                             }
-                            finally { if (e_3) throw e_3.error; }
                         }
                     }
-                }
-                catch (e_2_1) { e_2 = { error: e_2_1 }; }
-                finally {
-                    try {
-                        if (_r && !_r.done && (_b = _q.return)) _b.call(_q);
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (_r && !_r.done && (_b = _q.return)) _b.call(_q);
+                        }
+                        finally { if (e_2) throw e_2.error; }
                     }
-                    finally { if (e_2) throw e_2.error; }
                 }
             }
         }
@@ -925,83 +1125,49 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
             }
             finally { if (e_1) throw e_1.error; }
         }
-        var playerNotMoveList = [];
-        try {
-            for (var _y = __values(gameConfig.groups[puzzle_game_config_1.EMPuzzleConst.PLAYER]), _z = _y.next(); !_z.done; _z = _y.next()) {
-                var playerCfg = _z.value;
-                var players = level.getObjectsByType(playerCfg);
-                try {
-                    for (var players_1 = (e_10 = void 0, __values(players)), players_1_1 = players_1.next(); !players_1_1.done; players_1_1 = players_1.next()) {
-                        var p = players_1_1.value;
-                        if (!movedObject[p.id]) {
-                            playerNotMoveList.push(p);
-                            p.removeFromLayer();
-                        }
-                    }
-                }
-                catch (e_10_1) { e_10 = { error: e_10_1 }; }
-                finally {
-                    try {
-                        if (players_1_1 && !players_1_1.done && (_k = players_1.return)) _k.call(players_1);
-                    }
-                    finally { if (e_10) throw e_10.error; }
-                }
-            }
-        }
-        catch (e_9_1) { e_9 = { error: e_9_1 }; }
-        finally {
-            try {
-                if (_z && !_z.done && (_j = _y.return)) _j.call(_y);
-            }
-            finally { if (e_9) throw e_9.error; }
-        }
-        var errorStack = [];
-        try {
-            for (var playerNotMoveList_1 = __values(playerNotMoveList), playerNotMoveList_1_1 = playerNotMoveList_1.next(); !playerNotMoveList_1_1.done; playerNotMoveList_1_1 = playerNotMoveList_1.next()) {
-                var p = playerNotMoveList_1_1.value;
-                movedObject[p.id] = { x: p.x, y: p.y };
-                p.setCoord(p.x + moveOffset.x, p.y + moveOffset.y);
-                if (!p.addToLayer()) {
-                    errorStack.push(p);
-                }
-            }
-        }
-        catch (e_11_1) { e_11 = { error: e_11_1 }; }
-        finally {
-            try {
-                if (playerNotMoveList_1_1 && !playerNotMoveList_1_1.done && (_l = playerNotMoveList_1.return)) _l.call(playerNotMoveList_1);
-            }
-            finally { if (e_11) throw e_11.error; }
-        }
-        while (errorStack.length) {
-            try {
-                for (var errorStack_2 = (e_12 = void 0, __values(errorStack)), errorStack_2_1 = errorStack_2.next(); !errorStack_2_1.done; errorStack_2_1 = errorStack_2.next()) {
-                    var p = errorStack_2_1.value;
-                    p.setCoord(movedObject[p.id].x, movedObject[p.id].y);
-                    if (p.addToLayer()) {
-                        errorStack.splice(errorStack.indexOf(p), 1);
-                        break;
-                    }
-                    else {
-                        if (errorStack.indexOf(p.layer.objects[p.y][p.x]) != -1) {
-                            p.layer.objects[p.y][p.x].removeFromLayer();
-                            errorStack.push(p.layer.objects[p.y][p.x]);
-                        }
-                    }
-                }
-            }
-            catch (e_12_1) { e_12 = { error: e_12_1 }; }
-            finally {
-                try {
-                    if (errorStack_2_1 && !errorStack_2_1.done && (_m = errorStack_2.return)) _m.call(errorStack_2);
-                }
-                finally { if (e_12) throw e_12.error; }
-            }
-        }
         this.checkState();
     };
+    PuzzleGameLoop.prototype.back = function () {
+        var e_13, _a;
+        var level = this.getComponent(puzzle_game_level_1.PuzzleGameLevel);
+        if (this.shortCuts.length) {
+            var shortCut = this.shortCuts.pop();
+            try {
+                for (var _b = __values(shortCut.layers), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var layer = _c.value;
+                    if (!level.config.game.ruleLayers[layer.layer])
+                        continue;
+                    var realLayer = level.layers[layer.layer];
+                    for (var y = 0; y < level.config.height; y++) {
+                        for (var x = 0; x < level.config.width; x++) {
+                            var obj = realLayer.objects[y][x];
+                            if (obj) {
+                                obj.removeFromLayer();
+                                obj.entity.destroy();
+                            }
+                        }
+                    }
+                    for (var y = 0; y < level.config.height; y++) {
+                        for (var x = 0; x < level.config.width; x++) {
+                            var obj = layer.objects[y][x];
+                            if (obj) {
+                                ecs.Entity.create().addComponent(puzzle_game_object_1.PuzzleGameObject, realLayer, obj.config, x, y);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (e_13_1) { e_13 = { error: e_13_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                }
+                finally { if (e_13) throw e_13.error; }
+            }
+        }
+    };
     PuzzleGameLoop.prototype.checkState = function () {
-        var e_13, _a, e_14, _b, e_15, _c, e_16, _d, e_17, _e, e_18, _f, e_19, _g, e_20, _h;
+        var e_14, _a, e_15, _b, e_16, _c, e_17, _d, e_18, _e, e_19, _f, e_20, _g, e_21, _h;
         var level = this.getComponent(puzzle_game_level_1.PuzzleGameLevel);
         var win = true;
         try {
@@ -1009,7 +1175,7 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                 var item = _k.value;
                 if (item.limit === puzzle_game_config_1.EMPuzzleConditionLimit.NO) {
                     try {
-                        for (var _l = (e_14 = void 0, __values(item.master)), _m = _l.next(); !_m.done; _m = _l.next()) {
+                        for (var _l = (e_15 = void 0, __values(item.master)), _m = _l.next(); !_m.done; _m = _l.next()) {
                             var type = _m.value;
                             if (level.layers[type.layer].getObjectByType(type)) {
                                 win = false;
@@ -1017,25 +1183,25 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                             }
                         }
                     }
-                    catch (e_14_1) { e_14 = { error: e_14_1 }; }
+                    catch (e_15_1) { e_15 = { error: e_15_1 }; }
                     finally {
                         try {
                             if (_m && !_m.done && (_b = _l.return)) _b.call(_l);
                         }
-                        finally { if (e_14) throw e_14.error; }
+                        finally { if (e_15) throw e_15.error; }
                     }
                 }
                 else if (item.limit === puzzle_game_config_1.EMPuzzleConditionLimit.ALL) {
                     try {
-                        for (var _o = (e_15 = void 0, __values(item.master)), _p = _o.next(); !_p.done; _p = _o.next()) {
+                        for (var _o = (e_16 = void 0, __values(item.master)), _p = _o.next(); !_p.done; _p = _o.next()) {
                             var type = _p.value;
                             var masters = level.layers[type.layer].getObjectsByType(type);
                             try {
-                                for (var masters_1 = (e_16 = void 0, __values(masters)), masters_1_1 = masters_1.next(); !masters_1_1.done; masters_1_1 = masters_1.next()) {
+                                for (var masters_1 = (e_17 = void 0, __values(masters)), masters_1_1 = masters_1.next(); !masters_1_1.done; masters_1_1 = masters_1.next()) {
                                     var master = masters_1_1.value;
                                     var has_1 = false;
                                     try {
-                                        for (var _q = (e_17 = void 0, __values(level.layers)), _r = _q.next(); !_r.done; _r = _q.next()) {
+                                        for (var _q = (e_18 = void 0, __values(level.layers)), _r = _q.next(); !_r.done; _r = _q.next()) {
                                             var layer = _r.value;
                                             if (layer.objects[master.y][master.x] && item.other.indexOf(layer.objects[master.y][master.x].config) != -1) {
                                                 has_1 = true;
@@ -1043,12 +1209,12 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                                             }
                                         }
                                     }
-                                    catch (e_17_1) { e_17 = { error: e_17_1 }; }
+                                    catch (e_18_1) { e_18 = { error: e_18_1 }; }
                                     finally {
                                         try {
                                             if (_r && !_r.done && (_e = _q.return)) _e.call(_q);
                                         }
-                                        finally { if (e_17) throw e_17.error; }
+                                        finally { if (e_18) throw e_18.error; }
                                     }
                                     if (!has_1) {
                                         win = false;
@@ -1056,36 +1222,36 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                                     }
                                 }
                             }
-                            catch (e_16_1) { e_16 = { error: e_16_1 }; }
+                            catch (e_17_1) { e_17 = { error: e_17_1 }; }
                             finally {
                                 try {
                                     if (masters_1_1 && !masters_1_1.done && (_d = masters_1.return)) _d.call(masters_1);
                                 }
-                                finally { if (e_16) throw e_16.error; }
+                                finally { if (e_17) throw e_17.error; }
                             }
                             if (!win)
                                 break;
                         }
                     }
-                    catch (e_15_1) { e_15 = { error: e_15_1 }; }
+                    catch (e_16_1) { e_16 = { error: e_16_1 }; }
                     finally {
                         try {
                             if (_p && !_p.done && (_c = _o.return)) _c.call(_o);
                         }
-                        finally { if (e_15) throw e_15.error; }
+                        finally { if (e_16) throw e_16.error; }
                     }
                 }
                 else if (item.limit === puzzle_game_config_1.EMPuzzleConditionLimit.SOME) {
                     var has_2 = false;
                     try {
-                        for (var _s = (e_18 = void 0, __values(item.master)), _t = _s.next(); !_t.done; _t = _s.next()) {
+                        for (var _s = (e_19 = void 0, __values(item.master)), _t = _s.next(); !_t.done; _t = _s.next()) {
                             var type = _t.value;
                             var masters = level.layers[type.layer].getObjectsByType(type);
                             try {
-                                for (var masters_2 = (e_19 = void 0, __values(masters)), masters_2_1 = masters_2.next(); !masters_2_1.done; masters_2_1 = masters_2.next()) {
+                                for (var masters_2 = (e_20 = void 0, __values(masters)), masters_2_1 = masters_2.next(); !masters_2_1.done; masters_2_1 = masters_2.next()) {
                                     var master = masters_2_1.value;
                                     try {
-                                        for (var _u = (e_20 = void 0, __values(level.layers)), _v = _u.next(); !_v.done; _v = _u.next()) {
+                                        for (var _u = (e_21 = void 0, __values(level.layers)), _v = _u.next(); !_v.done; _v = _u.next()) {
                                             var layer = _v.value;
                                             if (layer.objects[master.y][master.x] && item.other.indexOf(layer.objects[master.y][master.x].config) != -1) {
                                                 has_2 = true;
@@ -1093,32 +1259,32 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                                             }
                                         }
                                     }
-                                    catch (e_20_1) { e_20 = { error: e_20_1 }; }
+                                    catch (e_21_1) { e_21 = { error: e_21_1 }; }
                                     finally {
                                         try {
                                             if (_v && !_v.done && (_h = _u.return)) _h.call(_u);
                                         }
-                                        finally { if (e_20) throw e_20.error; }
+                                        finally { if (e_21) throw e_21.error; }
                                     }
                                     if (has_2)
                                         break;
                                 }
                             }
-                            catch (e_19_1) { e_19 = { error: e_19_1 }; }
+                            catch (e_20_1) { e_20 = { error: e_20_1 }; }
                             finally {
                                 try {
                                     if (masters_2_1 && !masters_2_1.done && (_g = masters_2.return)) _g.call(masters_2);
                                 }
-                                finally { if (e_19) throw e_19.error; }
+                                finally { if (e_20) throw e_20.error; }
                             }
                         }
                     }
-                    catch (e_18_1) { e_18 = { error: e_18_1 }; }
+                    catch (e_19_1) { e_19 = { error: e_19_1 }; }
                     finally {
                         try {
                             if (_t && !_t.done && (_f = _s.return)) _f.call(_s);
                         }
-                        finally { if (e_18) throw e_18.error; }
+                        finally { if (e_19) throw e_19.error; }
                     }
                     if (!has_2)
                         win = false;
@@ -1127,12 +1293,12 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
                     break;
             }
         }
-        catch (e_13_1) { e_13 = { error: e_13_1 }; }
+        catch (e_14_1) { e_14 = { error: e_14_1 }; }
         finally {
             try {
                 if (_k && !_k.done && (_a = _j.return)) _a.call(_j);
             }
-            finally { if (e_13) throw e_13.error; }
+            finally { if (e_14) throw e_14.error; }
         }
         if (win) {
             level.state = 'win';
@@ -1143,6 +1309,16 @@ var PuzzleGameLoop = /** @class */ (function (_super) {
     return PuzzleGameLoop;
 }(ecs.Component));
 exports.PuzzleGameLoop = PuzzleGameLoop;
+var GameShortCut = /** @class */ (function () {
+    function GameShortCut() {
+    }
+    return GameShortCut;
+}());
+var GameShortCutLayer = /** @class */ (function () {
+    function GameShortCutLayer() {
+    }
+    return GameShortCutLayer;
+}());
 
 
 /***/ }),
@@ -1216,9 +1392,14 @@ var PuzzleGameObject = /** @class */ (function (_super) {
         return true;
     };
     PuzzleGameObject.prototype.setCoord = function (x, y) {
-        if (this.isInLayer && this.layer.objects[this.y][this.x] === this) {
-            this.layer.objects[this.y][this.x] = null;
+        if (this.isInLayer && this.layer.objects[y][x] && this.layer.objects[y][x] != this) {
+            return false;
         }
+        if (this.isInLayer && this.layer.objects[this.y][this.x] !== this) {
+            console.error('出错叻!?');
+            return false;
+        }
+        this.layer.objects[this.y][this.x] = null;
         this._x = x;
         this._y = y;
         if (this.isInLayer) {
@@ -1228,6 +1409,7 @@ var PuzzleGameObject = /** @class */ (function (_super) {
         }
         this.transform.x = x * this.config.game.blockWidth;
         this.transform.y = y * this.config.game.blockHeight;
+        return true;
     };
     PuzzleGameObject.prototype.createShow = function () {
         this.addComponent(leaf.Bitmap).texture = leaf.RectTexture.getTexture(this.config.blocks, this.config.colorId);
@@ -1420,6 +1602,51 @@ var PuzzleGameUI = /** @class */ (function (_super) {
         downBtn.transform.x = 16;
         downBtn.transform.y = 26;
         downBtn.parent = arrGroup;
+        var rect = ecs.Entity.create().addComponent(leaf.Bitmap);
+        rect.texture = leaf.PointTexture.getTexture(0xff0000);
+        rect.transform.scaleX = rect.transform.scaleY = 33;
+        rect.parent = arrGroup;
+        rect.transform.x = -4;
+        rect.transform.alpha = 0.1;
+        rect.transform.y = -4;
+        rect.addComponent(leaf.TouchComponent).onTouchStart.on(function (e) {
+            var rot = Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI;
+            leftBtn.transform.alpha = rightBtn.transform.alpha
+                = upBtn.transform.alpha = downBtn.transform.alpha = 1;
+            if (rot <= 45 && rot >= -45) {
+                rightBtn.transform.alpha = 0.5;
+            }
+            else if (rot >= -135 && rot < -45) {
+                upBtn.transform.alpha = 0.5;
+            }
+            else if (rot >= 45 && rot <= 135) {
+                downBtn.transform.alpha = 0.5;
+            }
+            else {
+                leftBtn.transform.alpha = 0.5;
+            }
+        });
+        rect.getComponent(leaf.TouchComponent).onTouchEnd.on(function (e) {
+            leftBtn.transform.alpha = rightBtn.transform.alpha
+                = upBtn.transform.alpha = downBtn.transform.alpha = 1;
+            var rot = Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI;
+            var dir = puzzle_game_config_1.EMPuzzleMove.RIGHT;
+            if (rot <= 45 && rot >= -45) {
+                dir = puzzle_game_config_1.EMPuzzleMove.RIGHT;
+            }
+            else if (rot >= -135 && rot < -45) {
+                dir = puzzle_game_config_1.EMPuzzleMove.UP;
+            }
+            else if (rot >= 45 && rot <= 135) {
+                dir = puzzle_game_config_1.EMPuzzleMove.DOWN;
+            }
+            else {
+                dir = puzzle_game_config_1.EMPuzzleMove.LEFT;
+            }
+            _this.game.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(dir);
+            console.error(dir);
+            // console.error(e.localX, e.localY, Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI);
+        });
         arrGroup.transform.x = 5;
         arrGroup.transform.y = 0;
         dirGroup.transform.x = 2;
@@ -1450,17 +1677,20 @@ var PuzzleGameUI = /** @class */ (function (_super) {
         this.entity.name = 'w';
         this.uiRoot.transform.y = leaf.getStageHeight() - 100;
         this.uiRoot.transform.scaleX = this.uiRoot.transform.scaleY = 3;
-        this.addClick(upBtn, function () {
-            _this.game.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(puzzle_game_config_1.EMPuzzleMove.UP);
-        });
-        this.addClick(downBtn, function () {
-            _this.game.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(puzzle_game_config_1.EMPuzzleMove.DOWN);
-        });
-        this.addClick(leftBtn, function () {
-            _this.game.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(puzzle_game_config_1.EMPuzzleMove.LEFT);
-        });
-        this.addClick(rightBtn, function () {
-            _this.game.getComponent(puzzle_game_loop_1.PuzzleGameLoop).run(puzzle_game_config_1.EMPuzzleMove.RIGHT);
+        // this.addClick(upBtn, () => {
+        //     this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.UP);
+        // })
+        // this.addClick(downBtn, () => {
+        //     this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.DOWN);
+        // })
+        // this.addClick(leftBtn, () => {
+        //     this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.LEFT);
+        // })
+        // this.addClick(rightBtn, () => {
+        //     this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.RIGHT);
+        // })
+        this.addClick(xBtn, function () {
+            _this.game.getComponent(puzzle_game_loop_1.PuzzleGameLoop).back();
         });
         this.addClick(zBtn, function () {
             _this.game.getComponent(puzzle_game_1.PuzzleGame).reload();
@@ -1528,6 +1758,7 @@ var PuzzleGame = /** @class */ (function (_super) {
         this.scaleToStage = scaleToStage;
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
+        // leaf.StateWin.show();
     };
     PuzzleGame.prototype.awake = function () {
         var _this = this;
@@ -1614,6 +1845,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 orange.autoloadLink("PuzzleScene");
 var PuzzleGameConfig = /** @class */ (function () {
     function PuzzleGameConfig(txt) {
+        var e_1, _a, e_2, _b;
         this.blockWidth = 0;
         this.blockHeight = 0;
         this.objects = {};
@@ -1624,7 +1856,15 @@ var PuzzleGameConfig = /** @class */ (function () {
         this.rules = [];
         this.winConditions = [];
         this.levels = [];
+        this.messages = [];
+        this.ruleLayers = {};
         txt = txt.toLocaleLowerCase();
+        txt = this.mergeSpace(txt);
+        // while (txt.indexOf('(') != -1) {
+        //     let toIndex = txt.indexOf(')', txt.indexOf('('));
+        //     if (toIndex === -1) break;
+        //     txt = txt.slice(0, txt.indexOf('(')) + txt.slice(txt.indexOf(')', txt.indexOf('(')) + 1, txt.length);
+        // }
         var lines = txt.split("\n");
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i];
@@ -1650,15 +1890,67 @@ var PuzzleGameConfig = /** @class */ (function () {
                     this.objects[name_2].game = this;
             }
         }
+        var index = 0;
         for (var name_3 in this.objects) {
+            this.objects[name_3].id = index++;
+            if (this.groups[EMPuzzleConst.PLAYER].indexOf(this.objects[name_3]) != -1) {
+                this.objects[name_3].isPlayer = true;
+            }
             if (this.blockWidth < this.objects[name_3].width)
                 this.blockWidth = this.objects[name_3].width;
             if (this.blockHeight < this.objects[name_3].height)
                 this.blockHeight = this.objects[name_3].height;
         }
+        for (var name_4 in this.objects) {
+            var obj = this.objects[name_4];
+            if (!obj.blocks.length || !obj.blocks[0].length) {
+                for (var y = 0; y < this.blockHeight; y++) {
+                    obj.blocks[y] = [];
+                    for (var x = 0; x < this.blockWidth; x++) {
+                        obj.blocks[y][x] = obj.colors[0];
+                    }
+                }
+            }
+        }
+        try {
+            for (var _c = __values(this.ruleObjects), _d = _c.next(); !_d.done; _d = _c.next()) {
+                var obj = _d.value;
+                this.ruleLayers[obj.layer] = true;
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        var _loop_1 = function (level) {
+            if (false) { var w; }
+            level.blocks = [];
+            for (var y = 0; y < level.height; y++) {
+                level.blocks[y] = [];
+                for (var x = 0; x < level.width; x++) {
+                    level.blocks[y][x] = null;
+                }
+            }
+        };
+        try {
+            for (var _e = __values(this.levels), _f = _e.next(); !_f.done; _f = _e.next()) {
+                var level = _f.value;
+                _loop_1(level);
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
     }
     PuzzleGameConfig.prototype.parseFace = function (lines, index) {
-        var e_1, _a;
+        var e_3, _a;
         var level;
         var y = 0;
         for (var i = index; i < lines.length; i++) {
@@ -1687,7 +1979,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                     }
                     var x = i_1;
                     try {
-                        for (var _b = (e_1 = void 0, __values(this.legends[c])), _c = _b.next(); !_c.done; _c = _b.next()) {
+                        for (var _b = (e_3 = void 0, __values(this.legends[c])), _c = _b.next(); !_c.done; _c = _b.next()) {
                             var obj = _c.value;
                             if (!level.layerObjects[obj.layer])
                                 level.layerObjects[obj.layer] = [];
@@ -1700,12 +1992,12 @@ var PuzzleGameConfig = /** @class */ (function () {
                             level.layers[obj.layer][y][x] = obj;
                         }
                     }
-                    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                    catch (e_3_1) { e_3 = { error: e_3_1 }; }
                     finally {
                         try {
                             if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                         }
-                        finally { if (e_1) throw e_1.error; }
+                        finally { if (e_3) throw e_3.error; }
                     }
                 }
                 level.height++;
@@ -1724,16 +2016,23 @@ var PuzzleGameConfig = /** @class */ (function () {
         return lines.length;
     };
     PuzzleGameConfig.prototype.parseLevels = function (lines, index) {
-        var e_2, _a;
+        var e_4, _a;
         var level;
         var y = 0;
         for (var i = index; i < lines.length; i++) {
             var line = lines[i];
+            if (line.slice(0, 'message '.length) === 'message ') {
+                if (!this.messages[this.levels.length]) {
+                    this.messages[this.levels.length] = [];
+                }
+                this.messages[this.levels.length].push(line.slice('message '.length, line.length));
+                continue;
+            }
             if (this.isBlockDevice(line)) {
                 if (level) {
                     this.levels.push(level);
                 }
-                console.error(this.levels);
+                // console.error(this.levels);
                 return i - 1;
             }
             line = this.deleteSpace(line);
@@ -1754,7 +2053,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                     }
                     var x = i_2;
                     try {
-                        for (var _b = (e_2 = void 0, __values(this.legends[c])), _c = _b.next(); !_c.done; _c = _b.next()) {
+                        for (var _b = (e_4 = void 0, __values(this.legends[c])), _c = _b.next(); !_c.done; _c = _b.next()) {
                             var obj = _c.value;
                             if (!level.layerObjects[obj.layer])
                                 level.layerObjects[obj.layer] = [];
@@ -1767,12 +2066,12 @@ var PuzzleGameConfig = /** @class */ (function () {
                             level.layers[obj.layer][y][x] = obj;
                         }
                     }
-                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    catch (e_4_1) { e_4 = { error: e_4_1 }; }
                     finally {
                         try {
                             if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                         }
-                        finally { if (e_2) throw e_2.error; }
+                        finally { if (e_4) throw e_4.error; }
                     }
                 }
                 level.height++;
@@ -1788,15 +2087,15 @@ var PuzzleGameConfig = /** @class */ (function () {
         if (level) {
             this.levels.push(level);
         }
-        console.error(this.levels);
+        // console.error(this.levels);
         return lines.length;
     };
     PuzzleGameConfig.prototype.parseWinConditions = function (lines, index) {
-        var e_3, _a, e_4, _b, e_5, _c;
+        var e_5, _a, e_6, _b, e_7, _c;
         for (var i = index; i < lines.length; i++) {
             var line = lines[i];
             if (this.isBlockDevice(line)) {
-                console.error(this.winConditions);
+                // console.error(this.winConditions);
                 return i - 1;
             }
             line = this.mergeSpace(line);
@@ -1816,32 +2115,32 @@ var PuzzleGameConfig = /** @class */ (function () {
                     }
                     cond.other = this.groups[strs[3]];
                     try {
-                        for (var _d = (e_3 = void 0, __values(cond.master)), _e = _d.next(); !_e.done; _e = _d.next()) {
+                        for (var _d = (e_5 = void 0, __values(cond.master)), _e = _d.next(); !_e.done; _e = _d.next()) {
                             var c = _e.value;
-                            if (this.ruleObjects.indexOf(c) === -1)
+                            if (c && this.ruleObjects.indexOf(c) === -1)
                                 this.ruleObjects.push(c);
                         }
                     }
-                    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                    catch (e_5_1) { e_5 = { error: e_5_1 }; }
                     finally {
                         try {
                             if (_e && !_e.done && (_a = _d.return)) _a.call(_d);
                         }
-                        finally { if (e_3) throw e_3.error; }
+                        finally { if (e_5) throw e_5.error; }
                     }
                     try {
-                        for (var _f = (e_4 = void 0, __values(cond.other)), _g = _f.next(); !_g.done; _g = _f.next()) {
+                        for (var _f = (e_6 = void 0, __values(cond.other)), _g = _f.next(); !_g.done; _g = _f.next()) {
                             var c = _g.value;
-                            if (this.ruleObjects.indexOf(c) === -1)
+                            if (c && this.ruleObjects.indexOf(c) === -1)
                                 this.ruleObjects.push(c);
                         }
                     }
-                    catch (e_4_1) { e_4 = { error: e_4_1 }; }
+                    catch (e_6_1) { e_6 = { error: e_6_1 }; }
                     finally {
                         try {
                             if (_g && !_g.done && (_b = _f.return)) _b.call(_f);
                         }
-                        finally { if (e_4) throw e_4.error; }
+                        finally { if (e_6) throw e_6.error; }
                     }
                 }
                 else if (strs.length === 2) {
@@ -1851,18 +2150,18 @@ var PuzzleGameConfig = /** @class */ (function () {
                     }
                     cond.master = this.groups[strs[0]];
                     try {
-                        for (var _h = (e_5 = void 0, __values(cond.master)), _j = _h.next(); !_j.done; _j = _h.next()) {
+                        for (var _h = (e_7 = void 0, __values(cond.master)), _j = _h.next(); !_j.done; _j = _h.next()) {
                             var c = _j.value;
-                            if (this.ruleObjects.indexOf(c) === -1)
+                            if (c && this.ruleObjects.indexOf(c) === -1)
                                 this.ruleObjects.push(c);
                         }
                     }
-                    catch (e_5_1) { e_5 = { error: e_5_1 }; }
+                    catch (e_7_1) { e_7 = { error: e_7_1 }; }
                     finally {
                         try {
                             if (_j && !_j.done && (_c = _h.return)) _c.call(_h);
                         }
-                        finally { if (e_5) throw e_5.error; }
+                        finally { if (e_7) throw e_7.error; }
                     }
                 }
                 this.winConditions.push(cond);
@@ -1870,12 +2169,16 @@ var PuzzleGameConfig = /** @class */ (function () {
         }
     };
     PuzzleGameConfig.prototype.parseRules = function (lines, index) {
-        var e_6, _a, e_7, _b, e_8, _c, e_9, _d, e_10, _e, e_11, _f;
+        var e_8, _a, e_9, _b, e_10, _c, e_11, _d, e_12, _e, e_13, _f, e_14, _g, e_15, _h, e_16, _j;
         for (var i = index; i < lines.length; i++) {
             var line = lines[i];
             if (this.isBlockDevice(line)) {
-                console.error(this.rules);
+                // console.error(this.rules);
                 return i - 1;
+            }
+            if (i === index && !this.rules.length) {
+                i--;
+                line = '[moving player] -> [moving player]';
             }
             //[ >  Player | Crate ] -> [  >  Player | > Crate  ]
             //1. -> 分割前后
@@ -1889,132 +2192,116 @@ var PuzzleGameConfig = /** @class */ (function () {
             // toForces: EMPuzzleForce[][];
             if (line.indexOf("->") != -1) {
                 var rule = new PuzzleRule();
+                rule.source = line;
                 rule.ranks = [];
                 rule.toRanks = [];
                 rule.toForces = [];
+                rule.limits = [];
+                rule.toLimits = [];
                 // line = this.deleteSpace(line);
                 var befores = line.split("->")[0];
                 var ends = line.split("->")[1];
-                var rank = [];
-                var toRank = [];
-                var force = [];
-                rule.ranks.push(rank);
-                rule.toRanks.push(toRank);
-                rule.toForces.push(force);
+                //解析前面的限定词
+                var lets = line.split("[")[0];
+                lets = this.deleteSpaceFrontEnd(lets);
+                if (lets.length) {
+                    var words = lets.split(" ");
+                    try {
+                        for (var words_1 = (e_8 = void 0, __values(words)), words_1_1 = words_1.next(); !words_1_1.done; words_1_1 = words_1.next()) {
+                            var word = words_1_1.value;
+                            if (exports.puzzleDirections.indexOf(word) != -1) {
+                                rule.directions = exports.puzzleDirection[word];
+                            }
+                        }
+                    }
+                    catch (e_8_1) { e_8 = { error: e_8_1 }; }
+                    finally {
+                        try {
+                            if (words_1_1 && !words_1_1.done && (_a = words_1.return)) _a.call(words_1);
+                        }
+                        finally { if (e_8) throw e_8.error; }
+                    }
+                }
                 //解析前半部分
                 var rules = befores.match(/\[[a-zA-Z0-9><\| \t]+\]/g);
                 if (!rules) {
                     console.error("parse error rule:", line);
                 }
                 try {
-                    for (var rules_1 = (e_6 = void 0, __values(rules)), rules_1_1 = rules_1.next(); !rules_1_1.done; rules_1_1 = rules_1.next()) {
+                    for (var rules_1 = (e_9 = void 0, __values(rules)), rules_1_1 = rules_1.next(); !rules_1_1.done; rules_1_1 = rules_1.next()) {
                         var str = rules_1_1.value;
+                        var rank = [];
+                        var limit = [];
+                        rule.ranks.push(rank);
+                        rule.limits.push(limit);
                         str = str.slice(1, str.length - 1);
                         var legends = str.split("|");
                         try {
-                            for (var legends_1 = (e_7 = void 0, __values(legends)), legends_1_1 = legends_1.next(); !legends_1_1.done; legends_1_1 = legends_1.next()) {
+                            for (var legends_1 = (e_10 = void 0, __values(legends)), legends_1_1 = legends_1.next(); !legends_1_1.done; legends_1_1 = legends_1.next()) {
                                 var legend = legends_1_1.value;
-                                if (legends.indexOf(legend) === 0) {
-                                    legend = this.deleteSpaceFrontEnd(this.mergeSpace(legend));
-                                    rule.force = legend.split(' ')[0];
-                                    legend = legend.split(' ')[1];
-                                }
-                                else {
-                                    legend = this.deleteSpaceFrontEnd(legend);
-                                }
+                                var limit2 = [];
+                                var isFirst = legends.indexOf(legend) === 0;
+                                legend = this.deleteSpaceFrontEnd(this.mergeSpace(legend));
                                 if (legend === '...') {
                                     rank.push(null);
                                 }
                                 else {
-                                    if (!this.groups[legend]) {
-                                        console.error("parse error rule, no object:", legend, '\n', line);
+                                    var rank2 = [];
+                                    limit.push(limit2);
+                                    rank.push(rank2);
+                                    if (!legend) {
+                                        continue;
                                     }
+                                    var strs = legend.split(' ');
+                                    if (exports.puzzleForces.indexOf(strs[0]) != -1) {
+                                        rule.force = strs[0];
+                                        strs.shift();
+                                    }
+                                    var index_1 = 0;
                                     try {
-                                        for (var _g = (e_8 = void 0, __values(this.groups[legend])), _h = _g.next(); !_h.done; _h = _g.next()) {
-                                            var g = _h.value;
-                                            if (this.ruleObjects.indexOf(g) === -1)
-                                                this.ruleObjects.push(g);
-                                        }
-                                    }
-                                    catch (e_8_1) { e_8 = { error: e_8_1 }; }
-                                    finally {
-                                        try {
-                                            if (_h && !_h.done && (_c = _g.return)) _c.call(_g);
-                                        }
-                                        finally { if (e_8) throw e_8.error; }
-                                    }
-                                    rank.push(this.groups[legend]);
-                                }
-                            }
-                        }
-                        catch (e_7_1) { e_7 = { error: e_7_1 }; }
-                        finally {
-                            try {
-                                if (legends_1_1 && !legends_1_1.done && (_b = legends_1.return)) _b.call(legends_1);
-                            }
-                            finally { if (e_7) throw e_7.error; }
-                        }
-                    }
-                }
-                catch (e_6_1) { e_6 = { error: e_6_1 }; }
-                finally {
-                    try {
-                        if (rules_1_1 && !rules_1_1.done && (_a = rules_1.return)) _a.call(rules_1);
-                    }
-                    finally { if (e_6) throw e_6.error; }
-                }
-                rules = ends.match(/\[[a-zA-Z0-9><\| \t]+\]/g);
-                this.rules.push(rule);
-                try {
-                    for (var rules_2 = (e_9 = void 0, __values(rules)), rules_2_1 = rules_2.next(); !rules_2_1.done; rules_2_1 = rules_2.next()) {
-                        var str = rules_2_1.value;
-                        str = str.slice(1, str.length - 1);
-                        var legends = str.split("|");
-                        try {
-                            for (var legends_2 = (e_10 = void 0, __values(legends)), legends_2_1 = legends_2.next(); !legends_2_1.done; legends_2_1 = legends_2.next()) {
-                                var legend = legends_2_1.value;
-                                legend = this.deleteSpaceFrontEnd(this.mergeSpace(legend));
-                                var strs = legend.split(' ');
-                                console.error(strs.length, legend);
-                                var toForce = null;
-                                if (strs.length === 1) {
-                                    legend = strs[0];
-                                }
-                                else if (strs.length === 2) {
-                                    toForce = strs[0];
-                                    legend = strs[1];
-                                }
-                                if (legend === '...') {
-                                    force.push(toForce);
-                                    toRank.push(null);
-                                }
-                                else {
-                                    if (!this.groups[legend]) {
-                                        console.error("parse error rule, no object:", legend, '\n', line);
-                                    }
-                                    force.push(toForce);
-                                    try {
-                                        for (var _j = (e_11 = void 0, __values(this.groups[legend])), _k = _j.next(); !_k.done; _k = _j.next()) {
-                                            var g = _k.value;
-                                            if (this.ruleObjects.indexOf(g) === -1)
-                                                this.ruleObjects.push(g);
+                                        for (var strs_1 = (e_11 = void 0, __values(strs)), strs_1_1 = strs_1.next(); !strs_1_1.done; strs_1_1 = strs_1.next()) {
+                                            var subStr = strs_1_1.value;
+                                            if (exports.puzzleConditionLimits.indexOf(subStr) != -1) {
+                                                limit2[index_1] = subStr;
+                                            }
+                                            else {
+                                                if (!this.groups[subStr]) {
+                                                    console.error("parse error rule, no object:", subStr, '\n', line);
+                                                }
+                                                try {
+                                                    for (var _k = (e_12 = void 0, __values(this.groups[subStr])), _l = _k.next(); !_l.done; _l = _k.next()) {
+                                                        var objCfg = _l.value;
+                                                        if (objCfg && this.ruleObjects.indexOf(objCfg) === -1) {
+                                                            this.ruleObjects.push(objCfg);
+                                                        }
+                                                    }
+                                                }
+                                                catch (e_12_1) { e_12 = { error: e_12_1 }; }
+                                                finally {
+                                                    try {
+                                                        if (_l && !_l.done && (_e = _k.return)) _e.call(_k);
+                                                    }
+                                                    finally { if (e_12) throw e_12.error; }
+                                                }
+                                                limit2[index_1] = limit2[index_1] || null;
+                                                rank2[index_1++] = this.groups[subStr];
+                                            }
                                         }
                                     }
                                     catch (e_11_1) { e_11 = { error: e_11_1 }; }
                                     finally {
                                         try {
-                                            if (_k && !_k.done && (_f = _j.return)) _f.call(_j);
+                                            if (strs_1_1 && !strs_1_1.done && (_d = strs_1.return)) _d.call(strs_1);
                                         }
                                         finally { if (e_11) throw e_11.error; }
                                     }
-                                    toRank.push(this.groups[legend]);
                                 }
                             }
                         }
                         catch (e_10_1) { e_10 = { error: e_10_1 }; }
                         finally {
                             try {
-                                if (legends_2_1 && !legends_2_1.done && (_e = legends_2.return)) _e.call(legends_2);
+                                if (legends_1_1 && !legends_1_1.done && (_c = legends_1.return)) _c.call(legends_1);
                             }
                             finally { if (e_10) throw e_10.error; }
                         }
@@ -2023,23 +2310,132 @@ var PuzzleGameConfig = /** @class */ (function () {
                 catch (e_9_1) { e_9 = { error: e_9_1 }; }
                 finally {
                     try {
-                        if (rules_2_1 && !rules_2_1.done && (_d = rules_2.return)) _d.call(rules_2);
+                        if (rules_1_1 && !rules_1_1.done && (_b = rules_1.return)) _b.call(rules_1);
                     }
                     finally { if (e_9) throw e_9.error; }
                 }
-                //解析后半部分
-                if (rank.length) {
-                    if (rank.length != toRank.length || rank.length != force.length) {
-                        console.error("parse error rule, length no equals:", line);
+                if (!rule.force)
+                    rule.force = EMPuzzleForce.NONE;
+                if (rule.force != EMPuzzleForce.NONE && !(rule.ranks[0]
+                    && rule.ranks[0][0] && rule.ranks[0][0][0]
+                    && this.groups[EMPuzzleConst.PLAYER].indexOf(rule.ranks[0][0][0][0]) != -1)) {
+                    continue;
+                }
+                if (rule.force != EMPuzzleForce.NONE) {
+                    rule.isPlayerMoved = true;
+                }
+                rules = ends.match(/\[[a-zA-Z0-9><\| \t]+\]/g);
+                rule.index = this.rules.length;
+                this.rules.push(rule);
+                try {
+                    for (var rules_2 = (e_13 = void 0, __values(rules)), rules_2_1 = rules_2.next(); !rules_2_1.done; rules_2_1 = rules_2.next()) {
+                        var str = rules_2_1.value;
+                        var toRank = [];
+                        var toForce = [];
+                        var toLimit = [];
+                        rule.toRanks.push(toRank);
+                        rule.toForces.push(toForce);
+                        rule.toLimits.push(toLimit);
+                        str = str.slice(1, str.length - 1);
+                        var legends = str.split("|");
+                        try {
+                            for (var legends_2 = (e_14 = void 0, __values(legends)), legends_2_1 = legends_2.next(); !legends_2_1.done; legends_2_1 = legends_2.next()) {
+                                var legend = legends_2_1.value;
+                                var froceIndex = 0;
+                                var toRank2 = [];
+                                var toLimit2 = [];
+                                var toForce2 = [];
+                                toRank.push(toRank2);
+                                toLimit.push(toLimit2);
+                                toForce.push(toForce2);
+                                if (!legend) {
+                                    continue;
+                                }
+                                legend = this.deleteSpaceFrontEnd(this.mergeSpace(legend));
+                                var strs = legend.split(' ');
+                                var index_2 = 0;
+                                try {
+                                    for (var strs_2 = (e_15 = void 0, __values(strs)), strs_2_1 = strs_2.next(); !strs_2_1.done; strs_2_1 = strs_2.next()) {
+                                        var str_1 = strs_2_1.value;
+                                        if (legend === '...') {
+                                            toForce2[froceIndex] = null;
+                                            toLimit2[index_2] = null;
+                                            toRank2[index_2++] = null;
+                                        }
+                                        else if (exports.puzzleForces.indexOf(str_1) != -1) {
+                                            toForce2[froceIndex] = str_1;
+                                        }
+                                        else if (exports.puzzleConditionLimits.indexOf(str_1) != -1) {
+                                            toLimit2[index_2] = str_1;
+                                        }
+                                        else {
+                                            if (!str_1) {
+                                                toLimit2[index_2] = toLimit2[index_2] || null;
+                                                toRank2[index_2++] = null;
+                                            }
+                                            else {
+                                                if (!this.groups[str_1]) {
+                                                    console.error("parse error rule, no object:", legend, '\n', line);
+                                                }
+                                                try {
+                                                    for (var _m = (e_16 = void 0, __values(this.groups[str_1])), _o = _m.next(); !_o.done; _o = _m.next()) {
+                                                        var objCfg = _o.value;
+                                                        if (objCfg && this.ruleObjects.indexOf(objCfg) === -1) {
+                                                            this.ruleObjects.push(objCfg);
+                                                        }
+                                                    }
+                                                }
+                                                catch (e_16_1) { e_16 = { error: e_16_1 }; }
+                                                finally {
+                                                    try {
+                                                        if (_o && !_o.done && (_j = _m.return)) _j.call(_m);
+                                                    }
+                                                    finally { if (e_16) throw e_16.error; }
+                                                }
+                                                toLimit2[index_2] = toLimit2[index_2] || null;
+                                                toRank2[index_2++] = this.groups[str_1];
+                                            }
+                                        }
+                                    }
+                                }
+                                catch (e_15_1) { e_15 = { error: e_15_1 }; }
+                                finally {
+                                    try {
+                                        if (strs_2_1 && !strs_2_1.done && (_h = strs_2.return)) _h.call(strs_2);
+                                    }
+                                    finally { if (e_15) throw e_15.error; }
+                                }
+                            }
+                        }
+                        catch (e_14_1) { e_14 = { error: e_14_1 }; }
+                        finally {
+                            try {
+                                if (legends_2_1 && !legends_2_1.done && (_g = legends_2.return)) _g.call(legends_2);
+                            }
+                            finally { if (e_14) throw e_14.error; }
+                        }
                     }
                 }
+                catch (e_13_1) { e_13 = { error: e_13_1 }; }
+                finally {
+                    try {
+                        if (rules_2_1 && !rules_2_1.done && (_f = rules_2.return)) _f.call(rules_2);
+                    }
+                    finally { if (e_13) throw e_13.error; }
+                }
+                //解析后半部分
+                // if (rank.length) {
+                //     if (rank.length != toRank.length || rank.length != force.length) {
+                //         console.error("parse error rule, length no equals:", line);
+                //     }
+                // }
             }
         }
         this.rules.sort(function (a, b) { return a.ranks.length - b.ranks.length; });
         return lines.length;
     };
     PuzzleGameConfig.prototype.parseCollisionLayers = function (lines, index) {
-        var e_12, _a;
+        var e_17, _a, e_18, _b;
         for (var i = index; i < lines.length; i++) {
             var line = lines[i];
             if (this.isBlockDevice(line)) {
@@ -2049,20 +2445,30 @@ var PuzzleGameConfig = /** @class */ (function () {
             if (line.length) {
                 var names = line.split(",");
                 try {
-                    for (var names_1 = (e_12 = void 0, __values(names)), names_1_1 = names_1.next(); !names_1_1.done; names_1_1 = names_1.next()) {
-                        var name_4 = names_1_1.value;
-                        name_4 = this.deleteSpace(name_4);
-                        if (this.objects[name_4]) {
-                            this.objects[name_4].layer = this.maxLayer;
+                    for (var names_1 = (e_17 = void 0, __values(names)), names_1_1 = names_1.next(); !names_1_1.done; names_1_1 = names_1.next()) {
+                        var name_5 = names_1_1.value;
+                        name_5 = this.deleteSpace(name_5);
+                        try {
+                            for (var _c = (e_18 = void 0, __values(this.groups[name_5])), _d = _c.next(); !_d.done; _d = _c.next()) {
+                                var obj = _d.value;
+                                obj.layer = this.maxLayer;
+                            }
+                        }
+                        catch (e_18_1) { e_18 = { error: e_18_1 }; }
+                        finally {
+                            try {
+                                if (_d && !_d.done && (_b = _c.return)) _b.call(_c);
+                            }
+                            finally { if (e_18) throw e_18.error; }
                         }
                     }
                 }
-                catch (e_12_1) { e_12 = { error: e_12_1 }; }
+                catch (e_17_1) { e_17 = { error: e_17_1 }; }
                 finally {
                     try {
                         if (names_1_1 && !names_1_1.done && (_a = names_1.return)) _a.call(names_1);
                     }
-                    finally { if (e_12) throw e_12.error; }
+                    finally { if (e_17) throw e_17.error; }
                 }
                 this.maxLayer++;
             }
@@ -2070,51 +2476,51 @@ var PuzzleGameConfig = /** @class */ (function () {
         return lines.length;
     };
     PuzzleGameConfig.prototype.parseLegend = function (lines, index) {
-        var e_13, _a, e_14, _b;
+        var e_19, _a, e_20, _b;
         for (var i = index; i < lines.length; i++) {
             var line = lines[i];
             if (this.isBlockDevice(line)) {
-                console.error(this.legends);
+                // console.error(this.legends);
                 return i - 1;
             }
             if (line.indexOf("=") != -1) {
                 var legend = line.split("=")[0];
-                var name_5 = line.split("=")[1];
-                name_5 = this.deleteSpace(name_5);
+                var name_6 = line.split("=")[1];
+                name_6 = this.deleteSpace(name_6);
                 legend = this.deleteSpace(legend);
                 if (legend.length === 1) {
                     this.legends[legend] = [];
-                    var names = name_5.split("and");
+                    var names = name_6.split("and");
                     try {
-                        for (var names_2 = (e_13 = void 0, __values(names)), names_2_1 = names_2.next(); !names_2_1.done; names_2_1 = names_2.next()) {
+                        for (var names_2 = (e_19 = void 0, __values(names)), names_2_1 = names_2.next(); !names_2_1.done; names_2_1 = names_2.next()) {
                             var n = names_2_1.value;
                             n = this.deleteSpace(n);
                             this.legends[legend].push(this.objects[n]);
                         }
                     }
-                    catch (e_13_1) { e_13 = { error: e_13_1 }; }
+                    catch (e_19_1) { e_19 = { error: e_19_1 }; }
                     finally {
                         try {
                             if (names_2_1 && !names_2_1.done && (_a = names_2.return)) _a.call(names_2);
                         }
-                        finally { if (e_13) throw e_13.error; }
+                        finally { if (e_19) throw e_19.error; }
                     }
                 }
                 else {
                     this.groups[legend] = [];
-                    var names = name_5.split("or");
+                    var names = name_6.split("or");
                     try {
-                        for (var names_3 = (e_14 = void 0, __values(names)), names_3_1 = names_3.next(); !names_3_1.done; names_3_1 = names_3.next()) {
+                        for (var names_3 = (e_20 = void 0, __values(names)), names_3_1 = names_3.next(); !names_3_1.done; names_3_1 = names_3.next()) {
                             var n = names_3_1.value;
                             this.groups[legend].push(this.objects[n]);
                         }
                     }
-                    catch (e_14_1) { e_14 = { error: e_14_1 }; }
+                    catch (e_20_1) { e_20 = { error: e_20_1 }; }
                     finally {
                         try {
                             if (names_3_1 && !names_3_1.done && (_b = names_3.return)) _b.call(names_3);
                         }
-                        finally { if (e_14) throw e_14.error; }
+                        finally { if (e_20) throw e_20.error; }
                     }
                 }
             }
@@ -2125,22 +2531,33 @@ var PuzzleGameConfig = /** @class */ (function () {
         for (var i = index; i < lines.length; i++) {
             var line = lines[i];
             if (this.isBlockDevice(line)) {
-                console.error(this.objects);
+                // console.error(this.objects);
                 return i - 1;
             }
-            var name_6 = line.match(/[a-zA-Z]+/) && line.match(/[a-zA-Z]+/).length ? line.match(/[a-zA-Z]+/)[0] : "";
-            if (name_6 && name_6.length) {
+            var name_7 = line.match(/[a-zA-Z0-9]+/) && line.match(/[a-zA-Z0-9]+/).length ? line.match(/[a-zA-Z0-9]+/)[0] : "";
+            if (name_7 && name_7.length) {
                 var obj = new PuzzleGameObjectConfig();
-                obj.name = name_6;
+                obj.name = name_7;
                 obj.colors = {};
                 obj.blocks = [];
                 obj.width = 0;
                 obj.height = 0;
                 i++;
-                var colorTexts = lines[i++].match(/[a-zA-Z]+/g);
+                var colorTexts = lines[i++].match(/[#0-9a-zA-Z]+/g);
                 var colorSum = '';
                 for (var c = 0; c < colorTexts.length; c++) {
-                    obj.colors[c + ''] = colorDefines[colorTexts[c].toUpperCase()];
+                    var cstr = colorTexts[c];
+                    var nums = { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, a: 10, A: 10, b: 11, B: 11, c: 12, C: 12, d: 13, D: 13, e: 14, E: 14, f: 15, F: 15 };
+                    if (cstr.charAt(0) == '#') {
+                        obj.colors[c + ''] = 0;
+                        for (var i_3 = 0; i_3 < cstr.length - 1; i_3++) {
+                            var char = cstr.charAt(cstr.length - 1 - i_3);
+                            obj.colors[c + ''] += (nums[char]) * Math.pow(16, i_3);
+                        }
+                    }
+                    else {
+                        obj.colors[c + ''] = colorDefines[colorTexts[c].toUpperCase()];
+                    }
                 }
                 for (; i < lines.length; i++) {
                     if (!lines[i].match(/[0-9\.]+/)) {
@@ -2249,14 +2666,20 @@ var EMPuzzleKey;
 })(EMPuzzleKey = exports.EMPuzzleKey || (exports.EMPuzzleKey = {}));
 var EMPuzzleDirection;
 (function (EMPuzzleDirection) {
-    EMPuzzleDirection[EMPuzzleDirection["UP"] = 1] = "UP";
-    EMPuzzleDirection[EMPuzzleDirection["LEFT"] = 2] = "LEFT";
-    EMPuzzleDirection[EMPuzzleDirection["RIGHT"] = 4] = "RIGHT";
-    EMPuzzleDirection[EMPuzzleDirection["DOWN"] = 8] = "DOWN";
-    EMPuzzleDirection[EMPuzzleDirection["H"] = 6] = "H";
-    EMPuzzleDirection[EMPuzzleDirection["V"] = 9] = "V";
-    EMPuzzleDirection[EMPuzzleDirection["ALL"] = 15] = "ALL";
+    EMPuzzleDirection["UP"] = "up";
+    EMPuzzleDirection["DOWN"] = "down";
+    EMPuzzleDirection["LEFT"] = "left";
+    EMPuzzleDirection["RIGHT"] = "right";
 })(EMPuzzleDirection = exports.EMPuzzleDirection || (exports.EMPuzzleDirection = {}));
+exports.puzzleDirection = {
+    up: ['up'],
+    left: ['left'],
+    right: ['right'],
+    down: ['down'],
+    horizontal: ['left', 'right'],
+    vertical: ['up', 'down'],
+};
+exports.puzzleDirections = ['up', 'left', 'right', 'down', 'horizontal', 'vertical'];
 var EMPuzzleConst;
 (function (EMPuzzleConst) {
     EMPuzzleConst["PLAYER"] = "player";
@@ -2279,7 +2702,9 @@ var EMPuzzleForce;
     EMPuzzleForce["LEFT"] = "left";
     EMPuzzleForce["RIGHT"] = "right";
     EMPuzzleForce["MOVING"] = "moving";
+    EMPuzzleForce["NONE"] = "none";
 })(EMPuzzleForce = exports.EMPuzzleForce || (exports.EMPuzzleForce = {}));
+exports.puzzleForces = ['>', '<', 'up', 'down', 'left', 'right', 'moving'];
 var EMPuzzleGameModel;
 (function (EMPuzzleGameModel) {
     EMPuzzleGameModel["OBJECTS"] = "objects";
@@ -2294,6 +2719,7 @@ var EMPuzzleGameModel;
 var PuzzleGameObjectConfig = /** @class */ (function () {
     function PuzzleGameObjectConfig() {
         this.layer = 0;
+        this.isPlayer = false;
     }
     return PuzzleGameObjectConfig;
 }());
@@ -2310,6 +2736,7 @@ var EMPuzzleConditionLimit;
     EMPuzzleConditionLimit["ALL"] = "all";
     EMPuzzleConditionLimit["SOME"] = "some";
 })(EMPuzzleConditionLimit = exports.EMPuzzleConditionLimit || (exports.EMPuzzleConditionLimit = {}));
+exports.puzzleConditionLimits = ['no', 'all', 'some'];
 var EMPuzzleConditionRelation;
 (function (EMPuzzleConditionRelation) {
     EMPuzzleConditionRelation["NONE"] = "";
@@ -2349,7 +2776,7 @@ var colorDefines = {
     "PINK": 0xe06f8b
 };
 function parseColorDefines(txt) {
-    var e_15, _a;
+    var e_21, _a;
     txt = "\n    .cm-s-midnight span.cm-COLOR-TRANSPARENT {\n        color: #777;\n        font-weight: normal\n    }\n    \n    .cm-s-midnight span.cm-COLOR-BLACK {\n        color: #555\n    }\n    \n    .cm-s-midnight span.cm-COLOR-WHITE {\n        color: #fff\n    }\n    ";
     var lines = txt.split("\n");
     var name;
@@ -2368,12 +2795,12 @@ function parseColorDefines(txt) {
             }
         }
     }
-    catch (e_15_1) { e_15 = { error: e_15_1 }; }
+    catch (e_21_1) { e_21 = { error: e_21_1 }; }
     finally {
         try {
             if (lines_1_1 && !lines_1_1.done && (_a = lines_1.return)) _a.call(lines_1);
         }
-        finally { if (e_15) throw e_15.error; }
+        finally { if (e_21) throw e_21.error; }
     }
     console.error(JSON.stringify(colors, null, 2));
 }
@@ -2454,23 +2881,27 @@ var FaceScene = /** @class */ (function (_super) {
         var gameList = [
             'game1-1_txt',
             'game1-2_txt',
+            'game1-3_txt'
         ];
         var nameList = [
-            '推箱子',
+            '经典推箱子',
             '走迷宫',
+            '初级推箱子'
         ];
         var _loop_1 = function (i) {
             var levelui = ecs.Entity.create();
             levelui.parent = levelList;
             levelui.transform.x = [30, 140][i % 2];
             levelui.transform.y = 130 * (~~(i / 2));
-            var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, gameList[i], 0, false, false, 100, 100);
+            var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, gameList[i], 1, false, false, 100, 100);
             level.parent = levelui;
             var label = ecs.Entity.create().addComponent(leaf.Label);
             label.text = nameList[i];
             label.parent = levelui;
             label.fontSize = 20;
             level.transform.y = 20;
+            if (window["lv"] == null)
+                window["lv"] = level;
             levelui.addComponent(leaf.TouchComponent).onTouchEnd.on(function () {
                 new puzzle_scene_1.PuzzleScene(gameList[i]);
             });
@@ -2502,7 +2933,7 @@ var FaceScene = /** @class */ (function (_super) {
             }
         });
         return _this;
-        // new PuzzleScene('game1-1_txt')
+        // ui.addComponent(HPComponent);
     }
     FaceScene = __decorate([
         orange.autoload("FaceScene")
@@ -2553,7 +2984,7 @@ var PuzzleScene = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         var child = ecs.Entity.create();
         child.parent = _this.scene;
-        // ecs.Entity.create().addComponent(PuzzleGame, 'game1-1_txt', 2).parent = child;
+        // ecs.Entity.create().addComponent(PuzzleGame, 'game1-1_txt', 10).parent = child;
         ecs.Entity.create().addComponent(puzzle_level_win_1.PuzzleLevelWin, game).parent = child;
         var zBtn = ecs.Entity.create().addComponent(leaf.Bitmap);
         zBtn.texture = leaf.RectTexture.getTexture(leaf.RectTexture.formatColors(0xffffff + "," + 0xaa0000 + "\n" +
@@ -2564,7 +2995,7 @@ var PuzzleScene = /** @class */ (function (_super) {
             '..0.0..\n' +
             '.0...0.\n' +
             '0.....0'));
-        zBtn.transform.y = 10;
+        zBtn.transform.y = 15;
         zBtn.transform.x = 10;
         zBtn.transform.scaleX = zBtn.transform.scaleY = 3;
         zBtn.parent = _this.scene;
@@ -2662,7 +3093,7 @@ var PuzzleLevelWin = /** @class */ (function (_super) {
         var listHeight = leaf.getStageHeight() - 60 - 40;
         game_storage_1.GameStorage.getStorage(name + "_maxStage").then(function (v) {
             var maxLevel = v || 0;
-            console.error('关卡', name + "_maxStage", v);
+            // console.error('关卡', `${name}_maxStage`, v);
             puzzle_game_config_1.PuzzleGameConfig.loadGameConfig(name, function (cfg) {
                 var _loop_1 = function (i) {
                     var levelui = ecs.Entity.create();

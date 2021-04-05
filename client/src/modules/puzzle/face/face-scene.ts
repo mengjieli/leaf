@@ -2,6 +2,7 @@ import { ModuleScene } from "../../../utils/ui/module-scene";
 import { PuzzleScene } from "../puzzle-scene";
 import { GameStorage } from "../../../utils/storage/game-storage";
 import { PuzzleGame } from "../component/puzzle-game";
+import { HPComponent } from "../../common/hp-component";
 
 @orange.autoload("FaceScene")
 export class FaceScene extends ModuleScene {
@@ -54,10 +55,12 @@ export class FaceScene extends ModuleScene {
         let gameList = [
             'game1-1_txt',
             'game1-2_txt',
+            'game1-3_txt'
         ]
         let nameList = [
-            '推箱子',
+            '经典推箱子',
             '走迷宫',
+            '初级推箱子'
         ]
 
         for (let i = 0; i < gameList.length; i++) {
@@ -66,13 +69,15 @@ export class FaceScene extends ModuleScene {
             levelui.transform.x = [30, 140][i % 2];
             levelui.transform.y = 130 * (~~(i / 2));
 
-            let level = ecs.Entity.create().addComponent(PuzzleGame, gameList[i], 0, false, false, 100, 100);
+            let level = ecs.Entity.create().addComponent(PuzzleGame, gameList[i], 1, false, false, 100, 100);
             level.parent = levelui;
             let label = ecs.Entity.create().addComponent(leaf.Label);
             label.text = nameList[i];
             label.parent = levelui;
             label.fontSize = 20;
             level.transform.y = 20;
+            if (window["lv"] == null) window["lv"] = level;
+
 
             levelui.addComponent(leaf.TouchComponent).onTouchEnd.on(() => {
                 new PuzzleScene(gameList[i]);
@@ -101,7 +106,7 @@ export class FaceScene extends ModuleScene {
                 if (levelList.transform.y > 0) levelList.transform.y = 0;
             }
         })
-        // new PuzzleScene('game1-1_txt')
+        // ui.addComponent(HPComponent);
     }
 
 }

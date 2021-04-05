@@ -12,8 +12,8 @@ export class PuzzleScene extends ModuleScene {
         let child = ecs.Entity.create();
         child.parent = this.scene;
 
-        ecs.Entity.create().addComponent(PuzzleGame, 'game1-1_txt', 1).parent = child;
-        // ecs.Entity.create().addComponent(PuzzleLevelWin, game).parent = child;
+        // ecs.Entity.create().addComponent(PuzzleGame, 'game1-1_txt', 10).parent = child;
+        ecs.Entity.create().addComponent(PuzzleLevelWin, game).parent = child;
 
         let zBtn = ecs.Entity.create().addComponent(leaf.Bitmap);
         zBtn.texture = leaf.RectTexture.getTexture(leaf.RectTexture.formatColors(
@@ -26,7 +26,7 @@ export class PuzzleScene extends ModuleScene {
             '.0...0.\n' +
             '0.....0'
         ));
-        zBtn.transform.y = 10;
+        zBtn.transform.y = 15;
         zBtn.transform.x = 10;
         zBtn.transform.scaleX = zBtn.transform.scaleY = 3;
         zBtn.parent = this.scene;
@@ -42,7 +42,6 @@ export class PuzzleScene extends ModuleScene {
         this.addClick(zBtn, () => {
             new FaceScene();
         })
-
     }
 
     addClick(btn: leaf.Bitmap, call: Function) {

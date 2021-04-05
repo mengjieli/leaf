@@ -27,6 +27,7 @@ export class PuzzleGameUI extends ecs.Component {
         let arrGroup = ecs.Entity.create();
         arrGroup.parent = dirGroup;
 
+
         let upBtn = ecs.Entity.create().addComponent(leaf.Bitmap);
         upBtn.texture = leaf.RectTexture.getTexture(leaf.RectTexture.formatColors(
             `${0xffffff},${0xaa0000}\n` +
@@ -89,6 +90,47 @@ export class PuzzleGameUI extends ecs.Component {
         downBtn.transform.y = 26;
         downBtn.parent = arrGroup;
 
+
+        let rect = ecs.Entity.create().addComponent(leaf.Bitmap);
+        rect.texture = leaf.PointTexture.getTexture(0xff0000);
+        rect.transform.scaleX = rect.transform.scaleY = 33;
+        rect.parent = arrGroup;
+        rect.transform.x = -4;
+        rect.transform.alpha = 0.1;
+        rect.transform.y = -4;
+        rect.addComponent(leaf.TouchComponent).onTouchStart.on(e => {
+            let rot = Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI;
+            leftBtn.transform.alpha = rightBtn.transform.alpha
+                = upBtn.transform.alpha = downBtn.transform.alpha = 1;
+            if (rot <= 45 && rot >= -45) {
+                rightBtn.transform.alpha = 0.5;
+            } else if (rot >= -135 && rot < -45) {
+                upBtn.transform.alpha = 0.5;
+            } else if (rot >= 45 && rot <= 135) {
+                downBtn.transform.alpha = 0.5;
+            } else {
+                leftBtn.transform.alpha = 0.5;
+            }
+        })
+        rect.getComponent(leaf.TouchComponent).onTouchEnd.on(e => {
+            leftBtn.transform.alpha = rightBtn.transform.alpha
+                = upBtn.transform.alpha = downBtn.transform.alpha = 1;
+            let rot = Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI;
+            let dir = EMPuzzleMove.RIGHT;
+            if (rot <= 45 && rot >= -45) {
+                dir = EMPuzzleMove.RIGHT;
+            } else if (rot >= -135 && rot < -45) {
+                dir = EMPuzzleMove.UP;
+            } else if (rot >= 45 && rot <= 135) {
+                dir = EMPuzzleMove.DOWN;
+            } else {
+                dir = EMPuzzleMove.LEFT;
+            }
+            this.game.getComponent(PuzzleGameLoop).run(dir);
+            console.error(dir);
+            // console.error(e.localX, e.localY, Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI);
+        })
+
         arrGroup.transform.x = 5;
         arrGroup.transform.y = 0;
 
@@ -131,17 +173,20 @@ export class PuzzleGameUI extends ecs.Component {
 
         this.uiRoot.transform.scaleX = this.uiRoot.transform.scaleY = 3;
 
-        this.addClick(upBtn, () => {
-            this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.UP);
-        })
-        this.addClick(downBtn, () => {
-            this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.DOWN);
-        })
-        this.addClick(leftBtn, () => {
-            this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.LEFT);
-        })
-        this.addClick(rightBtn, () => {
-            this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.RIGHT);
+        // this.addClick(upBtn, () => {
+        //     this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.UP);
+        // })
+        // this.addClick(downBtn, () => {
+        //     this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.DOWN);
+        // })
+        // this.addClick(leftBtn, () => {
+        //     this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.LEFT);
+        // })
+        // this.addClick(rightBtn, () => {
+        //     this.game.getComponent(PuzzleGameLoop).run(EMPuzzleMove.RIGHT);
+        // })
+        this.addClick(xBtn, () => {
+            this.game.getComponent(PuzzleGameLoop).back();
         })
         this.addClick(zBtn, () => {
             this.game.getComponent(PuzzleGame).reload();
