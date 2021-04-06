@@ -1886,23 +1886,21 @@ var PuzzleGameConfig = /** @class */ (function () {
                     i = this.parseLevels(lines, i + 2);
                 if (name_1 === EMPuzzleGameModel.FACE)
                     i = this.parseFace(lines, i + 2);
-                for (var name_2 in this.objects)
-                    this.objects[name_2].game = this;
             }
         }
         var index = 0;
-        for (var name_3 in this.objects) {
-            this.objects[name_3].id = index++;
-            if (this.groups[EMPuzzleConst.PLAYER].indexOf(this.objects[name_3]) != -1) {
-                this.objects[name_3].isPlayer = true;
+        for (var name_2 in this.objects) {
+            this.objects[name_2].id = index++;
+            if (this.groups[EMPuzzleConst.PLAYER].indexOf(this.objects[name_2]) != -1) {
+                this.objects[name_2].isPlayer = true;
             }
-            if (this.blockWidth < this.objects[name_3].width)
-                this.blockWidth = this.objects[name_3].width;
-            if (this.blockHeight < this.objects[name_3].height)
-                this.blockHeight = this.objects[name_3].height;
+            if (this.blockWidth < this.objects[name_2].width)
+                this.blockWidth = this.objects[name_2].width;
+            if (this.blockHeight < this.objects[name_2].height)
+                this.blockHeight = this.objects[name_2].height;
         }
-        for (var name_4 in this.objects) {
-            var obj = this.objects[name_4];
+        for (var name_3 in this.objects) {
+            var obj = this.objects[name_3];
             if (!obj.blocks.length || !obj.blocks[0].length) {
                 for (var y = 0; y < this.blockHeight; y++) {
                     obj.blocks[y] = [];
@@ -2446,10 +2444,10 @@ var PuzzleGameConfig = /** @class */ (function () {
                 var names = line.split(",");
                 try {
                     for (var names_1 = (e_17 = void 0, __values(names)), names_1_1 = names_1.next(); !names_1_1.done; names_1_1 = names_1.next()) {
-                        var name_5 = names_1_1.value;
-                        name_5 = this.deleteSpace(name_5);
+                        var name_4 = names_1_1.value;
+                        name_4 = this.deleteSpace(name_4);
                         try {
-                            for (var _c = (e_18 = void 0, __values(this.groups[name_5])), _d = _c.next(); !_d.done; _d = _c.next()) {
+                            for (var _c = (e_18 = void 0, __values(this.groups[name_4])), _d = _c.next(); !_d.done; _d = _c.next()) {
                                 var obj = _d.value;
                                 obj.layer = this.maxLayer;
                             }
@@ -2485,12 +2483,12 @@ var PuzzleGameConfig = /** @class */ (function () {
             }
             if (line.indexOf("=") != -1) {
                 var legend = line.split("=")[0];
-                var name_6 = line.split("=")[1];
-                name_6 = this.deleteSpace(name_6);
+                var name_5 = line.split("=")[1];
+                name_5 = this.deleteSpace(name_5);
                 legend = this.deleteSpace(legend);
                 if (legend.length === 1) {
                     this.legends[legend] = [];
-                    var names = name_6.split("and");
+                    var names = name_5.split("and");
                     try {
                         for (var names_2 = (e_19 = void 0, __values(names)), names_2_1 = names_2.next(); !names_2_1.done; names_2_1 = names_2.next()) {
                             var n = names_2_1.value;
@@ -2508,7 +2506,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                 }
                 else {
                     this.groups[legend] = [];
-                    var names = name_6.split("or");
+                    var names = name_5.split("or");
                     try {
                         for (var names_3 = (e_20 = void 0, __values(names)), names_3_1 = names_3.next(); !names_3_1.done; names_3_1 = names_3.next()) {
                             var n = names_3_1.value;
@@ -2532,9 +2530,11 @@ var PuzzleGameConfig = /** @class */ (function () {
             var line = lines[i];
             if (this.isBlockDevice(line)) {
                 // console.error(this.objects);
+                for (var name_6 in this.objects)
+                    this.objects[name_6].game = this;
                 return i - 1;
             }
-            var name_7 = line.match(/[a-zA-Z0-9]+/) && line.match(/[a-zA-Z0-9]+/).length ? line.match(/[a-zA-Z0-9]+/)[0] : "";
+            var name_7 = line.match(/[a-zA-Z0-9_]+/) && line.match(/[a-zA-Z0-9_]+/).length ? line.match(/[a-zA-Z0-9_]+/)[0] : "";
             if (name_7 && name_7.length) {
                 var obj = new PuzzleGameObjectConfig();
                 obj.name = name_7;
@@ -2543,7 +2543,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                 obj.width = 0;
                 obj.height = 0;
                 i++;
-                var colorTexts = lines[i++].match(/[#0-9a-zA-Z]+/g);
+                var colorTexts = lines[i++].match(/[#0-9a-zA-Z_]+/g);
                 var colorSum = '';
                 for (var c = 0; c < colorTexts.length; c++) {
                     var cstr = colorTexts[c];
@@ -2582,6 +2582,7 @@ var PuzzleGameConfig = /** @class */ (function () {
         return lines.length;
     };
     PuzzleGameConfig.prototype.isBlockDevice = function (line) {
+        line = this.deleteSpace(line);
         return line.length && line.match(/=/g) && line.match(/=/g).length === line.length;
     };
     PuzzleGameConfig.prototype.deleteSpace = function (line) {

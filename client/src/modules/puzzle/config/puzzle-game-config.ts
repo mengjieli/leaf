@@ -40,7 +40,6 @@ export class PuzzleGameConfig {
                 if (name === EMPuzzleGameModel.WINCONDITIONS) i = this.parseWinConditions(lines, i + 2);
                 if (name === EMPuzzleGameModel.LEVELS) i = this.parseLevels(lines, i + 2);
                 if (name === EMPuzzleGameModel.FACE) i = this.parseFace(lines, i + 2);
-                for (let name in this.objects) this.objects[name].game = this;
             }
         }
         let index = 0;
@@ -490,9 +489,10 @@ export class PuzzleGameConfig {
             let line = lines[i];
             if (this.isBlockDevice(line)) {
                 // console.error(this.objects);
+                for (let name in this.objects) this.objects[name].game = this;
                 return i - 1;
             }
-            let name = line.match(/[a-zA-Z0-9]+/) && line.match(/[a-zA-Z0-9]+/).length ? line.match(/[a-zA-Z0-9]+/)[0] : "";
+            let name = line.match(/[a-zA-Z0-9_]+/) && line.match(/[a-zA-Z0-9_]+/).length ? line.match(/[a-zA-Z0-9_]+/)[0] : "";
             if (name && name.length) {
                 let obj = new PuzzleGameObjectConfig();
                 obj.name = name;
@@ -501,7 +501,7 @@ export class PuzzleGameConfig {
                 obj.width = 0;
                 obj.height = 0;
                 i++;
-                let colorTexts = lines[i++].match(/[#0-9a-zA-Z]+/g);
+                let colorTexts = lines[i++].match(/[#0-9a-zA-Z_]+/g);
                 let colorSum = '';
                 for (let c = 0; c < colorTexts.length; c++) {
                     let cstr = colorTexts[c];
@@ -540,6 +540,7 @@ export class PuzzleGameConfig {
     }
 
     isBlockDevice(line: string) {
+        line = this.deleteSpace(line);
         return line.length && line.match(/=/g) && line.match(/=/g).length === line.length;
     }
 
