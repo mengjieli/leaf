@@ -148,7 +148,7 @@ export class PuzzleGameConfig {
                 y++;
             } else {
                 if (level) {
-                    this.levels.push(level);
+                    this.face = level;
                 }
                 level = null;
             }

@@ -90,7 +90,7 @@ export class FaceScene extends ModuleScene {
             levelui.transform.x = [30, 140][i % 2];
             levelui.transform.y = 130 * (~~(i / 2));
 
-            let level = ecs.Entity.create().addComponent(PuzzleGame, gameList[i], 1, false, false, 100, 100);
+            let level = ecs.Entity.create().addComponent(PuzzleGame, gameList[i], 0, false, false, 100, 100);
             level.parent = levelui;
             let label = ecs.Entity.create().addComponent(leaf.Label);
             label.text = nameList[i];

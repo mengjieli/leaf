@@ -1758,7 +1758,7 @@ var PuzzleGame = /** @class */ (function (_super) {
         this.scaleToStage = scaleToStage;
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
-        // leaf.StateWin.show();
+        leaf.StateWin.show();
     };
     PuzzleGame.prototype.awake = function () {
         var _this = this;
@@ -2005,7 +2005,7 @@ var PuzzleGameConfig = /** @class */ (function () {
             }
             else {
                 if (level) {
-                    this.levels.push(level);
+                    this.face = level;
                 }
                 level = null;
             }
@@ -2923,7 +2923,7 @@ var FaceScene = /** @class */ (function (_super) {
             levelui.parent = levelList;
             levelui.transform.x = [30, 140][i % 2];
             levelui.transform.y = 130 * (~~(i / 2));
-            var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, gameList[i], 1, false, false, 100, 100);
+            var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, gameList[i], 0, false, false, 100, 100);
             level.parent = levelui;
             var label = ecs.Entity.create().addComponent(leaf.Label);
             label.text = nameList[i];
@@ -3353,13 +3353,9 @@ var PuzzleLevelWin = /** @class */ (function (_super) {
                     levelui.parent = levelList;
                     levelui.transform.x = [30, 140][i % 2];
                     levelui.transform.y = 130 * (~~(i / 2));
-                    var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, name, cfg.levels[i].level, false, false, 100, 100);
-                    level.parent = levelui;
-                    var label = ecs.Entity.create().addComponent(leaf.Label);
-                    label.text = "\u7B2C" + (i + 1) + "\u5173";
-                    label.parent = levelui;
-                    label.fontSize = 20;
-                    level.transform.y = 20;
+                    var levelParent = ecs.Entity.create();
+                    levelParent.parent = levelui;
+                    levelParent.addComponent(LevelShortCut, levelList, listHeight, i + 1, i <= maxLevel, name, cfg.levels[i].level);
                     if (i > maxLevel) {
                         var levelMask = ecs.Entity.create().addComponent(leaf.Bitmap);
                         levelMask.texture = leaf.PointTexture.getTexture(0);
@@ -3367,7 +3363,6 @@ var PuzzleLevelWin = /** @class */ (function (_super) {
                         levelMask.transform.scaleX = 100;
                         levelMask.transform.scaleY = 100;
                         levelMask.transform.y = 20;
-                        label.transform.alpha = 0.8;
                         levelMask.parent = levelui;
                     }
                     levelui.addComponent(leaf.TouchComponent).onTouchEnd.on(function () {
@@ -3416,6 +3411,48 @@ var PuzzleLevelWin = /** @class */ (function (_super) {
     return PuzzleLevelWin;
 }(ecs.Component));
 exports.PuzzleLevelWin = PuzzleLevelWin;
+var LevelShortCut = /** @class */ (function (_super) {
+    __extends(LevelShortCut, _super);
+    function LevelShortCut() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    LevelShortCut.prototype.init = function (list, listHeight, levelIndex, hasLock, gameName, config) {
+        this.list = list;
+        this.listHeight = listHeight;
+        this.levelIndex = levelIndex;
+        this.gameName = gameName;
+        this.config = config;
+        this.hasLock = hasLock;
+    };
+    LevelShortCut.prototype.update = function () {
+        var y = this.entity.parent.transform.y;
+        var toY = y + 130;
+        if (toY + this.list.transform.y > 0 && y + this.list.transform.y < this.listHeight) {
+            if (!this.shortCut)
+                this.addShortCut(this.levelIndex, this.hasLock, this.gameName, this.config);
+        }
+        else {
+            if (this.shortCut) {
+                this.shortCut.destroy();
+                this.shortCut = null;
+            }
+        }
+    };
+    LevelShortCut.prototype.addShortCut = function (levelIndex, hasLock, name, config) {
+        this.shortCut = ecs.Entity.create();
+        this.shortCut.parent = this.entity;
+        var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, name, config, false, false, 100, 100);
+        level.parent = this.shortCut;
+        var label = ecs.Entity.create().addComponent(leaf.Label);
+        label.text = "\u7B2C" + levelIndex + "\u5173";
+        label.parent = this.shortCut;
+        label.fontSize = 20;
+        level.transform.y = 20;
+        if (!hasLock)
+            label.transform.alpha = 0.8;
+    };
+    return LevelShortCut;
+}(ecs.Component));
 
 
 /***/ }),

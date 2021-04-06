@@ -1,4 +1,4 @@
-import { PuzzleGameConfig } from "../config/puzzle-game-config";
+import { PuzzleGameConfig, PuzzleGameLevelConfig } from "../config/puzzle-game-config";
 import { PuzzleGame } from "../component/puzzle-game";
 import { GameStorage } from "../../../utils/storage/game-storage";
 import { PuzzleTip } from "./puzzle-tip";
@@ -52,13 +52,9 @@ export class PuzzleLevelWin extends ecs.Component {
                     levelui.transform.x = [30, 140][i % 2];
                     levelui.transform.y = 130 * (~~(i / 2));
 
-                    let level = ecs.Entity.create().addComponent(PuzzleGame, name, cfg.levels[i].level, false, false, 100, 100);
-                    level.parent = levelui;
-                    let label = ecs.Entity.create().addComponent(leaf.Label);
-                    label.text = `第${i + 1}关`;
-                    label.parent = levelui;
-                    label.fontSize = 20;
-                    level.transform.y = 20;
+                    let levelParent = ecs.Entity.create();
+                    levelParent.parent = levelui;
+                    levelParent.addComponent(LevelShortCut, levelList, listHeight, i + 1, i <= maxLevel, name, cfg.levels[i].level);
 
                     if (i > maxLevel) {
                         let levelMask = ecs.Entity.create().addComponent(leaf.Bitmap);
@@ -67,7 +63,6 @@ export class PuzzleLevelWin extends ecs.Component {
                         levelMask.transform.scaleX = 100;
                         levelMask.transform.scaleY = 100;
                         levelMask.transform.y = 20;
-                        label.transform.alpha = 0.8;
                         levelMask.parent = levelui;
                     }
 
@@ -111,5 +106,53 @@ export class PuzzleLevelWin extends ecs.Component {
     }
 
 
+
+}
+
+class LevelShortCut extends ecs.Component {
+
+    levelIndex: number;
+    config: PuzzleGameLevelConfig;
+    gameName: string;
+    shortCut: ecs.Entity;
+    list: ecs.Entity;
+    listHeight: number;
+    hasLock: boolean;
+
+    init(list: ecs.Entity, listHeight: number, levelIndex: number, hasLock: boolean, gameName: string, config: PuzzleGameLevelConfig) {
+        this.list = list;
+        this.listHeight = listHeight;
+        this.levelIndex = levelIndex;
+        this.gameName = gameName;
+        this.config = config;
+        this.hasLock = hasLock;
+    }
+
+    update() {
+        let y = this.entity.parent.transform.y;
+        let toY = y + 130;
+        if (toY + this.list.transform.y > 0 && y + this.list.transform.y < this.listHeight) {
+            if (!this.shortCut) this.addShortCut(this.levelIndex, this.hasLock, this.gameName, this.config);
+        } else {
+            if (this.shortCut) {
+                this.shortCut.destroy();
+                this.shortCut = null;
+            }
+        }
+    }
+
+    addShortCut(levelIndex: number, hasLock: boolean, name: string, config: PuzzleGameLevelConfig) {
+        this.shortCut = ecs.Entity.create();
+        this.shortCut.parent = this.entity;
+        let level = ecs.Entity.create().addComponent(PuzzleGame, name, config, false, false, 100, 100);
+        level.parent = this.shortCut;
+        let label = ecs.Entity.create().addComponent(leaf.Label);
+        label.text = `第${levelIndex}关`;
+        label.parent = this.shortCut;
+        label.fontSize = 20;
+        level.transform.y = 20;
+        if (!hasLock)
+            label.transform.alpha = 0.8;
+    }
 
 }
