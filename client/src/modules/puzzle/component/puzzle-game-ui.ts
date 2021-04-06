@@ -90,13 +90,12 @@ export class PuzzleGameUI extends ecs.Component {
         downBtn.transform.y = 26;
         downBtn.parent = arrGroup;
 
-
         let rect = ecs.Entity.create().addComponent(leaf.Bitmap);
         rect.texture = leaf.PointTexture.getTexture(0xff0000);
         rect.transform.scaleX = rect.transform.scaleY = 33;
         rect.parent = arrGroup;
         rect.transform.x = -4;
-        rect.transform.alpha = 0.1;
+        rect.transform.alpha = 0;
         rect.transform.y = -4;
         rect.addComponent(leaf.TouchComponent).onTouchStart.on(e => {
             let rot = Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI;

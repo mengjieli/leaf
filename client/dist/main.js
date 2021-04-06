@@ -1607,7 +1607,7 @@ var PuzzleGameUI = /** @class */ (function (_super) {
         rect.transform.scaleX = rect.transform.scaleY = 33;
         rect.parent = arrGroup;
         rect.transform.x = -4;
-        rect.transform.alpha = 0.1;
+        rect.transform.alpha = 0;
         rect.transform.y = -4;
         rect.addComponent(leaf.TouchComponent).onTouchStart.on(function (e) {
             var rot = Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI;
@@ -2836,6 +2836,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var module_scene_1 = __webpack_require__(/*! ../../../utils/ui/module-scene */ "../src/utils/ui/module-scene.ts");
 var puzzle_scene_1 = __webpack_require__(/*! ../puzzle-scene */ "../src/modules/puzzle/puzzle-scene.ts");
@@ -2844,6 +2855,25 @@ var FaceScene = /** @class */ (function (_super) {
     __extends(FaceScene, _super);
     function FaceScene() {
         var _this = _super.call(this) || this;
+        // //9,17,33
+        // let size = 29
+        // let blocks = MazeAlgorithm.makeSimpleMaze(17, 17);
+        // blocks[0][1] = 2;
+        // blocks[blocks.length - 1][blocks[0].length - 2] = 3;
+        // let print = (blocks) => {
+        //     let str = '\n';
+        //     for (let y = 0; y < blocks.length; y++) {
+        //         for (let x = 0; x < blocks[y].length; x++) {
+        //             blocks[y][x] = [".", "#", "P", "O"][blocks[y][x]] as any;
+        //             str += blocks[y][x];
+        //         }
+        //         str += '\n';
+        //     }
+        //     console.error(str);
+        // }
+        // print(blocks);
+        // // this.makeLevel();
+        // return
         // let label = ecs.Entity.create().addComponent(leaf.Label);
         // label.text = '开心游戏合集';
         // label.fontSize = 10;
@@ -2935,6 +2965,229 @@ var FaceScene = /** @class */ (function (_super) {
         return _this;
         // ui.addComponent(HPComponent);
     }
+    FaceScene.prototype.makeLevel = function () {
+        var e_1, _a, e_2, _b, e_3, _c, e_4, _d;
+        var copySearch = function (source) {
+            var copy = [];
+            for (var y = 0; y < h; y++) {
+                copy[y] = [];
+                for (var x = 0; x < w; x++) {
+                    copy[y][x] = source[y][x];
+                }
+            }
+            return copy;
+        };
+        console.clear();
+        var w = 25;
+        var h = 25;
+        var grids = [];
+        var search = [];
+        for (var y = 0; y < h; y++) {
+            search[y] = [];
+            grids[y] = [];
+            for (var x = 0; x < w; x++) {
+                search[y][x] = 0;
+                grids[y][x] = y === 0 || x === 0 || x === w - 1 || y === h - 1 ? 1 : 0;
+            }
+        }
+        grids[0][1] = 2;
+        grids[h - 1][w - 2] = 3;
+        var offsets = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+        var source = copySearch(grids);
+        while (true) {
+            var count_1 = 0;
+            grids = copySearch(source);
+            for (var y = 0; y < h; y++) {
+                var x = ~~(w * Math.random());
+                if (grids[y][x]) {
+                    continue;
+                }
+                var flag = true;
+                if (grids[y + 1][x] || grids[y - 1][x] || grids[y - 1][x - 1] || grids[y - 1][x + 1]
+                    || grids[y + 1][x - 1] || grids[y + 1][x + 1]) {
+                    flag = false;
+                    continue;
+                }
+                if (!flag)
+                    continue;
+                grids[y][x] = 1;
+                var addX = Math.random() < 0.5 ? -1 : 1;
+                var cx = x + addX;
+                while (cx >= 1 && cx < w - 1) {
+                    var flag_1 = true;
+                    if (grids[y + 1][cx] || grids[y - 1][cx] || grids[y - 1][cx - 1] || grids[y - 1][cx + 1] ||
+                        grids[y + 1][cx - 1] || grids[y + 1][cx + 1]) {
+                        flag_1 = false;
+                        break;
+                    }
+                    grids[y][cx] = 1;
+                    count_1++;
+                    cx += addX;
+                    if (!flag_1)
+                        continue;
+                    if (Math.random() < 0.2)
+                        continue;
+                }
+            }
+            if (count_1 > w + h)
+                break;
+        }
+        var count = 0;
+        while (count < h / 2) {
+            for (var y = 0; y < h; y++) {
+                var x = ~~(w * Math.random());
+                if (!grids[y][x] && !grids[y][x - 1] && !grids[y][x + 1] &&
+                    (!grids[y - 1][x] && !grids[y - 1][x - 1] && !grids[y - 1][x + 1]
+                        || !grids[y + 1][x] && !grids[y + 1][x - 1] && !grids[y + 1][x + 1])) {
+                    grids[y][x] = 1;
+                    count++;
+                }
+            }
+        }
+        var print = function (blocks) {
+            var str = '\n';
+            for (var y = 0; y < h; y++) {
+                for (var x = 0; x < w; x++) {
+                    str += blocks[y][x];
+                }
+                str += '\n';
+            }
+            console.error(str);
+        };
+        var endX = w - 2;
+        var endY = h - 1;
+        var results = [];
+        var paths = [{ x: 1, y: 0, path: [{ x: 1, y: 0 }], search: search }];
+        while (paths.length && true) {
+            if (results.length >= 1)
+                break;
+            var path_3 = paths.splice(~~(paths.length * Math.random()), 1)[0];
+            // if (path.path.length < (w + h) * 1) continue;
+            path_3.search[path_3.y][path_3.x] = 1;
+            var cks = offsets.concat();
+            while (cks.length) {
+                var offset = cks.splice(~~(Math.random() * cks.length), 1)[0];
+                var x = path_3.x + offset[0];
+                var y = path_3.y + offset[1];
+                if (x === endX && y === endY) {
+                    results.push(path_3.path.concat({ x: x, y: y }));
+                    print(path_3.search);
+                    console.error(path_3.path.length);
+                    continue;
+                }
+                if (x < 0 || x >= w || y < 0 || y >= h)
+                    continue;
+                if (path_3.search[y][x])
+                    continue;
+                if (grids[y][x])
+                    continue;
+                var flag = true;
+                try {
+                    for (var offsets_1 = (e_1 = void 0, __values(offsets)), offsets_1_1 = offsets_1.next(); !offsets_1_1.done; offsets_1_1 = offsets_1.next()) {
+                        var co = offsets_1_1.value;
+                        if (path_3.search[y + co[1]][x + co[0]] && (x + co[0] != path_3.x || y + co[1] != path_3.y)) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                }
+                catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                finally {
+                    try {
+                        if (offsets_1_1 && !offsets_1_1.done && (_a = offsets_1.return)) _a.call(offsets_1);
+                    }
+                    finally { if (e_1) throw e_1.error; }
+                }
+                if (!flag)
+                    continue;
+                var search_1 = copySearch(path_3.search);
+                search_1[path_3.y][path_3.x] = 1;
+                paths.push({
+                    x: x, y: y, path: path_3.path.concat([{ x: x, y: y }]),
+                    search: search_1
+                });
+            }
+        }
+        for (var i = 0; i < results.length; i++) {
+            for (var j = 0; j < results.length; j++) {
+                if (i === j)
+                    continue;
+                if (results[i].length != results[j].length)
+                    continue;
+                var flag = true;
+                for (var k = 0; k < results[i].length; k++) {
+                    if (results[i][k].x != results[j][k].x || results[i][k].y != results[j][k].y) {
+                        flag = false;
+                        break;
+                    }
+                }
+                if (flag) {
+                    console.error("same ???", i, j, results[i], results[j]);
+                    return;
+                }
+            }
+        }
+        // console.error(results);
+        grids = copySearch(source);
+        var path = results.pop();
+        path.shift();
+        var indexs = [];
+        try {
+            for (var path_1 = __values(path), path_1_1 = path_1.next(); !path_1_1.done; path_1_1 = path_1.next()) {
+                var p = path_1_1.value;
+                var ind = p.x + p.y * w;
+                indexs.push(ind);
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (path_1_1 && !path_1_1.done && (_b = path_1.return)) _b.call(path_1);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
+        try {
+            for (var path_2 = __values(path), path_2_1 = path_2.next(); !path_2_1.done; path_2_1 = path_2.next()) {
+                var p = path_2_1.value;
+                try {
+                    for (var offsets_2 = (e_4 = void 0, __values(offsets)), offsets_2_1 = offsets_2.next(); !offsets_2_1.done; offsets_2_1 = offsets_2.next()) {
+                        var off = offsets_2_1.value;
+                        var x = p.x + off[1];
+                        var y = p.y + off[0];
+                        if (x < 0 || x >= w || y < 0 || y >= h)
+                            continue;
+                        var ind = x + y * w;
+                        if (indexs.indexOf(ind) != -1)
+                            continue;
+                        if (!grids[y][x])
+                            grids[y][x] = 1;
+                        // console.error(x, y, ind, indexs);
+                    }
+                }
+                catch (e_4_1) { e_4 = { error: e_4_1 }; }
+                finally {
+                    try {
+                        if (offsets_2_1 && !offsets_2_1.done && (_d = offsets_2.return)) _d.call(offsets_2);
+                    }
+                    finally { if (e_4) throw e_4.error; }
+                }
+            }
+        }
+        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+        finally {
+            try {
+                if (path_2_1 && !path_2_1.done && (_c = path_2.return)) _c.call(path_2);
+            }
+            finally { if (e_3) throw e_3.error; }
+        }
+        for (var y = 0; y < h; y++) {
+            for (var x = 0; x < w; x++) {
+                grids[y][x] = [".", "#", "P", "O"][grids[y][x]];
+            }
+        }
+        print(grids);
+        // console.error(JSON.stringify(grids, null, 2));
+    };
     FaceScene = __decorate([
         orange.autoload("FaceScene")
     ], FaceScene);
