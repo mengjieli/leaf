@@ -32,6 +32,11 @@
       "type": 4
     },
     {
+      "name": "game1-4_txt",
+      "path": "assets/game/game1/game1-4.txt",
+      "type": 4
+    },
+    {
       "name": "block_png",
       "path": "assets/block.png",
       "type": 1

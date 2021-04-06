@@ -76,12 +76,14 @@ export class FaceScene extends ModuleScene {
         let gameList = [
             'game1-1_txt',
             'game1-2_txt',
-            'game1-3_txt'
+            'game1-3_txt',
+            'game1-4_txt'
         ]
         let nameList = [
             '经典推箱子',
             '走迷宫',
-            '初级推箱子'
+            '初级推箱子',
+            '吃苹果'
         ]
 
         for (let i = 0; i < gameList.length; i++) {

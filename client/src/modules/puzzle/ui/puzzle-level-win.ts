@@ -59,7 +59,7 @@ export class PuzzleLevelWin extends ecs.Component {
                     if (i > maxLevel) {
                         let levelMask = ecs.Entity.create().addComponent(leaf.Bitmap);
                         levelMask.texture = leaf.PointTexture.getTexture(0);
-                        levelMask.transform.alpha = Math.min(0.96, 0.7 + 0.02 * (i - maxLevel));
+                        levelMask.transform.alpha = Math.min(0.9, 0.7 + 0.02 * (i - maxLevel));
                         levelMask.transform.scaleX = 100;
                         levelMask.transform.scaleY = 100;
                         levelMask.transform.y = 20;

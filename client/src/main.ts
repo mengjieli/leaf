@@ -30,8 +30,8 @@ export class Main {
         leaf.Res.loadResources().then(() => {
             leaf.Res.getRes("block_png").load().then(
                 () => {
-                    // new PuzzleScene();
-                    new FaceScene();
+                    new PuzzleScene();
+                    // new FaceScene();
                 }
             )
         })

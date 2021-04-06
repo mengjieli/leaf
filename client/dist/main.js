@@ -132,7 +132,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var face_scene_1 = __webpack_require__(/*! ./modules/puzzle/face/face-scene */ "../src/modules/puzzle/face/face-scene.ts");
+var puzzle_scene_1 = __webpack_require__(/*! ./modules/puzzle/puzzle-scene */ "../src/modules/puzzle/puzzle-scene.ts");
 var Main = /** @class */ (function () {
     function Main() {
         this.init();
@@ -167,8 +167,8 @@ var Main = /** @class */ (function () {
                         console.error(leaf.GLCore.width, leaf.world.root.transform.scaleX);
                         leaf.Res.loadResources().then(function () {
                             leaf.Res.getRes("block_png").load().then(function () {
-                                // new PuzzleScene();
-                                new face_scene_1.FaceScene();
+                                new puzzle_scene_1.PuzzleScene();
+                                // new FaceScene();
                             });
                         });
                         return [2 /*return*/];
@@ -2911,12 +2911,14 @@ var FaceScene = /** @class */ (function (_super) {
         var gameList = [
             'game1-1_txt',
             'game1-2_txt',
-            'game1-3_txt'
+            'game1-3_txt',
+            'game1-4_txt'
         ];
         var nameList = [
             '经典推箱子',
             '走迷宫',
-            '初级推箱子'
+            '初级推箱子',
+            '吃苹果'
         ];
         var _loop_1 = function (i) {
             var levelui = ecs.Entity.create();
@@ -3228,7 +3230,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var module_scene_1 = __webpack_require__(/*! ../../utils/ui/module-scene */ "../src/utils/ui/module-scene.ts");
-var puzzle_level_win_1 = __webpack_require__(/*! ./ui/puzzle-level-win */ "../src/modules/puzzle/ui/puzzle-level-win.ts");
+var puzzle_game_1 = __webpack_require__(/*! ./component/puzzle-game */ "../src/modules/puzzle/component/puzzle-game.ts");
 var face_scene_1 = __webpack_require__(/*! ./face/face-scene */ "../src/modules/puzzle/face/face-scene.ts");
 var PuzzleScene = /** @class */ (function (_super) {
     __extends(PuzzleScene, _super);
@@ -3237,8 +3239,8 @@ var PuzzleScene = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         var child = ecs.Entity.create();
         child.parent = _this.scene;
-        // ecs.Entity.create().addComponent(PuzzleGame, 'game1-1_txt', 10).parent = child;
-        ecs.Entity.create().addComponent(puzzle_level_win_1.PuzzleLevelWin, game).parent = child;
+        ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, 'game1-4_txt', 1).parent = child;
+        // ecs.Entity.create().addComponent(PuzzleLevelWin, game).parent = child;
         var zBtn = ecs.Entity.create().addComponent(leaf.Bitmap);
         zBtn.texture = leaf.RectTexture.getTexture(leaf.RectTexture.formatColors(0xffffff + "," + 0xaa0000 + "\n" +
             '0.....0\n' +
@@ -3279,257 +3281,6 @@ var PuzzleScene = /** @class */ (function (_super) {
     return PuzzleScene;
 }(module_scene_1.ModuleScene));
 exports.PuzzleScene = PuzzleScene;
-
-
-/***/ }),
-
-/***/ "../src/modules/puzzle/ui/puzzle-level-win.ts":
-/*!****************************************************!*\
-  !*** ../src/modules/puzzle/ui/puzzle-level-win.ts ***!
-  \****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var puzzle_game_config_1 = __webpack_require__(/*! ../config/puzzle-game-config */ "../src/modules/puzzle/config/puzzle-game-config.ts");
-var puzzle_game_1 = __webpack_require__(/*! ../component/puzzle-game */ "../src/modules/puzzle/component/puzzle-game.ts");
-var game_storage_1 = __webpack_require__(/*! ../../../utils/storage/game-storage */ "../src/utils/storage/game-storage.ts");
-var puzzle_tip_1 = __webpack_require__(/*! ./puzzle-tip */ "../src/modules/puzzle/ui/puzzle-tip.ts");
-orange.autoloadLink("PuzzleScene");
-var PuzzleLevelWin = /** @class */ (function (_super) {
-    __extends(PuzzleLevelWin, _super);
-    function PuzzleLevelWin() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    PuzzleLevelWin.prototype.init = function (name) {
-        var _this = this;
-        if (name === void 0) { name = 'game1-1_txt'; }
-        var root = ecs.Entity.create();
-        root.parent = this.entity;
-        root.transform.y = 40;
-        var listScroller = ecs.Entity.create();
-        listScroller.parent = root;
-        var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
-        bg.parent = listScroller;
-        bg.texture = leaf.PointTexture.getTexture(0x00ff00);
-        bg.transform.scaleX = leaf.getStageWidth();
-        bg.transform.scaleY = leaf.getStageHeight() - 40 - 60;
-        bg.transform.alpha = 0;
-        var levelList = ecs.Entity.create();
-        levelList.parent = listScroller;
-        var mask = ecs.Entity.create().addComponent(leaf.Bitmap);
-        mask.texture = leaf.PointTexture.getTexture(0);
-        mask.parent = this.entity;
-        mask.transform.scaleX = leaf.getStageWidth();
-        mask.transform.scaleY = 40;
-        mask = ecs.Entity.create().addComponent(leaf.Bitmap);
-        mask.texture = leaf.PointTexture.getTexture(0);
-        mask.parent = this.entity;
-        mask.transform.scaleX = leaf.getStageWidth();
-        mask.transform.scaleY = 60;
-        mask.transform.y = leaf.getStageHeight() - mask.transform.scaleY;
-        var listHeight = leaf.getStageHeight() - 60 - 40;
-        game_storage_1.GameStorage.getStorage(name + "_maxStage").then(function (v) {
-            var maxLevel = v || 0;
-            // console.error('关卡', `${name}_maxStage`, v);
-            puzzle_game_config_1.PuzzleGameConfig.loadGameConfig(name, function (cfg) {
-                var _loop_1 = function (i) {
-                    var levelui = ecs.Entity.create();
-                    levelui.parent = levelList;
-                    levelui.transform.x = [30, 140][i % 2];
-                    levelui.transform.y = 130 * (~~(i / 2));
-                    var levelParent = ecs.Entity.create();
-                    levelParent.parent = levelui;
-                    levelParent.addComponent(LevelShortCut, levelList, listHeight, i + 1, i <= maxLevel, name, cfg.levels[i].level);
-                    if (i > maxLevel) {
-                        var levelMask = ecs.Entity.create().addComponent(leaf.Bitmap);
-                        levelMask.texture = leaf.PointTexture.getTexture(0);
-                        levelMask.transform.alpha = Math.min(0.96, 0.7 + 0.02 * (i - maxLevel));
-                        levelMask.transform.scaleX = 100;
-                        levelMask.transform.scaleY = 100;
-                        levelMask.transform.y = 20;
-                        levelMask.parent = levelui;
-                    }
-                    levelui.addComponent(leaf.TouchComponent).onTouchEnd.on(function () {
-                        if (startScroll)
-                            return;
-                        if (i + 1 > maxLevel + 1) {
-                            puzzle_tip_1.PuzzleTip.show("完成上一关即可解锁，加油～");
-                            return;
-                        }
-                        _this.entity.destroy();
-                        ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, name, i + 1).parent = leaf.world.scene;
-                    });
-                };
-                // for (let i = cfg.levels.length; i < 40; i++) {
-                //     cfg.levels[i] = cfg.levels[~~(Math.random() * cfg.levels.length)];
-                // }
-                for (var i = 0; i < cfg.levels.length; i++) {
-                    _loop_1(i);
-                }
-                var startX = 0;
-                var startY = 0;
-                var levelY = levelList.transform.y;
-                var startScroll = false;
-                listScroller.addComponent(leaf.TouchComponent).onTouchStart.on(function (e) {
-                    startScroll = false;
-                    startX = e.stageX;
-                    startY = e.stageY;
-                    levelY = levelList.transform.y;
-                });
-                listScroller.getComponent(leaf.TouchComponent).onTouchMove.on(function (e) {
-                    if (Math.abs(e.stageX - startX) > 10 || Math.abs(e.stageY - startY) > 10) {
-                        startScroll = true;
-                    }
-                    if (startScroll) {
-                        levelList.transform.y = levelY - startY + e.stageY;
-                        if (levelList.transform.y < listHeight - 130 * (~~(cfg.levels.length / 2))) {
-                            levelList.transform.y = listHeight - 130 * (~~(cfg.levels.length / 2));
-                        }
-                        if (levelList.transform.y > 0)
-                            levelList.transform.y = 0;
-                    }
-                });
-            });
-        });
-    };
-    return PuzzleLevelWin;
-}(ecs.Component));
-exports.PuzzleLevelWin = PuzzleLevelWin;
-var LevelShortCut = /** @class */ (function (_super) {
-    __extends(LevelShortCut, _super);
-    function LevelShortCut() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    LevelShortCut.prototype.init = function (list, listHeight, levelIndex, hasLock, gameName, config) {
-        this.list = list;
-        this.listHeight = listHeight;
-        this.levelIndex = levelIndex;
-        this.gameName = gameName;
-        this.config = config;
-        this.hasLock = hasLock;
-    };
-    LevelShortCut.prototype.update = function () {
-        var y = this.entity.parent.transform.y;
-        var toY = y + 130;
-        if (toY + this.list.transform.y > 0 && y + this.list.transform.y < this.listHeight) {
-            if (!this.shortCut)
-                this.addShortCut(this.levelIndex, this.hasLock, this.gameName, this.config);
-        }
-        else {
-            if (this.shortCut) {
-                this.shortCut.destroy();
-                this.shortCut = null;
-            }
-        }
-    };
-    LevelShortCut.prototype.addShortCut = function (levelIndex, hasLock, name, config) {
-        this.shortCut = ecs.Entity.create();
-        this.shortCut.parent = this.entity;
-        var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, name, config, false, false, 100, 100);
-        level.parent = this.shortCut;
-        var label = ecs.Entity.create().addComponent(leaf.Label);
-        label.text = "\u7B2C" + levelIndex + "\u5173";
-        label.parent = this.shortCut;
-        label.fontSize = 20;
-        level.transform.y = 20;
-        if (!hasLock)
-            label.transform.alpha = 0.8;
-    };
-    return LevelShortCut;
-}(ecs.Component));
-
-
-/***/ }),
-
-/***/ "../src/modules/puzzle/ui/puzzle-tip.ts":
-/*!**********************************************!*\
-  !*** ../src/modules/puzzle/ui/puzzle-tip.ts ***!
-  \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-orange.autoloadLink("PuzzleScene");
-var PuzzleTip = /** @class */ (function (_super) {
-    __extends(PuzzleTip, _super);
-    function PuzzleTip() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    PuzzleTip.prototype.init = function (text, color, time) {
-        var _this = this;
-        if (text === void 0) { text = ''; }
-        if (color === void 0) { color = 0xff8888; }
-        if (time === void 0) { time = 2000; }
-        this.parent = leaf.world.scene;
-        var label = ecs.Entity.create().addComponent(leaf.Label);
-        label.text = text;
-        label.fontSize = 10;
-        label.fontColor = color;
-        var rect = ecs.Entity.create().addComponent(leaf.Bitmap);
-        rect.parent = this.entity;
-        rect.transform.alpha = 0.8;
-        rect.texture = leaf.PointTexture.getTexture(0);
-        rect.transform.scaleX = label.textWidth + 20;
-        rect.transform.scaleY = label.textHeight + 10;
-        label.parent = this.entity;
-        label.transform.x = (leaf.getStageWidth() - label.textWidth) / 2;
-        label.transform.y = (leaf.getStageHeight() - label.textHeight) / 2;
-        rect.transform.x = label.transform.x - 10;
-        rect.transform.y = label.transform.y - 5;
-        this.transform.alpha = 0;
-        this.transform.y += 30;
-        this.addComponent(tween.Tween, this.transform, 300, {
-            alpha: 1,
-            y: this.transform.y - 30
-        }, tween.EaseFunction.QuadEaseOut);
-        setTimeout(function () {
-            _this.addComponent(tween.Tween, _this.transform, 300, {
-                alpha: 0,
-                y: _this.transform.y - 30
-            }, tween.EaseFunction.QuadEaseIn).onComplete = function () {
-                _this.entity.destroy();
-            };
-        }, time);
-    };
-    PuzzleTip.show = function (txt, color, time) {
-        if (color === void 0) { color = 0xff8888; }
-        if (time === void 0) { time = 2000; }
-        ecs.Entity.create().addComponent(PuzzleTip, txt);
-    };
-    return PuzzleTip;
-}(ecs.Component));
-exports.PuzzleTip = PuzzleTip;
 
 
 /***/ }),
