@@ -17,7 +17,7 @@ export class Main {
             } catch (e) {
 
             }
-            await orange.startup({
+        await orange.startup({
                 native: {
                     ip: "localhost",//"192.168.0.100",//(new orange.URLUtil(window.location.href)).params["serverIp"] || "localhost",
                     autoCompile: true
@@ -30,8 +30,8 @@ export class Main {
         leaf.Res.loadResources().then(() => {
             leaf.Res.getRes("block_png").load().then(
                 () => {
-                    new PuzzleScene();
-                    // new FaceScene();
+                    // new PuzzleScene();
+                    new FaceScene();
                 }
             )
         })

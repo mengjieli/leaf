@@ -17,14 +17,14 @@ import './js/main'
 window["IS_WEB"] = false;
 
 var fs = window.wxfs = wx.getFileSystemManager();
-window.wxloadText = function(url,onComplete) {
+window.wxloadText = function (url, onComplete) {
   fs.readFile({
-    filePath:url,
-    encoding:"utf-8",
-    success:function(a) {
+    filePath: url,
+    encoding: "utf-8",
+    success: function (a) {
       onComplete(a.data)
     },
-    fail:function(a) {
+    fail: function (a) {
       console.error(a)
     }
   })
@@ -32,3 +32,22 @@ window.wxloadText = function(url,onComplete) {
 
 new window.Main();
 
+wx.onShareAppMessage(function () {
+  // 用户点击了“转发”按钮
+  return {
+    title: '老婆在家千万不能开...'
+  }
+})
+
+
+wx.showShareMenu({
+  withShareTicket: true,
+  menus: ['shareAppMessage', 'shareTimeline']
+})
+
+
+
+
+// wx.shareAppMessage({
+//   title: '老婆在家千万不能开...'
+// })

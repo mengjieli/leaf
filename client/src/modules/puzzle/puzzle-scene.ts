@@ -12,8 +12,8 @@ export class PuzzleScene extends ModuleScene {
         let child = ecs.Entity.create();
         child.parent = this.scene;
 
-        ecs.Entity.create().addComponent(PuzzleGame, 'game1-4_txt', 1).parent = child;
-        // ecs.Entity.create().addComponent(PuzzleLevelWin, game).parent = child;
+        // ecs.Entity.create().addComponent(PuzzleGame, 'game1-4_txt', 1).parent = child;
+        ecs.Entity.create().addComponent(PuzzleLevelWin, game).parent = child;
 
         let zBtn = ecs.Entity.create().addComponent(leaf.Bitmap);
         zBtn.texture = leaf.RectTexture.getTexture(leaf.RectTexture.formatColors(

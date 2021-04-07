@@ -28,7 +28,7 @@ export class PuzzleGame extends ecs.Component {
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
 
-        leaf.StateWin.show();
+        // leaf.StateWin.show();
     }
 
     awake() {

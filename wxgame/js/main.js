@@ -1886,23 +1886,21 @@ var PuzzleGameConfig = /** @class */ (function () {
                     i = this.parseLevels(lines, i + 2);
                 if (name_1 === EMPuzzleGameModel.FACE)
                     i = this.parseFace(lines, i + 2);
-                for (var name_2 in this.objects)
-                    this.objects[name_2].game = this;
             }
         }
         var index = 0;
-        for (var name_3 in this.objects) {
-            this.objects[name_3].id = index++;
-            if (this.groups[EMPuzzleConst.PLAYER].indexOf(this.objects[name_3]) != -1) {
-                this.objects[name_3].isPlayer = true;
+        for (var name_2 in this.objects) {
+            this.objects[name_2].id = index++;
+            if (this.groups[EMPuzzleConst.PLAYER].indexOf(this.objects[name_2]) != -1) {
+                this.objects[name_2].isPlayer = true;
             }
-            if (this.blockWidth < this.objects[name_3].width)
-                this.blockWidth = this.objects[name_3].width;
-            if (this.blockHeight < this.objects[name_3].height)
-                this.blockHeight = this.objects[name_3].height;
+            if (this.blockWidth < this.objects[name_2].width)
+                this.blockWidth = this.objects[name_2].width;
+            if (this.blockHeight < this.objects[name_2].height)
+                this.blockHeight = this.objects[name_2].height;
         }
-        for (var name_4 in this.objects) {
-            var obj = this.objects[name_4];
+        for (var name_3 in this.objects) {
+            var obj = this.objects[name_3];
             if (!obj.blocks.length || !obj.blocks[0].length) {
                 for (var y = 0; y < this.blockHeight; y++) {
                     obj.blocks[y] = [];
@@ -2005,7 +2003,7 @@ var PuzzleGameConfig = /** @class */ (function () {
             }
             else {
                 if (level) {
-                    this.levels.push(level);
+                    this.face = level;
                 }
                 level = null;
             }
@@ -2446,10 +2444,10 @@ var PuzzleGameConfig = /** @class */ (function () {
                 var names = line.split(",");
                 try {
                     for (var names_1 = (e_17 = void 0, __values(names)), names_1_1 = names_1.next(); !names_1_1.done; names_1_1 = names_1.next()) {
-                        var name_5 = names_1_1.value;
-                        name_5 = this.deleteSpace(name_5);
+                        var name_4 = names_1_1.value;
+                        name_4 = this.deleteSpace(name_4);
                         try {
-                            for (var _c = (e_18 = void 0, __values(this.groups[name_5])), _d = _c.next(); !_d.done; _d = _c.next()) {
+                            for (var _c = (e_18 = void 0, __values(this.groups[name_4])), _d = _c.next(); !_d.done; _d = _c.next()) {
                                 var obj = _d.value;
                                 obj.layer = this.maxLayer;
                             }
@@ -2485,12 +2483,12 @@ var PuzzleGameConfig = /** @class */ (function () {
             }
             if (line.indexOf("=") != -1) {
                 var legend = line.split("=")[0];
-                var name_6 = line.split("=")[1];
-                name_6 = this.deleteSpace(name_6);
+                var name_5 = line.split("=")[1];
+                name_5 = this.deleteSpace(name_5);
                 legend = this.deleteSpace(legend);
                 if (legend.length === 1) {
                     this.legends[legend] = [];
-                    var names = name_6.split("and");
+                    var names = name_5.split("and");
                     try {
                         for (var names_2 = (e_19 = void 0, __values(names)), names_2_1 = names_2.next(); !names_2_1.done; names_2_1 = names_2.next()) {
                             var n = names_2_1.value;
@@ -2508,7 +2506,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                 }
                 else {
                     this.groups[legend] = [];
-                    var names = name_6.split("or");
+                    var names = name_5.split("or");
                     try {
                         for (var names_3 = (e_20 = void 0, __values(names)), names_3_1 = names_3.next(); !names_3_1.done; names_3_1 = names_3.next()) {
                             var n = names_3_1.value;
@@ -2532,9 +2530,11 @@ var PuzzleGameConfig = /** @class */ (function () {
             var line = lines[i];
             if (this.isBlockDevice(line)) {
                 // console.error(this.objects);
+                for (var name_6 in this.objects)
+                    this.objects[name_6].game = this;
                 return i - 1;
             }
-            var name_7 = line.match(/[a-zA-Z0-9]+/) && line.match(/[a-zA-Z0-9]+/).length ? line.match(/[a-zA-Z0-9]+/)[0] : "";
+            var name_7 = line.match(/[a-zA-Z0-9_]+/) && line.match(/[a-zA-Z0-9_]+/).length ? line.match(/[a-zA-Z0-9_]+/)[0] : "";
             if (name_7 && name_7.length) {
                 var obj = new PuzzleGameObjectConfig();
                 obj.name = name_7;
@@ -2543,7 +2543,7 @@ var PuzzleGameConfig = /** @class */ (function () {
                 obj.width = 0;
                 obj.height = 0;
                 i++;
-                var colorTexts = lines[i++].match(/[#0-9a-zA-Z]+/g);
+                var colorTexts = lines[i++].match(/[#0-9a-zA-Z_]+/g);
                 var colorSum = '';
                 for (var c = 0; c < colorTexts.length; c++) {
                     var cstr = colorTexts[c];
@@ -2582,6 +2582,7 @@ var PuzzleGameConfig = /** @class */ (function () {
         return lines.length;
     };
     PuzzleGameConfig.prototype.isBlockDevice = function (line) {
+        line = this.deleteSpace(line);
         return line.length && line.match(/=/g) && line.match(/=/g).length === line.length;
     };
     PuzzleGameConfig.prototype.deleteSpace = function (line) {
@@ -2911,19 +2912,19 @@ var FaceScene = /** @class */ (function (_super) {
         var gameList = [
             'game1-1_txt',
             'game1-2_txt',
-            'game1-3_txt'
+            'game1-3_txt',
         ];
         var nameList = [
             '经典推箱子',
             '走迷宫',
-            '初级推箱子'
+            '初级推箱子',
         ];
         var _loop_1 = function (i) {
             var levelui = ecs.Entity.create();
             levelui.parent = levelList;
             levelui.transform.x = [30, 140][i % 2];
             levelui.transform.y = 130 * (~~(i / 2));
-            var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, gameList[i], 1, false, false, 100, 100);
+            var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, gameList[i], 0, false, false, 100, 100);
             level.parent = levelui;
             var label = ecs.Entity.create().addComponent(leaf.Label);
             label.text = nameList[i];
@@ -3237,7 +3238,7 @@ var PuzzleScene = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         var child = ecs.Entity.create();
         child.parent = _this.scene;
-        // ecs.Entity.create().addComponent(PuzzleGame, 'game1-1_txt', 10).parent = child;
+        // ecs.Entity.create().addComponent(PuzzleGame, 'game1-4_txt', 1).parent = child;
         ecs.Entity.create().addComponent(puzzle_level_win_1.PuzzleLevelWin, game).parent = child;
         var zBtn = ecs.Entity.create().addComponent(leaf.Bitmap);
         zBtn.texture = leaf.RectTexture.getTexture(leaf.RectTexture.formatColors(0xffffff + "," + 0xaa0000 + "\n" +
@@ -3353,21 +3354,16 @@ var PuzzleLevelWin = /** @class */ (function (_super) {
                     levelui.parent = levelList;
                     levelui.transform.x = [30, 140][i % 2];
                     levelui.transform.y = 130 * (~~(i / 2));
-                    var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, name, cfg.levels[i].level, false, false, 100, 100);
-                    level.parent = levelui;
-                    var label = ecs.Entity.create().addComponent(leaf.Label);
-                    label.text = "\u7B2C" + (i + 1) + "\u5173";
-                    label.parent = levelui;
-                    label.fontSize = 20;
-                    level.transform.y = 20;
+                    var levelParent = ecs.Entity.create();
+                    levelParent.parent = levelui;
+                    levelParent.addComponent(LevelShortCut, levelList, listHeight, i + 1, i <= maxLevel, name, cfg.levels[i].level);
                     if (i > maxLevel) {
                         var levelMask = ecs.Entity.create().addComponent(leaf.Bitmap);
                         levelMask.texture = leaf.PointTexture.getTexture(0);
-                        levelMask.transform.alpha = Math.min(0.96, 0.7 + 0.02 * (i - maxLevel));
+                        levelMask.transform.alpha = Math.min(0.9, 0.7 + 0.02 * (i - maxLevel));
                         levelMask.transform.scaleX = 100;
                         levelMask.transform.scaleY = 100;
                         levelMask.transform.y = 20;
-                        label.transform.alpha = 0.8;
                         levelMask.parent = levelui;
                     }
                     levelui.addComponent(leaf.TouchComponent).onTouchEnd.on(function () {
@@ -3416,6 +3412,48 @@ var PuzzleLevelWin = /** @class */ (function (_super) {
     return PuzzleLevelWin;
 }(ecs.Component));
 exports.PuzzleLevelWin = PuzzleLevelWin;
+var LevelShortCut = /** @class */ (function (_super) {
+    __extends(LevelShortCut, _super);
+    function LevelShortCut() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    LevelShortCut.prototype.init = function (list, listHeight, levelIndex, hasLock, gameName, config) {
+        this.list = list;
+        this.listHeight = listHeight;
+        this.levelIndex = levelIndex;
+        this.gameName = gameName;
+        this.config = config;
+        this.hasLock = hasLock;
+    };
+    LevelShortCut.prototype.update = function () {
+        var y = this.entity.parent.transform.y;
+        var toY = y + 130;
+        if (toY + this.list.transform.y > 0 && y + this.list.transform.y < this.listHeight) {
+            if (!this.shortCut)
+                this.addShortCut(this.levelIndex, this.hasLock, this.gameName, this.config);
+        }
+        else {
+            if (this.shortCut) {
+                this.shortCut.destroy();
+                this.shortCut = null;
+            }
+        }
+    };
+    LevelShortCut.prototype.addShortCut = function (levelIndex, hasLock, name, config) {
+        this.shortCut = ecs.Entity.create();
+        this.shortCut.parent = this.entity;
+        var level = ecs.Entity.create().addComponent(puzzle_game_1.PuzzleGame, name, config, false, false, 100, 100);
+        level.parent = this.shortCut;
+        var label = ecs.Entity.create().addComponent(leaf.Label);
+        label.text = "\u7B2C" + levelIndex + "\u5173";
+        label.parent = this.shortCut;
+        label.fontSize = 20;
+        level.transform.y = 20;
+        if (!hasLock)
+            label.transform.alpha = 0.8;
+    };
+    return LevelShortCut;
+}(ecs.Component));
 
 
 /***/ }),
