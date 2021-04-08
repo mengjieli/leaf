@@ -2628,6 +2628,7 @@ function compile(command, text, randomseed) {
     return state;
 }
 
+window["compile"] = compile;
 
 
 function qualifyURL(url) {

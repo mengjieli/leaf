@@ -10,6 +10,7 @@ import './js/libs/native'
 import './js/libs/sync-data'
 import './js/libs/behavior-tree'
 import './js/libs/tween'
+import './js/libs/puzzle-script'
 import './js/libs/symbol'
 
 import './js/main'

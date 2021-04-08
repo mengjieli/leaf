@@ -1275,4 +1275,4 @@ var codeMirrorFn = function() {
     };
 };
 
-window.CodeMirror.defineMode('puzzle', codeMirrorFn);
+// window.CodeMirror.defineMode('puzzle', codeMirrorFn);

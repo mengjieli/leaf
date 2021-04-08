@@ -15,7 +15,7 @@ export class FaceScene extends ModuleScene {
             // console.error(r.data)
             let state = compile(["restart"], r.data as string);
             console.error(window["level"]);
-            window["loadLevelFromState"](state, 1);
+            window["loadLevelFromState"](state, 2);
 
 
             function print() {

@@ -411,7 +411,7 @@ function loadLevelFromLevelDat(state, leveldat, randomseed) {
 	if (leveldat.message === undefined) {
 		titleMode = 0;
 		textMode = false;
-		level = leveldat.clone();
+		window.level = level = leveldat.clone();
 		RebuildLevelArrays();
 
 

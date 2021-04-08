@@ -1,5 +1,6 @@
 import { FaceScene } from "./modules/puzzle/face/face-scene";
 import { PuzzleScene } from "./modules/puzzle/puzzle-scene";
+import { PuzzleScriptScene } from "./modules/puzzle-script/puzzle-script-scene";
 
 export class Main {
 
@@ -17,7 +18,7 @@ export class Main {
             } catch (e) {
 
             }
-        await orange.startup({
+            await orange.startup({
                 native: {
                     ip: "localhost",//"192.168.0.100",//(new orange.URLUtil(window.location.href)).params["serverIp"] || "localhost",
                     autoCompile: true
@@ -31,7 +32,8 @@ export class Main {
             leaf.Res.getRes("block_png").load().then(
                 () => {
                     // new PuzzleScene();
-                    new FaceScene();
+                    // new FaceScene();
+                    new PuzzleScriptScene();
                 }
             )
         })
