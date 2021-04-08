@@ -37,6 +37,11 @@
       "type": 4
     },
     {
+      "name": "test_txt",
+      "path": "assets/game/test.txt",
+      "type": 4
+    },
+    {
       "name": "block_png",
       "path": "assets/block.png",
       "type": 1

@@ -11,6 +11,14 @@ export class FaceScene extends ModuleScene {
     constructor() {
         super();
 
+        leaf.Res.getRes("test_txt").load().then(r => {
+            // console.error(r.data)
+            let state = compile(["restart"], r.data as string);
+            console.error(state);
+        });
+        return;
+
+        // return;
         // //9,17,33
         // let size = 29
         // let blocks = MazeAlgorithm.makeSimpleMaze(17, 17);

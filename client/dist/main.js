@@ -2856,6 +2856,13 @@ var FaceScene = /** @class */ (function (_super) {
     __extends(FaceScene, _super);
     function FaceScene() {
         var _this = _super.call(this) || this;
+        leaf.Res.getRes("test_txt").load().then(function (r) {
+            // console.error(r.data)
+            var state = compile(["restart"], r.data);
+            console.error(state);
+        });
+        return _this;
+        // return;
         // //9,17,33
         // let size = 29
         // let blocks = MazeAlgorithm.makeSimpleMaze(17, 17);

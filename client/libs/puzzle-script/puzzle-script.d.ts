@@ -1,0 +1,1 @@
+declare function compile(command: stringp[], text: string, seed?: number);
