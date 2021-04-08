@@ -21,6 +21,7 @@ Mobile.hasTouch = function() {
 }
 
 Mobile.enable = function (force) {
+    return;
     if (force || Mobile.hasTouch() && !Mobile._instance) {
         Mobile._instance = new Mobile.GestureHandler();
         Mobile._instance.bindEvents();

@@ -2859,7 +2859,116 @@ var FaceScene = /** @class */ (function (_super) {
         leaf.Res.getRes("test_txt").load().then(function (r) {
             // console.error(r.data)
             var state = compile(["restart"], r.data);
-            console.error(state);
+            console.error(window["level"]);
+            window["loadLevelFromState"](state, 1);
+            function print() {
+                var e_1, _a, e_2, _b, e_3, _c, e_4, _d;
+                var str = "\n";
+                for (var y = 0; y < window["level"].height; y++) {
+                    for (var x = 0; x < window["level"].width; x++) {
+                        var ind = y + x * window["level"].height;
+                        var pc = "-";
+                        try {
+                            for (var _e = (e_1 = void 0, __values(state.collisionLayers[3])), _f = _e.next(); !_f.done; _f = _e.next()) {
+                                var name_1 = _f.value;
+                                var char = "?";
+                                try {
+                                    for (var _g = (e_2 = void 0, __values(state.legend_synonyms)), _h = _g.next(); !_h.done; _h = _g.next()) {
+                                        var item = _h.value;
+                                        if (item[1] === name_1)
+                                            char = item[0];
+                                    }
+                                }
+                                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                                finally {
+                                    try {
+                                        if (_h && !_h.done && (_b = _g.return)) _b.call(_g);
+                                    }
+                                    finally { if (e_2) throw e_2.error; }
+                                }
+                                if (window["level"].objects[ind] & state.objectMasks[name_1].data[0]) {
+                                    pc = char;
+                                }
+                            }
+                        }
+                        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                        finally {
+                            try {
+                                if (_f && !_f.done && (_a = _e.return)) _a.call(_e);
+                            }
+                            finally { if (e_1) throw e_1.error; }
+                        }
+                        try {
+                            for (var _j = (e_3 = void 0, __values(state.collisionLayers[2])), _k = _j.next(); !_k.done; _k = _j.next()) {
+                                var name_2 = _k.value;
+                                var char = "?";
+                                try {
+                                    for (var _l = (e_4 = void 0, __values(state.legend_synonyms)), _m = _l.next(); !_m.done; _m = _l.next()) {
+                                        var item = _m.value;
+                                        if (item[1] === name_2)
+                                            char = item[0];
+                                    }
+                                }
+                                catch (e_4_1) { e_4 = { error: e_4_1 }; }
+                                finally {
+                                    try {
+                                        if (_m && !_m.done && (_d = _l.return)) _d.call(_l);
+                                    }
+                                    finally { if (e_4) throw e_4.error; }
+                                }
+                                if (window["level"].objects[ind] & state.objectMasks[name_2].data[0]) {
+                                    pc = char;
+                                }
+                            }
+                        }
+                        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                        finally {
+                            try {
+                                if (_k && !_k.done && (_c = _j.return)) _c.call(_j);
+                            }
+                            finally { if (e_3) throw e_3.error; }
+                        }
+                        str += pc;
+                    }
+                    str += "\n";
+                }
+                console.error(str);
+            }
+            print();
+            // window["processInput"](0)
+            // print();
+            var flag = false;
+            window.onkeyup = function (e) {
+                console.clear();
+                console.error(e.keyCode);
+                if (e.keyCode === 87 || e.keyCode === 38) {
+                    window["processInput"](0);
+                }
+                else if (e.keyCode === 83 || e.keyCode === 40) {
+                    window["processInput"](2);
+                }
+                else if (e.keyCode === 65 || e.keyCode === 37) {
+                    window["processInput"](1);
+                }
+                else if (e.keyCode === 68 || e.keyCode === 39) {
+                    window["processInput"](3);
+                }
+                else if (e.keyCode === 90) {
+                    window["processInput"]("undo");
+                    window["DoUndo"](false, true);
+                }
+                else if (e.keyCode === 82) {
+                    window["processInput"]("restart");
+                    window["DoRestart"]();
+                    //restart
+                }
+                print();
+            };
+            // let sign = 
+            //left 1 right 3 up 0 down 2 none 4
+            // console.error(window["level"].objects);
+            // console.error(state.objectMasks.player.data[0]);
+            // console.error(state.objectMasks.playerbody.data[0]);
         });
         return _this;
         // return;
@@ -2974,7 +3083,7 @@ var FaceScene = /** @class */ (function (_super) {
         // ui.addComponent(HPComponent);
     }
     FaceScene.prototype.makeLevel = function () {
-        var e_1, _a, e_2, _b, e_3, _c, e_4, _d;
+        var e_5, _a, e_6, _b, e_7, _c, e_8, _d;
         var copySearch = function (source) {
             var copy = [];
             for (var y = 0; y < h; y++) {
@@ -3091,7 +3200,7 @@ var FaceScene = /** @class */ (function (_super) {
                     continue;
                 var flag = true;
                 try {
-                    for (var offsets_1 = (e_1 = void 0, __values(offsets)), offsets_1_1 = offsets_1.next(); !offsets_1_1.done; offsets_1_1 = offsets_1.next()) {
+                    for (var offsets_1 = (e_5 = void 0, __values(offsets)), offsets_1_1 = offsets_1.next(); !offsets_1_1.done; offsets_1_1 = offsets_1.next()) {
                         var co = offsets_1_1.value;
                         if (path_3.search[y + co[1]][x + co[0]] && (x + co[0] != path_3.x || y + co[1] != path_3.y)) {
                             flag = false;
@@ -3099,12 +3208,12 @@ var FaceScene = /** @class */ (function (_super) {
                         }
                     }
                 }
-                catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                catch (e_5_1) { e_5 = { error: e_5_1 }; }
                 finally {
                     try {
                         if (offsets_1_1 && !offsets_1_1.done && (_a = offsets_1.return)) _a.call(offsets_1);
                     }
-                    finally { if (e_1) throw e_1.error; }
+                    finally { if (e_5) throw e_5.error; }
                 }
                 if (!flag)
                     continue;
@@ -3147,18 +3256,18 @@ var FaceScene = /** @class */ (function (_super) {
                 indexs.push(ind);
             }
         }
-        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        catch (e_6_1) { e_6 = { error: e_6_1 }; }
         finally {
             try {
                 if (path_1_1 && !path_1_1.done && (_b = path_1.return)) _b.call(path_1);
             }
-            finally { if (e_2) throw e_2.error; }
+            finally { if (e_6) throw e_6.error; }
         }
         try {
             for (var path_2 = __values(path), path_2_1 = path_2.next(); !path_2_1.done; path_2_1 = path_2.next()) {
                 var p = path_2_1.value;
                 try {
-                    for (var offsets_2 = (e_4 = void 0, __values(offsets)), offsets_2_1 = offsets_2.next(); !offsets_2_1.done; offsets_2_1 = offsets_2.next()) {
+                    for (var offsets_2 = (e_8 = void 0, __values(offsets)), offsets_2_1 = offsets_2.next(); !offsets_2_1.done; offsets_2_1 = offsets_2.next()) {
                         var off = offsets_2_1.value;
                         var x = p.x + off[1];
                         var y = p.y + off[0];
@@ -3172,21 +3281,21 @@ var FaceScene = /** @class */ (function (_super) {
                         // console.error(x, y, ind, indexs);
                     }
                 }
-                catch (e_4_1) { e_4 = { error: e_4_1 }; }
+                catch (e_8_1) { e_8 = { error: e_8_1 }; }
                 finally {
                     try {
                         if (offsets_2_1 && !offsets_2_1.done && (_d = offsets_2.return)) _d.call(offsets_2);
                     }
-                    finally { if (e_4) throw e_4.error; }
+                    finally { if (e_8) throw e_8.error; }
                 }
             }
         }
-        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+        catch (e_7_1) { e_7 = { error: e_7_1 }; }
         finally {
             try {
                 if (path_2_1 && !path_2_1.done && (_c = path_2.return)) _c.call(path_2);
             }
-            finally { if (e_3) throw e_3.error; }
+            finally { if (e_7) throw e_7.error; }
         }
         for (var y = 0; y < h; y++) {
             for (var x = 0; x < w; x++) {

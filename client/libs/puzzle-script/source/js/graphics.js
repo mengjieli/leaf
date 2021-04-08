@@ -193,6 +193,7 @@ function glyphCount(){
 }
 
 function redraw() {
+    return;
     if (cellwidth===0||cellheight===0) {
         return;
     }

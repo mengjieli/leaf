@@ -2267,6 +2267,7 @@ function calculateRowColMasks() {
 
 /* returns a bool indicating if anything changed */
 function processInput(dir,dontDoWin,dontModify) {
+	console.error(dir);
 	againing = false;
 
 	if (verbose_logging) { 

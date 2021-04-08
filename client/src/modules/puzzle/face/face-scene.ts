@@ -14,7 +14,71 @@ export class FaceScene extends ModuleScene {
         leaf.Res.getRes("test_txt").load().then(r => {
             // console.error(r.data)
             let state = compile(["restart"], r.data as string);
-            console.error(state);
+            console.error(window["level"]);
+            window["loadLevelFromState"](state, 1);
+
+
+            function print() {
+                let str = "\n";
+                for (let y = 0; y < window["level"].height; y++) {
+                    for (let x = 0; x < window["level"].width; x++) {
+                        let ind = y + x * window["level"].height;
+                        let pc = "-";
+                        for (let name of state.collisionLayers[3]) {
+                            let char = "?";
+                            for (let item of state.legend_synonyms) {
+                                if (item[1] === name) char = item[0];
+                            }
+                            if (window["level"].objects[ind] & state.objectMasks[name].data[0]) {
+                                pc = char;
+                            }
+                        }
+                        for (let name of state.collisionLayers[2]) {
+                            let char = "?";
+                            for (let item of state.legend_synonyms) {
+                                if (item[1] === name) char = item[0];
+                            }
+                            if (window["level"].objects[ind] & state.objectMasks[name].data[0]) {
+                                pc = char;
+                            }
+                        }
+                        str += pc;
+                    }
+                    str += "\n";
+                }
+                console.error(str);
+            }
+            print();
+            // window["processInput"](0)
+            // print();
+            let flag = false;
+            window.onkeyup = (e) => {
+                console.clear();
+                console.error(e.keyCode);
+                if (e.keyCode === 87 || e.keyCode === 38) {
+                    window["processInput"](0)
+                } else if (e.keyCode === 83 || e.keyCode === 40) {
+                    window["processInput"](2)
+                } else if (e.keyCode === 65 || e.keyCode === 37) {
+                    window["processInput"](1)
+                } else if (e.keyCode === 68 || e.keyCode === 39) {
+                    window["processInput"](3)
+                } else if (e.keyCode === 90) {
+                    window["processInput"]("undo")
+                    window["DoUndo"](false, true);
+                } else if (e.keyCode === 82) {
+                    window["processInput"]("restart")
+                    window["DoRestart"]();
+                    //restart
+                }
+                print();
+            }
+            // let sign = 
+
+            //left 1 right 3 up 0 down 2 none 4
+            // console.error(window["level"].objects);
+            // console.error(state.objectMasks.player.data[0]);
+            // console.error(state.objectMasks.playerbody.data[0]);
         });
         return;
 

@@ -17928,6 +17928,7 @@ function glyphCount(){
 }
 
 function redraw() {
+    return;
     if (cellwidth===0||cellheight===0) {
         return;
     }
@@ -18686,18 +18687,18 @@ function mouseOut() {
 //  window.console.log("clear");
 }
 
-document.addEventListener('touchstart', onMouseDown, false);
-document.addEventListener('touchmove', mouseMove, false);
-document.addEventListener('touchend', onMouseUp, false);
+// document.addEventListener('touchstart', onMouseDown, false);
+// document.addEventListener('touchmove', mouseMove, false);
+// document.addEventListener('touchend', onMouseUp, false);
 
-document.addEventListener('mousedown', onMouseDown, false);
-document.addEventListener('mouseup', onMouseUp, false);
+// document.addEventListener('mousedown', onMouseDown, false);
+// document.addEventListener('mouseup', onMouseUp, false);
 
-document.addEventListener('keydown', onKeyDown, false);
-document.addEventListener('keyup', onKeyUp, false);
+// document.addEventListener('keydown', onKeyDown, false);
+// document.addEventListener('keyup', onKeyUp, false);
 
-window.addEventListener('focus', onMyFocus, false);
-window.addEventListener('blur', onMyBlur, false);
+// window.addEventListener('focus', onMyFocus, false);
+// window.addEventListener('blur', onMyBlur, false);
 
 
 function prevent(e) {
@@ -19042,6 +19043,7 @@ Mobile.hasTouch = function() {
 }
 
 Mobile.enable = function (force) {
+    return;
     if (force || Mobile.hasTouch() && !Mobile._instance) {
         Mobile._instance = new Mobile.GestureHandler();
         Mobile._instance.bindEvents();
