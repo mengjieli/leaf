@@ -19060,9 +19060,9 @@ function update() {
 }
 
 // Lights, camera…function!
-// setInterval(function() {
-    // update();
-// }, deltatime);
+setInterval(function() {
+    update();
+}, deltatime);
 
 //////////File Source js/mobile.js
 /*
@@ -20731,13 +20731,11 @@ function tryActivateYoutube() {
 	}
 }
 
-window.winning = false;
-
 function setGameState(_state, command, randomseed) {
 	oldflickscreendat = [];
 	timer = 0;
 	autotick = 0;
-	window.winning = winning = false;
+	winning = false;
 	againing = false;
 	messageselected = false;
 	STRIDE_MOV = _state.STRIDE_MOV;
@@ -20805,7 +20803,7 @@ function setGameState(_state, command, randomseed) {
 					logWarning('A "restart" command is being triggered in the "run_rules_on_level_start" section of level creation, which would cause an infinite loop if it was actually triggered, but it\'s being ignored, so it\'s not.');
 					break;
 				}
-				window.winning = winning = false;
+				winning = false;
 				timer = 0;
 				titleScreen = true;
 				tryPlayTitleSound();
@@ -20834,7 +20832,7 @@ function setGameState(_state, command, randomseed) {
 				}
 				var targetLevel = i;
 				curlevel = i;
-				window.winning = winning = false;
+				winning = false;
 				timer = 0;
 				titleScreen = false;
 				textMode = false;
@@ -20853,7 +20851,7 @@ function setGameState(_state, command, randomseed) {
 			{
 				var targetLevel = command[1];
 				curlevel = i;
-				window.winning = winning = false;
+				winning = false;
 				timer = 0;
 				titleScreen = false;
 				textMode = false;
@@ -20873,7 +20871,7 @@ function setGameState(_state, command, randomseed) {
 					var level = state.levels[i];
 					if (level.lineNumber <= targetLine + 1) {
 						curlevel = i;
-						window.winning = winning = false;
+						winning = false;
 						timer = 0;
 						titleScreen = false;
 						textMode = false;
@@ -21016,8 +21014,6 @@ function DoRestart(force) {
 	restarting = false;
 }
 
-window.DoRestart = DoRestart;
-
 function backupDiffers() {
 	if (backups.length == 0) {
 		return true;
@@ -21054,8 +21050,6 @@ function DoUndo(force, ignoreDuplicates) {
 		}
 	}
 }
-
-window.DoUndo = DoUndo;
 
 function getPlayerPositions() {
 	var result = [];
@@ -21383,17 +21377,6 @@ BitVec.prototype.anyBitsInCommon = function (other) {
 	return !this.bitsClearInArray(other.data);
 }
 
-var call1List = [];
-var call1Count = 0;
-
-window.compaireCallList = function () {
-	for (let i = 0; i < call1List.length; i++) {
-		if (call1List[i] != call2List[i]) {
-			console.error("????", i, call1List[i], call2List[i]);
-		}
-	}
-}
-
 function Rule(rule) {
 	this.direction = rule[0]; 		/* direction rule scans in */
 	this.patterns = rule[1];		/* lists of CellPatterns to match */
@@ -21406,121 +21389,13 @@ function Rule(rule) {
 	this.isRandom = rule[8];
 	this.cellRowMasks = rule[9];
 	this.cellRowMatches = [];
-	let _this = this;
 	for (var i = 0; i < this.patterns.length; i++) {
-		this.cellRowMatches.push((function () {
-			if (window.hasEval) {
-				let call = _this.generateCellRowMatchesFunction(_this.patterns[i], _this.isEllipsis[i]);
-				return function () {
-					call1Count++;
-					let res = call.apply(_this, arguments);
-					call1List.push(res);
-					return res;
-				}
-			} else {
-				let call = _this.generateCellRowMatchesFunction2(_this.patterns[i], _this.isEllipsis[i]);
-				return function () {
-					call1Count++;
-					let res = call.apply(_this, arguments);
-					call1List.push(res);
-					return res;
-				}
-			}
-		})());
+		this.cellRowMatches.push(this.generateCellRowMatchesFunction(this.patterns[i], this.isEllipsis[i]));
 	}
-	// if (!window.hasEval) {
-	// 	for (var i = 0; i < this.patterns.length; i++) {
-	// 		this.cellRowMatches.push(this.generateCellRowMatchesFunction2(this.patterns[i], this.isEllipsis[i]));
-	// 	}
-	// } else {
-	// 	for (var i = 0; i < this.patterns.length; i++) {
-	// 		this.cellRowMatches.push(this.generateCellRowMatchesFunction(this.patterns[i], this.isEllipsis[i]));
-	// 	}
-	// }
 	/* TODO: eliminate isRigid, groupNumber, isRandom
 	from this class by moving them up into a RuleGroup class */
 }
 
-
-
-function zz(cellRow, i) {
-	var d = 1 + 0 * level.height;
-	var cellObjects0 = level.objects[i];
-	var cellMovements0 = level.movements[i];
-	return (true && (0 | (cellObjects0 & 48))) && cellRow[1].matches((i + 1 * d))
-}
-
-
-window.hasEval = false;
-
-Rule.prototype.generateCellRowMatchesFunction2 = function (cellRow, hasEllipsis) {
-	if (hasEllipsis == false) {
-		var sobj = STRIDE_OBJ;
-		var smov = STRIDE_MOV;
-		var cell0Call = cellRow[0].generateMatchString2('0_')
-		var delta = dirMasksDelta[this.direction];
-		var d0 = delta[0];
-		var d1 = delta[1];
-		var cr_l = cellRow.length;
-		return (cellRow2, j, kmax, kmin) => {
-			var d = d1 + d0 * level.height;
-			var cellObjects = [];
-			if (sobj === 1) {
-				for (var i = 0; i < sobj; ++i) {
-					cellObjects[i] = level.objects[j];
-				}
-			} else {
-				for (var i = 0; i < sobj; ++i) {
-					cellObjects[i] = level.objects[j * sobj + i];
-				}
-			}
-			var cellMovements = [];
-			if (smov === 1) {
-				for (var i = 0; i < smov; ++i) {
-					cellMovements[i] = level.movements[j];
-				}
-			} else {
-				for (var i = 0; i < smov; ++i) {
-					cellMovements[i] = level.movements[j * smov + i];
-				}
-			}
-			let flag = cell0Call(cellObjects, cellMovements);
-			if (!flag) return false;
-			for (var cellIndex = 1; cellIndex < cr_l; cellIndex++) {
-				if (!cellRow2[cellIndex].matches(j + cellIndex * d)) return false;
-			}
-			return true;
-		}
-	} else {
-		var delta = dirMasksDelta[this.direction];
-		var d0 = delta[0];
-		var d1 = delta[1];
-		var cr_l = cellRow.length;
-		return (cellRow2, j, kmax, kmin) => {
-			var d = d1 + d0 * level.height;
-			var result = [];
-			var cond = cellRow2[0].matches(j);
-			var cellIndex = 1;
-			for (; cellRow[cellIndex] !== ellipsisPattern; cellIndex++) {
-				cond = cond && cellRow[cellIndex].matches(j + cellIndex * d);
-			}
-			cellIndex++;
-			if (cond) {
-				for (var k = kmin; k < kmax; k++) {
-					cond = cellRow2[cellIndex].matches((i + d * (k + (cellIndex - 1))));
-					cellIndex++;
-					for (; cellIndex < cr_l; cellIndex++) {
-						cond = cond && cellRow[cellIndex].matches((i + d * (k + (cellIndex - 1))));
-					}
-					if (cond) {
-						result.push([i, k]);
-					}
-				}
-			}
-			return result;
-		}
-	}
-}
 
 Rule.prototype.generateCellRowMatchesFunction = function (cellRow, hasEllipsis) {
 	if (hasEllipsis == false) {
@@ -21620,40 +21495,13 @@ Rule.prototype.toJSON = function () {
 var STRIDE_OBJ = 1;
 var STRIDE_MOV = 1;
 
-var call2Count = 0;
-var call2List = [];
-
 function CellPattern(row) {
 	this.objectsPresent = row[0];
 	this.objectsMissing = row[1];
 	this.anyObjectsPresent = row[2];
 	this.movementsPresent = row[3];
 	this.movementsMissing = row[4];
-	let _this = this;
-	this.matches = (function () {
-		if (window.hasEval) {
-			let call = _this.generateMatchFunction();
-			return function () {
-				call2Count++;
-				let res = call.apply(_this, arguments);
-				call2List.push(res);
-				return res;
-			}
-		} else {
-			let call = _this.generateMatchFunction2();
-			return function () {
-				call2Count++;
-				let res = call.apply(_this, arguments);
-				call2List.push(res);
-				return res;
-			}
-		}
-	})();
-	// if (!window.hasEval) {
-	// 	this.matches = this.generateMatchFunction2();
-	// } else {
-	// 	this.matches = this.generateMatchFunction();
-	// }
+	this.matches = this.generateMatchFunction();
 	this.replacement = row[5];
 };
 
@@ -21671,66 +21519,6 @@ function CellReplacement(row) {
 var matchCache = {};
 
 
-CellPattern.prototype.generateMatchString2 = function () {
-	var ops = [];
-	var oms = [];
-	var mps = [];
-	var mms = [];
-	var max = Math.max(STRIDE_OBJ, STRIDE_MOV);
-	for (var i = 0; i < max; ++i) {
-		ops[i] = this.objectsPresent.data[i];
-		oms[i] = this.objectsMissing.data[i];
-		mps[i] = this.movementsPresent.data[i];
-		mms[i] = this.movementsMissing.data[i];
-	}
-	var alen = this.anyObjectsPresent.length;
-	var sobj = STRIDE_OBJ;
-	var apji = [];
-	for (var j = 0; j < this.anyObjectsPresent.length; j++) {
-		apji[j] = [];
-		for (var i = 0; i < STRIDE_OBJ; ++i) {
-			apji[j][i] = this.anyObjectsPresent[j].data[i];
-		}
-	}
-	return (cellObjects, cellMovements) => {
-		let val = true;
-		for (var i = 0; i < max; ++i) {
-			var co = cellObjects[i];
-			var cm = cellMovements[i];
-			var op = ops[i];
-			var om = oms[i];
-			var mp = mps[i];
-			var mm = mms[i];
-			if (op) {
-				if (op & (op - 1))
-					val = val && ((co & op) === op);
-				else
-					val = val && (co & op);
-			}
-			if (om)
-				val = val && !(co & om);
-			if (mp) {
-				if (mp & (mp - 1))
-					val = val && ((cm & mp) === mp);
-				else
-					val = val && (cm & mp);
-			}
-			if (mm)
-				val = val && !(cm & mm);
-		}
-		for (var j = 0; j < alen; j++) {
-			let v = 0;
-			for (var i = 0; i < sobj; ++i) {
-				var aop = apji[j][i];
-				if (aop) {
-					v = v | (cellObjects[i] & aop);
-				}
-			}
-			val = val && v;
-		}
-		return val;
-	}
-}
 
 CellPattern.prototype.generateMatchString = function () {
 	var fn = "(true";
@@ -21769,39 +21557,6 @@ CellPattern.prototype.generateMatchString = function () {
 	}
 	fn += '\t)';
 	return fn;
-}
-
-
-// "	var cellObjects0 = level.objects[i];
-// 	var cellMovements0 = level.movements[i];
-// return (true		&& (0|(cellObjects0&48))	);"
-CellPattern.prototype.generateMatchFunction2 = function () {
-	var call = this.generateMatchString2();
-	var sobj = STRIDE_OBJ;
-	var smov = STRIDE_MOV;
-	return (j) => {
-		var cellObjects = [];
-		var cellMovements = [];
-		if (sobj === 1) {
-			for (var i = 0; i < sobj; ++i) {
-				cellObjects[i] = level.objects[j];
-			}
-		} else {
-			for (var i = 0; i < sobj; ++i) {
-				cellObjects[i] = level.objects[j * sobj + i];
-			}
-		}
-		if (smov === 1) {
-			for (var i = 0; i < smov; ++i) {
-				cellMovements[i] = level.movements[j];
-			}
-		} else {
-			for (var i = 0; i < smov; ++i) {
-				cellMovements[i] = level.movements[j * smov + i];
-			}
-		}
-		return call(cellObjects, cellMovements);
-	}
 }
 
 CellPattern.prototype.generateMatchFunction = function () {
@@ -21943,7 +21698,7 @@ CellPattern.prototype.replace = function (rule, currentIndex) {
 //say cellRow has length 5, with a split in the middle
 /*
 function cellRowMatchesWildcardFunctionGenerate(direction,cellRow,i, maxk, mink) {
-	
+
 	var result = [];
 	var matchfirsthalf = cellRow[0].matches(i)&&cellRow[1].matches((i+d)%level.n_tiles);
 	if (matchfirsthalf) {
@@ -22988,7 +22743,7 @@ function DoWin() {
 		return;
 	}
 
-	window.winning = winning = true;
+	winning = true;
 	timer = 0;
 }
 

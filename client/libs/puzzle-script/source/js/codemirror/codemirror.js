@@ -3,11 +3,14 @@
 //
 // You can find some technical background for some of the code below
 // at http://marijnhaverbeke.nl/blog/#cm-internals .
-
+var StringStream;
+function setStringStream(val){
+  StringStream = val;
+}
 
 var CodeMirror = (function (mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    module.exports = mod();
+  return   module.exports = mod();
   else if (typeof define == "function" && define.amd) // AMD
     return define([], mod);
   else // Plain browser env
@@ -15,6 +18,7 @@ var CodeMirror = (function (mod) {
   return this.CodeMirror;
 })(function () {
   "use strict";
+
 
   // BROWSER SNIFFING
 
@@ -4732,6 +4736,7 @@ var CodeMirror = (function (mod) {
     this.lastColumnPos = this.lastColumnValue = 0;
     this.lineStart = 0;
   };
+  setStringStream(StringStream);
 
   StringStream.prototype = {
     eol: function () { return this.pos >= this.string.length; },
@@ -7506,5 +7511,9 @@ var CodeMirror = (function (mod) {
 
   CodeMirror.version = "4.0.3";
 
+  CodeMirror.StringStream = StringStream;
+
   return CodeMirror;
 });
+
+

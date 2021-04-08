@@ -851,6 +851,6 @@ function update() {
 }
 
 // Lights, camera…function!
-setInterval(function() {
-    update();
-}, deltatime);
+// setInterval(function() {
+    // update();
+// }, deltatime);

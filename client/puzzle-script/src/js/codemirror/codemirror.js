@@ -4,6 +4,11 @@
 // You can find some technical background for some of the code below
 // at http://marijnhaverbeke.nl/blog/#cm-internals .
 
+var StringStream;
+function setStringStream(val) {
+  StringStream = val;
+}
+
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     module.exports = mod();
@@ -4706,6 +4711,8 @@
     this.lastColumnPos = this.lastColumnValue = 0;
     this.lineStart = 0;
   };
+
+  setStringStream(StringStream)
 
   StringStream.prototype = {
     eol: function() {return this.pos >= this.string.length;},

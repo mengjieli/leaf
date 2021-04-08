@@ -85,8 +85,12 @@ export class PuzzleScriptGameData {
 
     private isLoading: boolean = false;
 
-    load() {
-        if (this._data) return;
+    load(call?: any) {
+        if (this._data) {
+            call && call(this);
+            return;
+        }
+        call && this.onComplete.on(call);
         if (this.isLoading) return;
         console.error("load game", this.name);
         this.isLoading = true;
@@ -96,7 +100,7 @@ export class PuzzleScriptGameData {
             this._levels = [];
             for (let i = 0; i < this._data.levels.length; i++) {
                 if (this._data.levels[i] && !this._data.levels[i].message) {
-                    this._data.levels[i].index = this._levels.length;
+                    this._data.levels[i].index = i;
                     this._levels.push(this._data.levels[i]);
                 }
             }

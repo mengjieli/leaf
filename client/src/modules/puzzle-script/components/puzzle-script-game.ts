@@ -29,7 +29,7 @@ export class PuzzleScriptGame extends ecs.Component {
     onDataReady() {
         this.createLevel();
         //创建纹理
-        this.transform.scaleX = this.transform.scaleY = 5;
+        this.gridsRoot.transform.scaleX = this.gridsRoot.transform.scaleY = 2;
         this.bitmaps = [];
         for (let l = 0; l < this.data.data.collisionLayers.length; l++) {
             this.bitmaps[l] = [];
@@ -75,7 +75,7 @@ export class PuzzleScriptGame extends ecs.Component {
     }
 
     createLevel() {
-        window["loadLevelFromState"](this.data.data, this.level);
+        this.data.start(this.level);
     }
 
     get width() {
