@@ -1,122 +1,69 @@
 import { ModuleScene } from "../../../utils/ui/module-scene";
-import { PuzzleScene } from "../puzzle-scene";
+import { PuzzleScriptGame } from "../../puzzle-script/components/puzzle-script-game";
+import { PuzzleScriptScene } from "../../puzzle-script/puzzle-script-scene";
+import { PuzzleScriptGameShow } from "../../puzzle-script/components/puzzle-script-game-show";
+import { PuzzleScriptGameSize } from "../../puzzle-script/components/puzzle-script-game-size";
+import { PlayerData } from "../../../net/player-data";
+import { Platform } from "../../../utils/platform";
 import { GameStorage } from "../../../utils/storage/game-storage";
-import { PuzzleGame } from "../component/puzzle-game";
-import { HPComponent } from "../../common/hp-component";
-import { MazeAlgorithm } from "../../../utils/algorithm/maze-algorithm";
+import { GameConfig } from "../../../utils/game-config";
 
 @orange.autoload("FaceScene")
 export class FaceScene extends ModuleScene {
 
-    constructor() {
-        super();
+    constructor(first: boolean = false) {
+        super(0.5);
 
-        leaf.Res.getRes("test_txt").load().then(r => {
-            // console.error(r.data)
-            let state = compile(["restart"], r.data as string);
-            console.error(window["level"]);
-            window["loadLevelFromState"](state, 2);
-
-
-            function print() {
-                let str = "\n";
-                for (let y = 0; y < window["level"].height; y++) {
-                    for (let x = 0; x < window["level"].width; x++) {
-                        let ind = y + x * window["level"].height;
-                        let pc = "-";
-                        for (let name of state.collisionLayers[3]) {
-                            let char = "?";
-                            for (let item of state.legend_synonyms) {
-                                if (item[1] === name) char = item[0];
-                            }
-                            if (window["level"].objects[ind] & state.objectMasks[name].data[0]) {
-                                pc = char;
-                            }
-                        }
-                        for (let name of state.collisionLayers[2]) {
-                            let char = "?";
-                            for (let item of state.legend_synonyms) {
-                                if (item[1] === name) char = item[0];
-                            }
-                            if (window["level"].objects[ind] & state.objectMasks[name].data[0]) {
-                                pc = char;
-                            }
-                        }
-                        str += pc;
-                    }
-                    str += "\n";
-                }
-                console.error(str);
-            }
-            print();
-            // window["processInput"](0)
-            // print();
-            let flag = false;
-            window.onkeyup = (e) => {
-                console.clear();
-                console.error(e.keyCode);
-                if (e.keyCode === 87 || e.keyCode === 38) {
-                    window["processInput"](0)
-                } else if (e.keyCode === 83 || e.keyCode === 40) {
-                    window["processInput"](2)
-                } else if (e.keyCode === 65 || e.keyCode === 37) {
-                    window["processInput"](1)
-                } else if (e.keyCode === 68 || e.keyCode === 39) {
-                    window["processInput"](3)
-                } else if (e.keyCode === 90) {
-                    window["processInput"]("undo")
-                    window["DoUndo"](false, true);
-                } else if (e.keyCode === 82) {
-                    window["processInput"]("restart")
-                    window["DoRestart"]();
-                    //restart
-                }
-                print();
-            }
-            // let sign = 
-
-            //left 1 right 3 up 0 down 2 none 4
-            // console.error(window["level"].objects);
-            // console.error(state.objectMasks.player.data[0]);
-            // console.error(state.objectMasks.playerbody.data[0]);
-        });
-        return;
-
-        // return;
-        // //9,17,33
-        // let size = 29
-        // let blocks = MazeAlgorithm.makeSimpleMaze(17, 17);
-        // blocks[0][1] = 2;
-        // blocks[blocks.length - 1][blocks[0].length - 2] = 3;
-        // let print = (blocks) => {
-        //     let str = '\n';
-        //     for (let y = 0; y < blocks.length; y++) {
-        //         for (let x = 0; x < blocks[y].length; x++) {
-        //             blocks[y][x] = [".", "#", "P", "O"][blocks[y][x]] as any;
-        //             str += blocks[y][x];
-        //         }
-        //         str += '\n';
-        //     }
-        //     console.error(str);
-        // }
-        // print(blocks);
-        // // this.makeLevel();
-        // return
-
-        // let label = ecs.Entity.create().addComponent(leaf.Label);
-        // label.text = '开心游戏合集';
-        // label.fontSize = 10;
-        // label.transform.x = (leaf.getStageWidth() - label.textWidth) / 2;
-        // label.transform.y = 25;
-        // label.parent = this.scene;
-
-        let top = 100;
+        let top = 60;
         let ui = ecs.Entity.create();
         ui.parent = this.scene;
+        // label
+
+        if (first) {
+            if (Platform.isWeb) {
+                PlayerData.instance.load(() => {
+                });
+            } else {
+                let tc = this.scene.addComponent(leaf.TouchComponent);
+                tc.touchChildrenEnabled = false;
+                tc.touchEnabled = false;
+                Platform.login((d) => {
+                    PlayerData.instance.decode(d);
+                    vlabel.text = GameConfig.version + "_" + PlayerData.instance.uid;
+                    console.error("login");
+                    tc.destroy();
+                    let has = false;
+                    let list = [];
+                    for (let name of gameList) {
+                        list.push(GameStorage.getStorage(`${name}_maxStage`).then((v) => {
+                            if (PlayerData.instance.getGame(name).maxLevel < ~~v) {
+                                PlayerData.instance.getGame(name).maxLevel = ~~v;
+                                has = true;
+                            }
+                        }));
+                        GameStorage.setStorage(`${name}_maxStage`, 0);
+                    }
+                    Promise.all(list).then(() => {
+                        if (has) {
+                            console.error("has save");
+                            PlayerData.instance.save();
+                        }
+                    })
+                })
+            }
+        }
 
         let root = ecs.Entity.create();
         root.parent = ui;
         root.transform.y = top;
+
+        let vlabel = ecs.Entity.create().addComponent(leaf.Label);
+        vlabel.parent = this.scene;
+        vlabel.text = GameConfig.version + (first ? "" : "_" + PlayerData.instance.uid);
+        vlabel.fontColor = 0xffffff;
+        vlabel.fontSize = 10;
+        vlabel.transform.y = leaf.getStageHeight() - vlabel.fontSize;
+        vlabel.transform.alpha = 0.6;
 
         let listScroller = ecs.Entity.create();
         listScroller.parent = root;
@@ -129,33 +76,40 @@ export class FaceScene extends ModuleScene {
 
         let levelList = ecs.Entity.create();
         levelList.parent = listScroller;
+        listScroller.addComponent(leaf.RectMask, 0, 0, leaf.getStageWidth(), bg.transform.scaleY)
 
-        let mask = ecs.Entity.create().addComponent(leaf.Bitmap);
-        mask.texture = leaf.PointTexture.getTexture(0);
-        mask.parent = ui;
-        mask.transform.scaleX = leaf.getStageWidth();
-        mask.transform.scaleY = top;
+        // let mask = ecs.Entity.create().addComponent(leaf.Bitmap);
+        // mask.texture = leaf.PointTexture.getTexture(0xff0000);
+        // mask.parent = ui;
+        // mask.transform.scaleX = leaf.getStageWidth();
+        // mask.transform.scaleY = top;
+        // mask.transform.alpha = 0.3;
 
-        mask = ecs.Entity.create().addComponent(leaf.Bitmap);
-        mask.texture = leaf.PointTexture.getTexture(0);
-        mask.parent = ui;
-        mask.transform.scaleX = leaf.getStageWidth();
-        mask.transform.scaleY = 60;
-        mask.transform.y = leaf.getStageHeight() - mask.transform.scaleY;
+        // mask = ecs.Entity.create().addComponent(leaf.Bitmap);
+        // mask.texture = leaf.PointTexture.getTexture(0xff0000);
+        // mask.parent = ui;
+        // mask.transform.scaleX = leaf.getStageWidth();
+        // mask.transform.scaleY = 60;
+        // mask.transform.y = leaf.getStageHeight() - mask.transform.scaleY;
+        // mask.transform.alpha = 0.3;
 
         let listHeight = leaf.getStageHeight() - 60 - top;
 
         let gameList = [
-            'game1-1_txt',
-            'game1-2_txt',
-            'game1-3_txt',
-            // 'game1-4_txt'
+            // 'game1-1_txt',
+            // 'game1-2_txt',
+            // 'game1-3_txt',
+            // 'game1-4_txt',
+            // 'game1-5_txt',
+            'game1-6_txt',
         ]
         let nameList = [
-            '经典推箱子',
-            '走迷宫',
-            '初级推箱子',
-            // '吃苹果'
+            // '经典推箱子',
+            // '走迷宫',
+            // '初级推箱子',
+            // '吃苹果',
+            // '飞踢',
+            '贪吃蛇',
         ]
 
         for (let i = 0; i < gameList.length; i++) {
@@ -164,18 +118,24 @@ export class FaceScene extends ModuleScene {
             levelui.transform.x = [30, 140][i % 2];
             levelui.transform.y = 130 * (~~(i / 2));
 
-            let level = ecs.Entity.create().addComponent(PuzzleGame, gameList[i], 0, false, false, 100, 100);
+            let level = ecs.Entity.create().addComponent(PuzzleScriptGame, gameList[i], 0, () => {
+                // level.addComponent(leaf.BatchRender)
+            });
+            level.addComponent(PuzzleScriptGameShow);
+            level.addComponent(PuzzleScriptGameSize, 100, 100);
+            level.transform.y = 20;
+            level.transform.x = 0;
             level.parent = levelui;
             let label = ecs.Entity.create().addComponent(leaf.Label);
             label.text = nameList[i];
             label.parent = levelui;
             label.fontSize = 20;
-            level.transform.y = 20;
-            if (window["lv"] == null) window["lv"] = level;
-
 
             levelui.addComponent(leaf.TouchComponent).onTouchEnd.on(() => {
-                new PuzzleScene(gameList[i]);
+                if (startScroll) return;
+                setTimeout(() => {
+                    new PuzzleScriptScene(gameList[i]);
+                })
             })
         }
 
@@ -195,18 +155,17 @@ export class FaceScene extends ModuleScene {
             }
             if (startScroll) {
                 levelList.transform.y = levelY - startY + e.stageY;
-                if (levelList.transform.y < listHeight - 130 * (~~(gameList.length / 2))) {
-                    levelList.transform.y = listHeight - 130 * (~~(gameList.length / 2));
+                if (levelList.transform.y < listHeight - 130 * (Math.ceil(gameList.length / 2))) {
+                    levelList.transform.y = listHeight - 130 * (Math.ceil(gameList.length / 2));
                 }
-                if (levelList.transform.y > 0) levelList.transform.y = 0;
+                if (levelList.transform.y > 0) {
+                    levelList.transform.y = 0;
+                }
             }
         })
-        // ui.addComponent(HPComponent);
     }
 
     makeLevel() {
-
-
         let copySearch = function (source: number[][]): number[][] {
             let copy = [];
             for (let y = 0; y < h; y++) {

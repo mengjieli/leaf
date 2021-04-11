@@ -12,6 +12,8 @@ export class PuzzleScriptGameData {
 
     blockHeight: number = 5;
 
+    againInterval: number = 150;
+
     private _data: any;
 
     get data() {
@@ -27,6 +29,7 @@ export class PuzzleScriptGameData {
     }
 
     start(level: number) {
+        window["setState"](this.data);
         window["loadLevelFromState"](this._data, this.levels[level].index);
     }
 
@@ -65,19 +68,25 @@ export class PuzzleScriptGameData {
 
     run(op?: "up" | "down" | "left" | "right" | "undo" | "restart") {
         if (op === "up") {
-            window["processInput"](0);
+            window["checkKey"]({ keyCode: 38 }, true);
+            // window["processInput"](0);
         } else if (op === "down") {
-            window["processInput"](2);
+            window["checkKey"]({ keyCode: 40 }, true);
+            // window["processInput"](2);
         } else if (op === "left") {
-            window["processInput"](1);
+            window["checkKey"]({ keyCode: 37 }, true);
+            // window["processInput"](1);
         } else if (op === "right") {
-            window["processInput"](3);
+            window["checkKey"]({ keyCode: 39 }, true);
+            // window["processInput"](3);
         } else if (op === "undo") {
-            window["processInput"]("undo")
-            window["DoUndo"](false, true);
+            window["checkKey"]({ keyCode: 90 }, true);
+            // window["processInput"]("undo")
+            // window["DoUndo"](false, true);
         } else if (op === 'restart') {
-            window["processInput"]("restart")
-            window["DoRestart"]();
+            window["checkKey"]({ keyCode: 82 }, true);
+            // window["processInput"]("restart")
+            // window["DoRestart"]();
         } else {
             window["processInput"](4);
         }
@@ -92,11 +101,15 @@ export class PuzzleScriptGameData {
         }
         call && this.onComplete.on(call);
         if (this.isLoading) return;
-        console.error("load game", this.name);
         this.isLoading = true;
         leaf.Res.getRes(this.name).load().then((r) => {
             this.isLoading = false;
             this._data = compile(["restart"], r.data as string);
+            if (this._data.metadata.again_interval !== undefined) {
+                this.againInterval = this._data.metadata.again_interval * 1000;
+            } else {
+                this.againInterval = 150;
+            }
             this._levels = [];
             for (let i = 0; i < this._data.levels.length; i++) {
                 if (this._data.levels[i] && !this._data.levels[i].message) {

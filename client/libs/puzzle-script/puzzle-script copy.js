@@ -2202,6 +2202,7 @@ var autotickinterval=0;
 var winning=false;
 var againing=false;
 var againinterval=150;
+window.againinterval = againinterval;
 var norepeat_action=false;
 var oldflickscreendat=[];//used for buffering old flickscreen/scrollscreen positions, in case player vanishes
 var keybuffer = [];
@@ -20788,8 +20789,10 @@ function setGameState(_state, command, randomseed) {
 
 	if (state.metadata.again_interval !== undefined) {
 		againinterval = state.metadata.again_interval * 1000;
+		window.againinterval = againinterval;
 	} else {
 		againinterval = 150;
+		window.againinterval = againinterval;
 	}
 	if (throttle_movement && autotickinterval === 0) {
 		logWarning("throttle_movement is designed for use in conjunction with realtime_interval. Using it in other situations makes games gross and unresponsive, broadly speaking.  Please don't.");

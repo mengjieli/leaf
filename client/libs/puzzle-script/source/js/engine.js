@@ -389,6 +389,14 @@ function drawMessageScreen() {
 	canvasResize();
 }
 
+window.setLevel = function (lv) {
+	window.level = level = lv;
+}
+
+window.setState = function (st) {
+	window.state = state = st;
+}
+
 var loadedLevelSeed = 0;
 
 function loadLevelFromLevelDat(state, leveldat, randomseed) {
@@ -403,6 +411,7 @@ function loadLevelFromLevelDat(state, leveldat, randomseed) {
 	titleSelection = (curlevel > 0 || curlevelTarget !== null) ? 1 : 0;
 	titleSelected = false;
 	againing = false;
+	window.againing = againing;
 	if (leveldat === undefined) {
 		consolePrint("Trying to access a level that doesn't exist.", true);
 		goToTitleScreen();
@@ -622,6 +631,7 @@ function setGameState(_state, command, randomseed) {
 	autotick = 0;
 	window.winning = winning = false;
 	againing = false;
+	window.againing = againing;
 	messageselected = false;
 	STRIDE_MOV = _state.STRIDE_MOV;
 	STRIDE_OBJ = _state.STRIDE_OBJ;
@@ -652,11 +662,13 @@ function setGameState(_state, command, randomseed) {
 			var object = state.objects[n];
 			var sprite = {
 				colors: object.colors,
-				dat: object.spritematrix
+				dat: object.spritematrix,
+				name:n
 			};
 			sprites[object.id] = sprite;
 		}
 	}
+	state.sprites = sprites;
 	if (state.metadata.realtime_interval !== undefined) {
 		autotick = 0;
 		autotickinterval = state.metadata.realtime_interval * 1000;
@@ -676,6 +688,7 @@ function setGameState(_state, command, randomseed) {
 	} else {
 		againinterval = 150;
 	}
+	window.againinterval = againinterval;
 	if (throttle_movement && autotickinterval === 0) {
 		logWarning("throttle_movement is designed for use in conjunction with realtime_interval. Using it in other situations makes games gross and unresponsive, broadly speaking.  Please don't.");
 	}
@@ -862,6 +875,7 @@ function restoreLevel(lev) {
 	}
 
 	againing = false;
+	window.againing = againing;
 	level.commandQueue = [];
 	level.commandQueueSourceRules = [];
 }
@@ -951,6 +965,8 @@ function getPlayerPositions() {
 	}
 	return result;
 }
+
+window["getPlayerPositions"] = getPlayerPositions;
 
 function getLayersOfMask(cellMask) {
 	var layers = [];
@@ -1332,7 +1348,6 @@ function zz(cellRow, i) {
 	var cellMovements0 = level.movements[i];
 	return (true && (0 | (cellObjects0 & 48))) && cellRow[1].matches((i + 1 * d))
 }
-
 
 window.hasEval = false;
 
@@ -2505,6 +2520,7 @@ function calculateRowColMasks() {
 /* returns a bool indicating if anything changed */
 function processInput(dir, dontDoWin, dontModify) {
 	againing = false;
+	window.againing = againing;
 
 	if (verbose_logging) {
 		if (dir === -1) {
@@ -2741,6 +2757,7 @@ function processInput(dir, dontDoWin, dontModify) {
 					}
 
 					againing = true;
+					window.againing = againing;
 					timer = 0;
 				} else {
 					verbose_logging = old_verbose_logging;
@@ -2765,6 +2782,7 @@ function processInput(dir, dontDoWin, dontModify) {
 
 	if (winning) {
 		againing = false;
+		window.againing = againing;
 	}
 
 	return modified;
@@ -2860,11 +2878,16 @@ function checkWin(dontDoWin) {
 	}
 }
 
+window.setWin = function (val) {
+	window["winning"] = winning = val;
+}
+
 function DoWin() {
 	if (winning) {
 		return;
 	}
 	againing = false;
+	window.againing = againing;
 	tryPlayEndLevelSound();
 	if (unitTesting) {
 		nextLevel();
@@ -2889,6 +2912,7 @@ function anyMovements() {
 
 function nextLevel() {
 	againing = false;
+	window.againing = againing;
 	messagetext = "";
 	if (state && state.levels && (curlevel > state.levels.length)) {
 		curlevel = state.levels.length - 1;
@@ -2964,6 +2988,7 @@ function nextLevel() {
 
 function goToTitleScreen() {
 	againing = false;
+	window.againing = againing;
 	messagetext = "";
 	titleScreen = true;
 	textMode = true;

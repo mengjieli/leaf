@@ -467,9 +467,9 @@ var tween;
                 r -= Math.PI;
                 var l = Math.sqrt((points[2].y - points[1].y) * (points[2].y - points[1].y) + (points[2].x - points[1].x) * (points[2].x - points[1].x));
                 points = [{
-                        x: points[0].x + Math.cos(r) * l * 0.5,
-                        y: points[0].y + Math.sin(r) * l * 1,
-                    }].concat(points);
+                    x: points[0].x + Math.cos(r) * l * 0.5,
+                    y: points[0].y + Math.sin(r) * l * 1,
+                }].concat(points);
                 var len = points.length;
                 r1 = Math.atan2(points[len - 1].y - points[len - 2].y, points[len - 1].x - points[len - 2].x);
                 r2 = Math.atan2(points[len - 2].y - points[len - 3].y, points[len - 2].x - points[len - 3].x);
@@ -483,9 +483,9 @@ var tween;
             }
             else {
                 points = [{
-                        x: points[0].x + (points[0].x - points[1].x),
-                        y: points[0].y + points[0].y - points[1].y
-                    }].concat(points);
+                    x: points[0].x + (points[0].x - points[1].x),
+                    y: points[0].y + points[0].y - points[1].y
+                }].concat(points);
                 points.push({
                     x: points[points.length - 1].x + points[points.length - 1].x - points[points.length - 2].x,
                     y: points[points.length - 1].y + points[points.length - 1].y - points[points.length - 2].y
@@ -664,5 +664,7 @@ var tween;
         return TweenPluginData;
     }());
     tween_1.TweenPluginData = TweenPluginData;
+
+    window["tween"] = tween_1;
 })(tween || (tween = {}));
 //# sourceMappingURL=tween.js.map

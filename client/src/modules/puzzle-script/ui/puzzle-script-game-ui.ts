@@ -1,4 +1,7 @@
 import { PuzzleScriptGame } from "../components/puzzle-script-game";
+import { PuzzleScriptLevelWin } from "./puzzle-script-level-win";
+import { PlayerData } from "../../../net/player-data";
+import { PuzzleScriptGameResult } from "./puzzle-level-game-result";
 
 orange.autoloadLink("PuzzleScene");
 
@@ -120,7 +123,14 @@ export class PuzzleScriptGameUI extends ecs.Component {
                 dir = "left";
             }
             this.game.data.run(dir as any);
-            console.error(dir);
+            // console.error(dir);
+            if (window["winning"] && !this.entity.getComponent(PuzzleScriptGameResult)) {
+                if (PlayerData.instance.getGame(this.game.data.name).maxLevel < this.game.level + 1) {
+                    PlayerData.instance.getGame(this.game.data.name).maxLevel = this.game.level + 1;
+                    PlayerData.instance.save();
+                }
+                this.entity.addComponent(PuzzleScriptGameResult);
+            }
             // console.error(e.localX, e.localY, Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI);
         })
 
@@ -162,7 +172,7 @@ export class PuzzleScriptGameUI extends ecs.Component {
 
         this.entity.name = 'w';
 
-        this.uiRoot.transform.y = leaf.getStageHeight() - 100;
+        this.uiRoot.transform.y = leaf.getStageHeight() - 160;
 
         this.uiRoot.transform.scaleX = this.uiRoot.transform.scaleY = 3;
 

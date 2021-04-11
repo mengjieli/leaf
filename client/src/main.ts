@@ -1,6 +1,9 @@
 import { FaceScene } from "./modules/puzzle/face/face-scene";
 import { PuzzleScene } from "./modules/puzzle/puzzle-scene";
 import { PuzzleScriptScene } from "./modules/puzzle-script/puzzle-script-scene";
+import { PlayerData } from "./net/player-data";
+import { Platform } from "./utils/platform";
+import { MainScene } from "./modules/main/main-scene";
 
 export class Main {
 
@@ -25,15 +28,15 @@ export class Main {
                 }
             });
         }
+        orange.debug = false;
         leaf.init();
-        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 256;
-        console.error(leaf.GLCore.width, leaf.world.root.transform.scaleX);
+        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 640;
         leaf.Res.loadResources().then(() => {
             leaf.Res.getRes("block_png").load().then(
                 () => {
+                    new MainScene();
+                    // new FaceScene(true);
                     // new PuzzleScene();
-                    // new FaceScene();
-                    new PuzzleScriptScene();
                 }
             )
         })

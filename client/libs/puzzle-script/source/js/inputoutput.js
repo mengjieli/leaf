@@ -824,7 +824,7 @@ function update() {
     if (winning) {
         if (timer/1000>0.5) {
             winning=false;
-            nextLevel();
+            // nextLevel();
         }
     }
     if (keybuffer.length>0) {
@@ -850,7 +850,12 @@ function update() {
     }
 }
 
+window["puzzleUpdate"] = update;
+
 // Lights, camera…function!
 // setInterval(function() {
     // update();
 // }, deltatime);
+
+
+window.checkKey = checkKey;

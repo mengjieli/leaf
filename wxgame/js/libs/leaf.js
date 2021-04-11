@@ -14,7 +14,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    };
+    }
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -196,6 +196,16 @@ var leaf;
         });
         GLCore.init = function () {
             var canvas = (window["canvas"] || document.getElementById('leaf'));
+            var backingStore = window.devicePixelRatio || 1;
+            var canvasScaleFactor = backingStore;
+            var m = new ecs.Matrix();
+            m.identity();
+            m.scale(1 / canvasScaleFactor, 1 / canvasScaleFactor);
+            var transform = "matrix(" + m.a + "," + m.b + "," + m.c + "," + m.d + "," + m.tx + "," + m.ty + ")";
+            canvas.style.transformOrigin = "0% 0% 0px";
+            canvas.style["transform"] = transform;
+            // canvas.width *= canvasScaleFactor;
+            // canvas.height *= canvasScaleFactor;
             if (window["wx"]) {
                 window["wx"].onTouchStart(function (e) {
                     var e_1, _a;
@@ -309,6 +319,7 @@ var leaf;
                     gl.disable(gl.DEPTH_TEST);
                     gl.disable(gl.CULL_FACE);
                     gl.enable(gl.BLEND);
+                    gl.clear(gl.STENCIL_BUFFER_BIT);
                     gl.enable(gl.STENCIL_TEST);
                     gl.blendColor(1.0, 1.0, 1.0, 1.0);
                     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
@@ -371,6 +382,27 @@ var leaf;
 window["leaf"] = leaf;
 var leaf;
 (function (leaf) {
+    var RectMask = /** @class */ (function (_super) {
+        __extends(RectMask, _super);
+        function RectMask() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        RectMask.prototype.init = function (x, y, w, h) {
+            if (x === void 0) { x = 0; }
+            if (y === void 0) { y = 0; }
+            if (w === void 0) { w = 0; }
+            if (h === void 0) { h = 0; }
+            this.x = x;
+            this.y = y;
+            this.width = w;
+            this.height = h;
+        };
+        return RectMask;
+    }(ecs.Component));
+    leaf.RectMask = RectMask;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
     /**
      * @internal
      */
@@ -378,9 +410,9 @@ var leaf;
         function RenerManager() {
             this.matrix = new ecs.Matrix();
             this.cc = 0;
+            this.masks = [];
         }
         RenerManager.prototype.update = function () {
-            var e_7, _a;
             var now = Date.now();
             var gl = leaf.GLCore.gl;
             leaf.BlendModeFunc.changeBlendMode(leaf.BlendMode.NORMAL);
@@ -388,9 +420,13 @@ var leaf;
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             //清除舞台，这句如果和 3d 合并之后应该去掉
             gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.clear(gl.STENCIL_BUFFER_BIT);
             var tasks = [];
             this.matrix.identity();
             this.cc = 0;
+            this.masks.length = 0;
+            this.newTask = false;
+            this.hasMask = false;
             this.preRenderEntity(leaf.world.root, this.matrix, 1, tasks);
             var rd = leaf.world.root.getComponent(leaf.Render);
             if (rd) {
@@ -409,25 +445,46 @@ var leaf;
             var now2 = Date.now();
             leaf.runInfo.preRenderTime += now2 - now;
             leaf.TextAtlas.$checkUpdate();
-            try {
-                for (var tasks_1 = __values(tasks), tasks_1_1 = tasks_1.next(); !tasks_1_1.done; tasks_1_1 = tasks_1.next()) {
-                    var task = tasks_1_1.value;
-                    task.render();
+            for (var i = 0; i < tasks.length; i++) {
+                var task = tasks[i];
+                if (this.masks[i]) {
+                    var mask = this.masks[i];
+                    gl.enable(gl.SCISSOR_TEST);
+                    // turn on scissor test
+                    // set the scissor rectangle
+                    var global = mask.transform.worldMatrix;
+                    // global.save();
+                    // global.translate(mask.x, mask.y);
+                    var x = global.tx + mask.x * global.a;
+                    var y = global.ty + mask.y * global.d;
+                    ;
+                    var w = mask.width * global.a;
+                    var h = mask.height * global.d;
+                    gl.scissor(x, leaf.GLCore.height - y - h, w, h);
+                    // execute drawing commands in the scissor box (e.g. clear)
+                    // turn off scissor test again
                 }
-            }
-            catch (e_7_1) { e_7 = { error: e_7_1 }; }
-            finally {
-                try {
-                    if (tasks_1_1 && !tasks_1_1.done && (_a = tasks_1.return)) _a.call(tasks_1);
+                task.render();
+                if (this.masks[i]) {
+                    gl.disable(gl.SCISSOR_TEST);
                 }
-                finally { if (e_7) throw e_7.error; }
             }
             var now3 = Date.now();
             leaf.runInfo.glRenderTime += now3 - now2;
             leaf.runInfo.renderTime += now3 - now;
+            this.masks.length = 0;
         };
         RenerManager.prototype.preRenderEntity = function (entity, matrix, alpha, tasks) {
-            var e_8, _a;
+            var e_7, _a;
+            var mask = entity.getComponent(leaf.RectMask);
+            if (mask) {
+                this.masks[tasks.length] = mask;
+                if (tasks.length) {
+                    tasks[tasks.length - 1].startNewTask();
+                }
+                this.newTask = true;
+                this.hasMask = true;
+            }
             var rd = entity.getComponent(leaf.Render);
             if (!rd || rd.renderChildren) {
                 matrix.save();
@@ -444,7 +501,8 @@ var leaf;
                                 if (tasks.length && tasks[tasks.length - 1] != tk) {
                                     tasks[tasks.length - 1].startNewTask();
                                 }
-                                if (!tasks.length || tasks[tasks.length - 1] != tk) {
+                                if (!tasks.length || tasks[tasks.length - 1] != tk || this.newTask) {
+                                    this.newTask = false;
                                     tasks.push(tk);
                                 }
                             }
@@ -454,14 +512,21 @@ var leaf;
                         }
                     }
                 }
-                catch (e_8_1) { e_8 = { error: e_8_1 }; }
+                catch (e_7_1) { e_7 = { error: e_7_1 }; }
                 finally {
                     try {
                         if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                     }
-                    finally { if (e_8) throw e_8.error; }
+                    finally { if (e_7) throw e_7.error; }
                 }
                 matrix.restore();
+            }
+            if (mask) {
+                if (tasks.length) {
+                    tasks[tasks.length - 1].startNewTask();
+                }
+                this.newTask = true;
+                this.hasMask = true;
             }
             this.cc++;
         };
@@ -480,7 +545,7 @@ var leaf;
             return _super !== null && _super.apply(this, arguments) || this;
         }
         RenderSystem.prototype.update = function () {
-            var e_9, _a, e_10, _b, e_11, _c;
+            var e_8, _a, e_9, _b, e_10, _c;
             var now = Date.now();
             var gl = leaf.GLCore.gl;
             leaf.BlendModeFunc.changeBlendMode(leaf.BlendMode.NORMAL);
@@ -496,17 +561,17 @@ var leaf;
                     if (tk) {
                         if (tasks.length && tasks[tasks.length - 1] != tk) {
                             try {
-                                for (var tasks_2 = __values(tasks), tasks_2_1 = tasks_2.next(); !tasks_2_1.done; tasks_2_1 = tasks_2.next()) {
-                                    var t = tasks_2_1.value;
+                                for (var tasks_1 = __values(tasks), tasks_1_1 = tasks_1.next(); !tasks_1_1.done; tasks_1_1 = tasks_1.next()) {
+                                    var t = tasks_1_1.value;
                                     t.startNewTask();
                                 }
                             }
-                            catch (e_9_1) { e_9 = { error: e_9_1 }; }
+                            catch (e_8_1) { e_8 = { error: e_8_1 }; }
                             finally {
                                 try {
-                                    if (tasks_2_1 && !tasks_2_1.done && (_a = tasks_2.return)) _a.call(tasks_2);
+                                    if (tasks_1_1 && !tasks_1_1.done && (_a = tasks_1.return)) _a.call(tasks_1);
                                 }
-                                finally { if (e_9) throw e_9.error; }
+                                finally { if (e_8) throw e_8.error; }
                             }
                         }
                         if (!tasks.length || tasks[tasks.length - 1] != tk) {
@@ -517,33 +582,33 @@ var leaf;
                 rd.preRender();
             }
             try {
-                for (var tasks_3 = __values(tasks), tasks_3_1 = tasks_3.next(); !tasks_3_1.done; tasks_3_1 = tasks_3.next()) {
-                    var t = tasks_3_1.value;
+                for (var tasks_2 = __values(tasks), tasks_2_1 = tasks_2.next(); !tasks_2_1.done; tasks_2_1 = tasks_2.next()) {
+                    var t = tasks_2_1.value;
                     t.startNewTask();
                 }
             }
-            catch (e_10_1) { e_10 = { error: e_10_1 }; }
+            catch (e_9_1) { e_9 = { error: e_9_1 }; }
             finally {
                 try {
-                    if (tasks_3_1 && !tasks_3_1.done && (_b = tasks_3.return)) _b.call(tasks_3);
+                    if (tasks_2_1 && !tasks_2_1.done && (_b = tasks_2.return)) _b.call(tasks_2);
                 }
-                finally { if (e_10) throw e_10.error; }
+                finally { if (e_9) throw e_9.error; }
             }
             var now2 = Date.now();
             leaf.runInfo.preRenderTime += now2 - now;
             leaf.TextAtlas.$checkUpdate();
             try {
-                for (var tasks_4 = __values(tasks), tasks_4_1 = tasks_4.next(); !tasks_4_1.done; tasks_4_1 = tasks_4.next()) {
-                    var task = tasks_4_1.value;
+                for (var tasks_3 = __values(tasks), tasks_3_1 = tasks_3.next(); !tasks_3_1.done; tasks_3_1 = tasks_3.next()) {
+                    var task = tasks_3_1.value;
                     task.render();
                 }
             }
-            catch (e_11_1) { e_11 = { error: e_11_1 }; }
+            catch (e_10_1) { e_10 = { error: e_10_1 }; }
             finally {
                 try {
-                    if (tasks_4_1 && !tasks_4_1.done && (_c = tasks_4.return)) _c.call(tasks_4);
+                    if (tasks_3_1 && !tasks_3_1.done && (_c = tasks_3.return)) _c.call(tasks_3);
                 }
-                finally { if (e_11) throw e_11.error; }
+                finally { if (e_10) throw e_10.error; }
             }
             var now3 = Date.now();
             leaf.runInfo.glRenderTime += now3 - now2;
@@ -631,7 +696,7 @@ var leaf;
             this.preRenderEntity(this.entity, this.matrix, 1);
         };
         BatchRender.prototype.preRenderEntity = function (entity, matrix, alpha) {
-            var e_12, _a;
+            var e_11, _a;
             matrix.reconcat(entity.transform.local);
             try {
                 for (var _b = __values(entity.children), _c = _b.next(); !_c.done; _c = _b.next()) {
@@ -649,12 +714,12 @@ var leaf;
                     }
                 }
             }
-            catch (e_12_1) { e_12 = { error: e_12_1 }; }
+            catch (e_11_1) { e_11 = { error: e_11_1 }; }
             finally {
                 try {
                     if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                 }
-                finally { if (e_12) throw e_12.error; }
+                finally { if (e_11) throw e_11.error; }
             }
         };
         BatchRender.prototype.reset = function () {
@@ -1012,6 +1077,108 @@ var leaf;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {
+    var ScrollBitmap = /** @class */ (function (_super) {
+        __extends(ScrollBitmap, _super);
+        function ScrollBitmap() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.shader = leaf.ScrollerShaderTask.shader;
+            _this._tint = 0xffffff;
+            _this.scrollX = 0;
+            _this.scrollY = 0;
+            return _this;
+        }
+        Object.defineProperty(ScrollBitmap.prototype, "texture", {
+            get: function () {
+                return this._texture;
+            },
+            set: function (val) {
+                this._texture = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ScrollBitmap.prototype, "resource", {
+            get: function () {
+                return this._resource;
+            },
+            set: function (val) {
+                var _this = this;
+                if (this._resource === val)
+                    return;
+                if (this._res)
+                    this._res.removeCount();
+                this._resource = val;
+                var res = this._res = leaf.Res.getRes(val);
+                if (!res) {
+                    this.texture = null;
+                    return;
+                }
+                if (res.data) {
+                    this.texture = res.data;
+                    res.addCount();
+                }
+                else {
+                    res.addCount();
+                    res.load().then(function () {
+                        if (_this._res !== res)
+                            return;
+                        _this.texture = res.data;
+                    });
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ScrollBitmap.prototype, "tint", {
+            get: function () {
+                return this._tint;
+            },
+            set: function (val) {
+                this._tint = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ScrollBitmap.prototype, "width", {
+            get: function () {
+                return this._texture ? this._texture.sourceWidth : 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ScrollBitmap.prototype, "height", {
+            get: function () {
+                return this._texture ? this._texture.sourceHeight : 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        ScrollBitmap.prototype.preRender = function () {
+            if (!this._texture)
+                return;
+            // (this.shader).addTask(this.texture, this.entity.transform.worldMatrix, this.entity.transform.worldAlpha, this.blendMode, this._tint);
+        };
+        ScrollBitmap.prototype.preRender2 = function (matrix, alpha, shader) {
+            if (!this._texture)
+                return;
+            matrix.reconcat(this.entity.transform.local);
+            (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint, this.scrollX, this.scrollY);
+        };
+        ScrollBitmap.prototype.onDestroy = function () {
+            this.texture = null;
+            if (this._res)
+                this._res.removeCount();
+            this._resource = this._res = null;
+            this._tint = 0xffffff;
+            this.scrollX = this.scrollY = 0;
+            _super.prototype.onDestroy.call(this);
+        };
+        return ScrollBitmap;
+    }(leaf.Render));
+    leaf.ScrollBitmap = ScrollBitmap;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
     var RecordComponent = /** @class */ (function (_super) {
         __extends(RecordComponent, _super);
         function RecordComponent() {
@@ -1077,7 +1244,7 @@ var leaf;
             this.isRecording = true;
         };
         RecordSystem.prototype.startReplay = function (replayRecords) {
-            var e_13, _a;
+            var e_12, _a;
             var nrs = {};
             for (var k in replayRecords) {
                 try {
@@ -1086,12 +1253,12 @@ var leaf;
                         r.frame--;
                     }
                 }
-                catch (e_13_1) { e_13 = { error: e_13_1 }; }
+                catch (e_12_1) { e_12 = { error: e_12_1 }; }
                 finally {
                     try {
                         if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                     }
-                    finally { if (e_13) throw e_13.error; }
+                    finally { if (e_12) throw e_12.error; }
                 }
                 nrs[(+k) - 1] = replayRecords[k];
             }
@@ -1168,7 +1335,7 @@ var leaf;
             }
         };
         RecordSystem.prototype.getRecord = function (id) {
-            var e_14, _a;
+            var e_13, _a;
             for (var k in this.records) {
                 try {
                     for (var _b = __values(this.records[k]), _c = _b.next(); !_c.done; _c = _b.next()) {
@@ -1177,12 +1344,12 @@ var leaf;
                             return r;
                     }
                 }
-                catch (e_14_1) { e_14 = { error: e_14_1 }; }
+                catch (e_13_1) { e_13 = { error: e_13_1 }; }
                 finally {
                     try {
                         if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                     }
-                    finally { if (e_14) throw e_14.error; }
+                    finally { if (e_13) throw e_13.error; }
                 }
             }
         };
@@ -1368,7 +1535,7 @@ var leaf;
             return this.resources[name];
         };
         Res.clearUnsedTextures = function () {
-            var e_15, _a, e_16, _b, e_17, _c, e_18, _d, e_19, _e;
+            var e_14, _a, e_15, _b, e_16, _c, e_17, _d, e_18, _e;
             var c = 0;
             var list = [];
             try {
@@ -1394,12 +1561,12 @@ var leaf;
                     leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
                 }
             }
-            catch (e_15_1) { e_15 = { error: e_15_1 }; }
+            catch (e_14_1) { e_14 = { error: e_14_1 }; }
             finally {
                 try {
                     if (_g && !_g.done && (_a = _f.return)) _a.call(_f);
                 }
-                finally { if (e_15) throw e_15.error; }
+                finally { if (e_14) throw e_14.error; }
             }
             try {
                 for (var _h = __values(this.spriteSheets), _j = _h.next(); !_j.done; _j = _h.next()) {
@@ -1421,12 +1588,12 @@ var leaf;
                             }
                         }
                     }
-                    catch (e_17_1) { e_17 = { error: e_17_1 }; }
+                    catch (e_16_1) { e_16 = { error: e_16_1 }; }
                     finally {
                         try {
                             if (_l && !_l.done && (_c = _k.return)) _c.call(_k);
                         }
-                        finally { if (e_17) throw e_17.error; }
+                        finally { if (e_16) throw e_16.error; }
                     }
                     if (txt.data) {
                         // PIXI.BaseTexture.removeFromCache(txt.texture_url);
@@ -1441,12 +1608,12 @@ var leaf;
                     leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
                 }
             }
-            catch (e_16_1) { e_16 = { error: e_16_1 }; }
+            catch (e_15_1) { e_15 = { error: e_15_1 }; }
             finally {
                 try {
                     if (_j && !_j.done && (_b = _h.return)) _b.call(_h);
                 }
-                finally { if (e_16) throw e_16.error; }
+                finally { if (e_15) throw e_15.error; }
             }
             try {
                 for (var _m = __values(this.texts), _o = _m.next(); !_o.done; _o = _m.next()) {
@@ -1462,12 +1629,12 @@ var leaf;
                     leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
                 }
             }
-            catch (e_18_1) { e_18 = { error: e_18_1 }; }
+            catch (e_17_1) { e_17 = { error: e_17_1 }; }
             finally {
                 try {
                     if (_o && !_o.done && (_d = _m.return)) _d.call(_m);
                 }
-                finally { if (e_18) throw e_18.error; }
+                finally { if (e_17) throw e_17.error; }
             }
             try {
                 for (var _p = __values(this.jsons), _q = _p.next(); !_q.done; _q = _p.next()) {
@@ -1483,17 +1650,17 @@ var leaf;
                     leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90: " + txt.name);
                 }
             }
-            catch (e_19_1) { e_19 = { error: e_19_1 }; }
+            catch (e_18_1) { e_18 = { error: e_18_1 }; }
             finally {
                 try {
                     if (_q && !_q.done && (_e = _p.return)) _e.call(_p);
                 }
-                finally { if (e_19) throw e_19.error; }
+                finally { if (e_18) throw e_18.error; }
             }
             leaf.debug && console.log("[Res] \u6E05\u9664\u65E0\u7528\u8D44\u6E90\uFF0C\u8FD8\u5269 " + c + " \u4E2A\u8D44\u6E90: " + list);
         };
         Res.getAliveResources = function () {
-            var e_20, _a, e_21, _b, e_22, _c, e_23, _d;
+            var e_19, _a, e_20, _b, e_21, _c, e_22, _d;
             var list = [];
             try {
                 for (var _e = __values(this.singleTexutres), _f = _e.next(); !_f.done; _f = _e.next()) {
@@ -1503,12 +1670,12 @@ var leaf;
                     }
                 }
             }
-            catch (e_20_1) { e_20 = { error: e_20_1 }; }
+            catch (e_19_1) { e_19 = { error: e_19_1 }; }
             finally {
                 try {
                     if (_f && !_f.done && (_a = _e.return)) _a.call(_e);
                 }
-                finally { if (e_20) throw e_20.error; }
+                finally { if (e_19) throw e_19.error; }
             }
             try {
                 for (var _g = __values(this.spriteSheets), _h = _g.next(); !_h.done; _h = _g.next()) {
@@ -1518,12 +1685,12 @@ var leaf;
                     }
                 }
             }
-            catch (e_21_1) { e_21 = { error: e_21_1 }; }
+            catch (e_20_1) { e_20 = { error: e_20_1 }; }
             finally {
                 try {
                     if (_h && !_h.done && (_b = _g.return)) _b.call(_g);
                 }
-                finally { if (e_21) throw e_21.error; }
+                finally { if (e_20) throw e_20.error; }
             }
             try {
                 for (var _j = __values(this.texts), _k = _j.next(); !_k.done; _k = _j.next()) {
@@ -1533,12 +1700,12 @@ var leaf;
                     }
                 }
             }
-            catch (e_22_1) { e_22 = { error: e_22_1 }; }
+            catch (e_21_1) { e_21 = { error: e_21_1 }; }
             finally {
                 try {
                     if (_k && !_k.done && (_c = _j.return)) _c.call(_j);
                 }
-                finally { if (e_22) throw e_22.error; }
+                finally { if (e_21) throw e_21.error; }
             }
             try {
                 for (var _l = __values(this.jsons), _m = _l.next(); !_m.done; _m = _l.next()) {
@@ -1548,12 +1715,12 @@ var leaf;
                     }
                 }
             }
-            catch (e_23_1) { e_23 = { error: e_23_1 }; }
+            catch (e_22_1) { e_22 = { error: e_22_1 }; }
             finally {
                 try {
                     if (_m && !_m.done && (_d = _l.return)) _d.call(_l);
                 }
-                finally { if (e_23) throw e_23.error; }
+                finally { if (e_22) throw e_22.error; }
             }
             return list;
         };
@@ -1756,7 +1923,7 @@ var leaf;
                     loadType: 1,
                     xhrType: 'text'
                 }).load(function (loader, resources) {
-                    var e_24, _a, e_25, _b;
+                    var e_23, _a, e_24, _b;
                     var cfg = JSON.parse(resources[fileName].data);
                     loader.resources = {};
                     ecs.ObjectPools.releaseRecyableObject(loader);
@@ -1774,12 +1941,12 @@ var leaf;
                                         Res.addRes(EMResourceType.SPRITE_SHEET_FRAME, frame, file.name);
                                     }
                                 }
-                                catch (e_25_1) { e_25 = { error: e_25_1 }; }
+                                catch (e_24_1) { e_24 = { error: e_24_1 }; }
                                 finally {
                                     try {
                                         if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
                                     }
-                                    finally { if (e_25) throw e_25.error; }
+                                    finally { if (e_24) throw e_24.error; }
                                 }
                             }
                             else if (file.type === EMResourceType.TEXT) {
@@ -1790,12 +1957,12 @@ var leaf;
                             }
                         }
                     }
-                    catch (e_24_1) { e_24 = { error: e_24_1 }; }
+                    catch (e_23_1) { e_23 = { error: e_23_1 }; }
                     finally {
                         try {
                             if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
                         }
-                        finally { if (e_24) throw e_24.error; }
+                        finally { if (e_23) throw e_23.error; }
                     }
                     resolve();
                 });
@@ -2656,7 +2823,7 @@ var leaf;
         NormalShaderTask.prototype.render = function () {
             var _this = this;
             var gl = leaf.GLCore.gl;
-            var max = this.renderCounts.pop();
+            var max = this.renderCounts.shift();
             gl.useProgram(_this.program);
             //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
             gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -2713,6 +2880,248 @@ var leaf;
         return NormalShaderTask;
     }(leaf.Shader));
     leaf.NormalShaderTask = NormalShaderTask;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    leaf.$size = (new Float32Array([0.0])).BYTES_PER_ELEMENT;
+    var ScrollerShaderTask = /** @class */ (function (_super) {
+        __extends(ScrollerShaderTask, _super);
+        function ScrollerShaderTask() {
+            var _this_1 = _super.call(this) || this;
+            _this_1.projectionMatrix = new Float32Array([
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                -1, 1, 0, 1
+            ]);
+            _this_1.offxs = [];
+            _this_1.offys = [];
+            _this_1.textures = [];
+            _this_1.count = [];
+            _this_1.positionData = [];
+            _this_1.blendMode = [];
+            _this_1.indiceData = [];
+            _this_1.tints = [];
+            _this_1.newAddNew = true;
+            _this_1.renderCounts = [];
+            _this_1.lastRenderCount = 0;
+            _this_1.renderIndex = 0;
+            //初始化作色器、program
+            _this_1.initProgram();
+            //初始化作色器固定变量 和 获取作色器中得变量
+            _this_1.initAttriLocation();
+            return _this_1;
+        }
+        /**
+         * 初始化作色器、program
+         * 1. 初始化 shader
+         * 2. 初始化 program
+         * 目前没有加 filter (滤镜) 的功能，后续可以继续扩展这两个 shader
+         * @param gl
+         */
+        ScrollerShaderTask.prototype.initProgram = function () {
+            var gl = leaf.GLCore.gl;
+            var vertexSource = "\n             attribute vec2 a_TexCoord;\n             attribute vec4 a_Position;\n             attribute float a_Alpha;\n             attribute float a_Sampler;\n             uniform mat4 u_PMatrix;\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n             varying float v_Sampler;\n             void main(void)\n             {\n                gl_Position = u_PMatrix*a_Position;\n                v_TexCoord = a_TexCoord;\n                v_Alpha = a_Alpha;\n                v_Sampler = a_Sampler;\n             }\n             ";
+            var fragmentSource = "\n             precision mediump float;\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n             varying float v_Sampler;\n             uniform vec4 u_Color;\n             uniform sampler2D u_Sampler0;\n             uniform sampler2D u_Sampler1;\n             uniform sampler2D u_Sampler2;\n             uniform sampler2D u_Sampler3;\n             uniform sampler2D u_Sampler4;\n             uniform sampler2D u_Sampler5;\n             uniform sampler2D u_Sampler6;\n             uniform sampler2D u_Sampler7;\n             vec4 getTextureColor(vec2 coord);\n             uniform float u_offx;\n             uniform float u_offy;\n             void main(void)\n             {\n                vec2 pos = vec2(v_TexCoord[0],v_TexCoord[1]);\n                pos.x = pos.x + u_offx;\n                pos.y = pos.y + u_offy;\n                pos = mod(pos,1.0);\n                gl_FragColor = getTextureColor(pos)*u_Color*v_Alpha;\n             }\n             vec4 getTextureColor(vec2 coord) {\n                if(v_Sampler == 0.0) {\n                    return texture2D(u_Sampler0,coord);\n                } else if(v_Sampler == 1.0) {\n                    return texture2D(u_Sampler1,coord);\n                } else if(v_Sampler == 2.0) {\n                    return texture2D(u_Sampler2,coord);\n                } else if(v_Sampler == 3.0) {\n                    return texture2D(u_Sampler3,coord);\n                } else if(v_Sampler == 4.0) {\n                    return texture2D(u_Sampler4,coord);\n                } else if(v_Sampler == 5.0) {\n                    return texture2D(u_Sampler5,coord);\n                } else if(v_Sampler == 6.0) {\n                    return texture2D(u_Sampler6,coord);\n                } else if(v_Sampler == 7.0) {\n                    return texture2D(u_Sampler7,coord);\n                }\n             }\n             ";
+            var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
+            var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
+            this.program = this.createWebGLProgram(vertexShader, fragmentShader);
+        };
+        /**
+         * 初始化作色器固定变量 和 获取作色器中得变量
+         * 主要初始化投影矩阵，投影矩阵不用每次调用都初始化，只要设置一次即可，除非舞台 (Stage) 的大小改变 (glViewPort)
+         * 获取一些变量。
+         * @param gl
+         * @param width
+         * @param height
+         */
+        ScrollerShaderTask.prototype.initAttriLocation = function () {
+            var gl = leaf.GLCore.gl;
+            var projectionMatrix = this.projectionMatrix;
+            projectionMatrix[0] = 2 / leaf.GLCore.width;
+            projectionMatrix[5] = -2 / leaf.GLCore.height;
+            var program = this.program;
+            program["name"] = "normal program";
+            gl.useProgram(this.program);
+            if (!this.buffer) {
+                this.buffer = gl.createBuffer();
+                this.indexBuffer = gl.createBuffer();
+                var indiceData = this.indiceData;
+                var count = 30000;
+                for (var i = 0; i < count; i++) {
+                    var index2 = i * 6;
+                    var index2_2 = i * 4;
+                    indiceData[0 + index2] = 0 + index2_2;
+                    indiceData[1 + index2] = 1 + index2_2;
+                    indiceData[2 + index2] = 2 + index2_2;
+                    indiceData[3 + index2] = 2 + index2_2;
+                    indiceData[4 + index2] = 1 + index2_2;
+                    indiceData[5 + index2] = 3 + index2_2;
+                }
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indiceData), gl.STATIC_DRAW);
+            }
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+            this.a_Position = gl.getAttribLocation(program, "a_Position");
+            gl.enableVertexAttribArray(this.a_Position);
+            gl.vertexAttribPointer(this.a_Position, 2, gl.FLOAT, false, leaf.$size * 6, 0);
+            this.a_TexCoord = gl.getAttribLocation(program, "a_TexCoord");
+            gl.enableVertexAttribArray(this.a_TexCoord);
+            gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 2);
+            this.a_Alpha = gl.getAttribLocation(program, "a_Alpha");
+            gl.enableVertexAttribArray(this.a_Alpha);
+            gl.vertexAttribPointer(this.a_Alpha, 1, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 4);
+            this.a_Sampler = gl.getAttribLocation(program, "a_Sampler");
+            gl.enableVertexAttribArray(this.a_Sampler);
+            gl.vertexAttribPointer(this.a_Sampler, 1, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 5);
+            this.u_PMatrix = gl.getUniformLocation(program, "u_PMatrix");
+            gl.uniformMatrix4fv(this.u_PMatrix, false, projectionMatrix);
+            this.u_offx = gl.getUniformLocation(program, "u_offx");
+            gl.uniform1f(this.u_offx, 0);
+            this.u_offy = gl.getUniformLocation(program, "u_offy");
+            gl.uniform1f(this.u_offy, 0);
+            this.u_Color = gl.getUniformLocation(program, "u_Color");
+            gl.uniform4f(this.u_Color, 1, 1, 1, 1);
+            this.u_Samplers = [];
+            for (var i = 0; i < 8; i++) {
+                this.u_Samplers[i] = gl.getUniformLocation(program, "u_Sampler" + i);
+            }
+        };
+        ScrollerShaderTask.prototype.addTask = function (texture, matrix, alpha, blendMode, tint, offx, offy) {
+            if (offx === void 0) { offx = 0; }
+            if (texture.dirty) {
+                texture.update();
+            }
+            var txtureIndex = this.textures.length ? this.textures[this.textures.length - 1].indexOf(texture.texture) : -1;
+            if (this.newAddNew ||
+                !this.textures.length ||
+                txtureIndex === -1 &&
+                    this.textures[this.textures.length - 1].length >= 8 ||
+                this.count.length && this.count[this.count.length - 1] > 512 ||
+                this.blendMode[this.blendMode.length - 1] != blendMode ||
+                this.tints[this.tints.length - 1] != tint ||
+                this.offxs[this.offxs.length - 1] != offx ||
+                this.offys[this.offys.length - 1] != offy) {
+                this.newAddNew = false;
+                this.textures.push([texture.texture]);
+                txtureIndex = 0;
+                this.positionData.push([]);
+                this.count.push(0);
+                this.blendMode.push(blendMode);
+                this.tints.push(tint);
+                this.offxs.push(offx);
+                this.offys.push(offy);
+            }
+            else {
+                if (txtureIndex === -1) {
+                    txtureIndex = this.textures[this.textures.length - 1].length;
+                    this.textures[this.textures.length - 1].push(texture.texture);
+                }
+            }
+            var index = this.count[this.count.length - 1] * 24;
+            var positionData = this.positionData[this.positionData.length - 1];
+            var width = texture.sourceWidth;
+            var height = texture.sourceHeight;
+            positionData[index] = matrix.c * height + matrix.tx;
+            positionData[1 + index] = matrix.d * height + matrix.ty;
+            positionData[2 + index] = texture.startX;
+            positionData[3 + index] = texture.endY;
+            positionData[4 + index] = alpha;
+            positionData[5 + index] = txtureIndex;
+            positionData[6 + index] = matrix.tx;
+            positionData[7 + index] = matrix.ty;
+            positionData[8 + index] = texture.startX;
+            positionData[9 + index] = texture.startY;
+            positionData[10 + index] = alpha;
+            positionData[11 + index] = txtureIndex;
+            positionData[12 + index] = matrix.a * width + matrix.c * height + matrix.tx;
+            positionData[13 + index] = matrix.b * width + matrix.d * height + matrix.ty;
+            positionData[14 + index] = texture.endX;
+            positionData[15 + index] = texture.endY;
+            positionData[16 + index] = alpha;
+            positionData[17 + index] = txtureIndex;
+            positionData[18 + index] = matrix.a * width + matrix.tx;
+            positionData[19 + index] = matrix.b * width + matrix.ty;
+            positionData[20 + index] = texture.endX;
+            positionData[21 + index] = texture.startY;
+            positionData[22 + index] = alpha;
+            positionData[23 + index] = txtureIndex;
+            this.count[this.count.length - 1]++;
+        };
+        ScrollerShaderTask.prototype.startNewTask = function () {
+            if (this.lastRenderCount != this.textures.length) {
+                this.renderCounts.push(this.textures.length);
+                this.lastRenderCount = this.textures.length;
+            }
+            this.newAddNew = true;
+        };
+        /**
+         * 渲染
+         */
+        ScrollerShaderTask.prototype.render = function () {
+            var _this = this;
+            var gl = leaf.GLCore.gl;
+            var max = this.renderCounts.shift();
+            gl.useProgram(_this.program);
+            //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+            gl.vertexAttribPointer(_this.a_Position, 2, gl.FLOAT, false, leaf.$size * 6, 0);
+            gl.vertexAttribPointer(_this.a_TexCoord, 2, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 2);
+            gl.vertexAttribPointer(_this.a_Alpha, 1, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 4);
+            gl.vertexAttribPointer(_this.a_Sampler, 1, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 5);
+            var i = this.renderIndex;
+            //开始渲染任务
+            for (var len = _this.textures.length; i < len && i < max; i++) {
+                //切换混合模式
+                leaf.BlendModeFunc.changeBlendMode(this.blendMode[i]);
+                gl.uniform1f(this.u_offx, this.offxs[i]);
+                gl.uniform1f(this.u_offy, this.offys[i]);
+                gl.uniform4f(this.u_Color, (this.tints[i] >> 16) / 255.0, ((this.tints[i] >> 8) & 0xFF) / 255.0, (this.tints[i] & 0xFF) / 255.0, 1);
+                //绑定当前需要渲染的纹理
+                for (var t = 0; t < _this.textures[i].length; t++) {
+                    gl.uniform1i(this.u_Samplers[t], t);
+                    gl.activeTexture(gl["TEXTURE" + t]);
+                    gl.bindTexture(gl.TEXTURE_2D, _this.textures[i][t]);
+                }
+                //分配 buffer 内容
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.positionData[i]), gl.STATIC_DRAW);
+                //真正的绘制，之前测试 drawElements 并不比 drawArrays 快，其实也很正常，因为二维里面顶点数据共用并不多，
+                //一个矩形也就对角线的两个顶点各被共用两次(两个三角形共用)，远小于 3D 里面的立方体一个顶点被 6 个三角形共用。
+                gl.drawElements(gl.TRIANGLES, _this.count[i] * 6, gl.UNSIGNED_SHORT, 0); //利用drawElements画三角形
+                leaf.runInfo.drawCount += _this.count[i];
+                leaf.runInfo.drawCall++;
+            }
+            _this.renderIndex = i;
+            if (_this.renderIndex === _this.textures.length) {
+                _this.reset();
+            }
+        };
+        ScrollerShaderTask.prototype.reset = function () {
+            var _this = this;
+            _this.textures = [];
+            _this.count = [];
+            _this.positionData = [];
+            _this.blendMode = [];
+            _this.tints = [];
+            _this.renderCounts.length = 0;
+            _this.lastRenderCount = 0;
+            _this.renderIndex = 0;
+            _this.offxs = [];
+            _this.offys = [];
+        };
+        Object.defineProperty(ScrollerShaderTask, "shader", {
+            get: function () {
+                if (!this._shader) {
+                    this._shader = new ScrollerShaderTask();
+                }
+                return this._shader;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return ScrollerShaderTask;
+    }(leaf.Shader));
+    leaf.ScrollerShaderTask = ScrollerShaderTask;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {

@@ -1,7 +1,7 @@
 {
   "description": "项目配置文件。",
   "setting": {
-    "urlCheck": false,
+    "urlCheck": true,
     "es6": true,
     "enhance": false,
     "postcss": true,
@@ -42,6 +42,8 @@
   "projectname": "leaf-game",
   "simulatorType": "wechat",
   "simulatorPluginLibVersion": {},
+  "cloudfunctionRoot": "cloudfunction/",
+  "cloudfunctionTemplateRoot": "cloudfunctionTemplate",
   "condition": {
     "search": {
       "list": []

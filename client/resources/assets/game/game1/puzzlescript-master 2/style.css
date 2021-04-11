@@ -1,0 +1,61 @@
+table.ps-table:not([data-ps-state="running"]) { filter: grayscale(100%); opacity: .5 }
+table.ps-table:not([data-ps-accepting-input="true"]) { opacity: .8 }
+
+table.ps-table:not(.ps-ui-disabled) {
+    /* width: 90%; */
+    width: 400px;
+
+    border-spacing: 10px;
+    border-collapse: collapse;
+}
+table.ps-table:not(.ps-ui-disabled) tr td.ps-cell {
+    position: relative;
+    padding: 0; /* it is 1px by default in Chromium */
+}
+table.ps-table:not(.ps-ui-disabled) td.ps-cell::after {
+    content: '';
+    display: block;
+    margin-top: 100%;
+}
+table.ps-table:not(.ps-ui-disabled) .ps-cell-label {
+    /* Move it off-screen so screenreaders read it but users do not see it */
+    position: absolute;
+    left:-9999px;
+}
+
+table.ps-table:not(.ps-ui-disabled) .ps-sprite-whole {
+    /* to make it square (depends on styling for "ps-cell") */
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    width: 100%;
+    height: 100%;
+}
+table.ps-table:not(.ps-ui-disabled) .ps-sprite-row {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    flex-wrap: nowrap
+}
+table.ps-table:not(.ps-ui-disabled) .ps-sprite-pixel { flex-grow: 1 }
+
+table.ps-table.ps-ui-disabled tr td.ps-cell .ps-cell-label.ps-cell-empty {
+    opacity: .25;
+}
+
+table.ps-table.ps-ui-disabled caption {
+    caption-side: bottom;
+    text-align: left;
+}
+
+table.ps-table:not(.ps-ui-disabled) caption,
+table.ps-table:not(.ps-ui-disabled) [aria-live] {
+    position: absolute;
+    left: -10000px;
+}

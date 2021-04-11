@@ -1,6 +1,891 @@
 {
   "files": [
     {
+      "name": "1-2-3-ban_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/1-2-3-ban.json",
+      "type": 5
+    },
+    {
+      "name": "2d-whale-world_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/2d-whale-world.json",
+      "type": 5
+    },
+    {
+      "name": "a-sneeze-a-day_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/a-sneeze-a-day.json",
+      "type": 5
+    },
+    {
+      "name": "aaaah-i-m-being-attacked_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/aaaah-i-m-being-attacked.json",
+      "type": 5
+    },
+    {
+      "name": "airport-aggression_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/airport-aggression.json",
+      "type": 5
+    },
+    {
+      "name": "alien-disco_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/alien-disco.json",
+      "type": 5
+    },
+    {
+      "name": "always-magnets_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/always-magnets.json",
+      "type": 5
+    },
+    {
+      "name": "atlas-shrank_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/atlas-shrank.json",
+      "type": 5
+    },
+    {
+      "name": "baguettes_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/baguettes.json",
+      "type": 5
+    },
+    {
+      "name": "barrier-trail_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/barrier-trail.json",
+      "type": 5
+    },
+    {
+      "name": "beam-islands_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/beam-islands.json",
+      "type": 5
+    },
+    {
+      "name": "becoming-one_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/becoming-one.json",
+      "type": 5
+    },
+    {
+      "name": "block-touching_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/block-touching.json",
+      "type": 5
+    },
+    {
+      "name": "blocker-snake_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/blocker-snake.json",
+      "type": 5
+    },
+    {
+      "name": "bomb-n-ice_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/bomb-n-ice.json",
+      "type": 5
+    },
+    {
+      "name": "botsket-ball_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/botsket-ball.json",
+      "type": 5
+    },
+    {
+      "name": "boxes-and-balloons_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/boxes-and-balloons.json",
+      "type": 5
+    },
+    {
+      "name": "boxes-love-bloxing-gloves_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/boxes-love-bloxing-gloves.json",
+      "type": 5
+    },
+    {
+      "name": "bruised_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/bruised.json",
+      "type": 5
+    },
+    {
+      "name": "bubble-butler_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/bubble-butler.json",
+      "type": 5
+    },
+    {
+      "name": "castlemouse_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/castlemouse.json",
+      "type": 5
+    },
+    {
+      "name": "chasm_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/chasm.json",
+      "type": 5
+    },
+    {
+      "name": "climbing-cubes_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/climbing-cubes.json",
+      "type": 5
+    },
+    {
+      "name": "closure-demake_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/closure-demake.json",
+      "type": 5
+    },
+    {
+      "name": "coin-counter_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/coin-counter.json",
+      "type": 5
+    },
+    {
+      "name": "collapsable-sokoban_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/collapsable-sokoban.json",
+      "type": 5
+    },
+    {
+      "name": "collapse_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/collapse.json",
+      "type": 5
+    },
+    {
+      "name": "collapsing-tiles_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/collapsing-tiles.json",
+      "type": 5
+    },
+    {
+      "name": "covering-holes_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/covering-holes.json",
+      "type": 5
+    },
+    {
+      "name": "crate-cables_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/crate-cables.json",
+      "type": 5
+    },
+    {
+      "name": "cubes-barrier_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/cubes-barrier.json",
+      "type": 5
+    },
+    {
+      "name": "cubes-medusa_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/cubes-medusa.json",
+      "type": 5
+    },
+    {
+      "name": "cyber-lasso_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/cyber-lasso.json",
+      "type": 5
+    },
+    {
+      "name": "dang-i-m-huge_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/dang-i-m-huge.json",
+      "type": 5
+    },
+    {
+      "name": "dangerous-dungeon_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/dangerous-dungeon.json",
+      "type": 5
+    },
+    {
+      "name": "directional_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/directional.json",
+      "type": 5
+    },
+    {
+      "name": "duality_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/duality.json",
+      "type": 5
+    },
+    {
+      "name": "dungeon-janitor_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/dungeon-janitor.json",
+      "type": 5
+    },
+    {
+      "name": "dup-block_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/dup-block.json",
+      "type": 5
+    },
+    {
+      "name": "easy-enigma_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/easy-enigma.json",
+      "type": 5
+    },
+    {
+      "name": "electric-wire_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/electric-wire.json",
+      "type": 5
+    },
+    {
+      "name": "element-walkers_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/element-walkers.json",
+      "type": 5
+    },
+    {
+      "name": "enqueue_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/enqueue.json",
+      "type": 5
+    },
+    {
+      "name": "entanglement-one_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/entanglement-one.json",
+      "type": 5
+    },
+    {
+      "name": "entanglement-two_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/entanglement-two.json",
+      "type": 5
+    },
+    {
+      "name": "esl-puzzle-game_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/esl-puzzle-game.json",
+      "type": 5
+    },
+    {
+      "name": "explod_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/explod.json",
+      "type": 5
+    },
+    {
+      "name": "extra-lives_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/extra-lives.json",
+      "type": 5
+    },
+    {
+      "name": "fatigued-square-maze_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/fatigued-square-maze.json",
+      "type": 5
+    },
+    {
+      "name": "fire-in-winter_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/fire-in-winter.json",
+      "type": 5
+    },
+    {
+      "name": "fish-friend_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/fish-friend.json",
+      "type": 5
+    },
+    {
+      "name": "flying-kick_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/flying-kick.json",
+      "type": 5
+    },
+    {
+      "name": "garten-der-medusen_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/garten-der-medusen.json",
+      "type": 5
+    },
+    {
+      "name": "gobble-rush_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/gobble-rush.json",
+      "type": 5
+    },
+    {
+      "name": "grouping_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/grouping.json",
+      "type": 5
+    },
+    {
+      "name": "hack-the-net_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/hack-the-net.json",
+      "type": 5
+    },
+    {
+      "name": "herding-hero_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/herding-hero.json",
+      "type": 5
+    },
+    {
+      "name": "hue-change_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/hue-change.json",
+      "type": 5
+    },
+    {
+      "name": "i-herd-u-liek-water-templs_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/i-herd-u-liek-water-templs.json",
+      "type": 5
+    },
+    {
+      "name": "ice-cream-stick_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/ice-cream-stick.json",
+      "type": 5
+    },
+    {
+      "name": "ice-path_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/ice-path.json",
+      "type": 5
+    },
+    {
+      "name": "icecrates_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/icecrates.json",
+      "type": 5
+    },
+    {
+      "name": "interconnection_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/interconnection.json",
+      "type": 5
+    },
+    {
+      "name": "islands_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/islands.json",
+      "type": 5
+    },
+    {
+      "name": "kettle_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/kettle.json",
+      "type": 5
+    },
+    {
+      "name": "knightoban_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/knightoban.json",
+      "type": 5
+    },
+    {
+      "name": "life-is-hard_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/life-is-hard.json",
+      "type": 5
+    },
+    {
+      "name": "lil-purple_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/lil-purple.json",
+      "type": 5
+    },
+    {
+      "name": "lime-rick_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/lime-rick.json",
+      "type": 5
+    },
+    {
+      "name": "line-of-sight_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/line-of-sight.json",
+      "type": 5
+    },
+    {
+      "name": "linked_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/linked.json",
+      "type": 5
+    },
+    {
+      "name": "maera-public-works_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/maera-public-works.json",
+      "type": 5
+    },
+    {
+      "name": "magik_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/magik.json",
+      "type": 5
+    },
+    {
+      "name": "magnetic_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/magnetic.json",
+      "type": 5
+    },
+    {
+      "name": "magnetized_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/magnetized.json",
+      "type": 5
+    },
+    {
+      "name": "manic-ammo_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/manic-ammo.json",
+      "type": 5
+    },
+    {
+      "name": "matchpub_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/matchpub.json",
+      "type": 5
+    },
+    {
+      "name": "mazezam_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/mazezam.json",
+      "type": 5
+    },
+    {
+      "name": "mc-escher-s-equestrian-armageddon_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/mc-escher-s-equestrian-armageddon.json",
+      "type": 5
+    },
+    {
+      "name": "microban_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/microban.json",
+      "type": 5
+    },
+    {
+      "name": "midas_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/midas.json",
+      "type": 5
+    },
+    {
+      "name": "mirror-isles_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/mirror-isles.json",
+      "type": 5
+    },
+    {
+      "name": "miss-direction_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/miss-direction.json",
+      "type": 5
+    },
+    {
+      "name": "modality_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/modality.json",
+      "type": 5
+    },
+    {
+      "name": "monkey-ruins_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/monkey-ruins.json",
+      "type": 5
+    },
+    {
+      "name": "monster-mess_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/monster-mess.json",
+      "type": 5
+    },
+    {
+      "name": "movement-garden_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/movement-garden.json",
+      "type": 5
+    },
+    {
+      "name": "moving-target_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/moving-target.json",
+      "type": 5
+    },
+    {
+      "name": "mowing_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/mowing.json",
+      "type": 5
+    },
+    {
+      "name": "multi-word-dictionary-game_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/multi-word-dictionary-game.json",
+      "type": 5
+    },
+    {
+      "name": "net_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/net.json",
+      "type": 5
+    },
+    {
+      "name": "newton-s-crates_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/newton-s-crates.json",
+      "type": 5
+    },
+    {
+      "name": "okosban_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/okosban.json",
+      "type": 5
+    },
+    {
+      "name": "out-of-bounds-2_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/out-of-bounds-2.json",
+      "type": 5
+    },
+    {
+      "name": "out-of-bounds_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/out-of-bounds.json",
+      "type": 5
+    },
+    {
+      "name": "out-there_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/out-there.json",
+      "type": 5
+    },
+    {
+      "name": "outward-force_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/outward-force.json",
+      "type": 5
+    },
+    {
+      "name": "overstep_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/overstep.json",
+      "type": 5
+    },
+    {
+      "name": "pants-shirt-cap_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/pants-shirt-cap.json",
+      "type": 5
+    },
+    {
+      "name": "path-lines_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/path-lines.json",
+      "type": 5
+    },
+    {
+      "name": "pathmaker_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/pathmaker.json",
+      "type": 5
+    },
+    {
+      "name": "pit-trails_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/pit-trails.json",
+      "type": 5
+    },
+    {
+      "name": "portal-ban_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/portal-ban.json",
+      "type": 5
+    },
+    {
+      "name": "positional_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/positional.json",
+      "type": 5
+    },
+    {
+      "name": "pot-wash-panic_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/pot-wash-panic.json",
+      "type": 5
+    },
+    {
+      "name": "pretender-to-the-crown_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/pretender-to-the-crown.json",
+      "type": 5
+    },
+    {
+      "name": "programaze_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/programaze.json",
+      "type": 5
+    },
+    {
+      "name": "purple_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/purple.json",
+      "type": 5
+    },
+    {
+      "name": "push_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/push.json",
+      "type": 5
+    },
+    {
+      "name": "pushcat-jr_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/pushcat-jr.json",
+      "type": 5
+    },
+    {
+      "name": "rainbow-keys-plus_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/rainbow-keys-plus.json",
+      "type": 5
+    },
+    {
+      "name": "robot-repairs-1-2_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/robot-repairs-1-2.json",
+      "type": 5
+    },
+    {
+      "name": "rock-paper-scissors_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/rock-paper-scissors.json",
+      "type": 5
+    },
+    {
+      "name": "roll-those-sixes_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/roll-those-sixes.json",
+      "type": 5
+    },
+    {
+      "name": "rows-and-columns_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/rows-and-columns.json",
+      "type": 5
+    },
+    {
+      "name": "scaling-walls_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/scaling-walls.json",
+      "type": 5
+    },
+    {
+      "name": "season-finale_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/season-finale.json",
+      "type": 5
+    },
+    {
+      "name": "separation_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/separation.json",
+      "type": 5
+    },
+    {
+      "name": "skippa_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/skippa.json",
+      "type": 5
+    },
+    {
+      "name": "skipping-stones_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/skipping-stones.json",
+      "type": 5
+    },
+    {
+      "name": "skyscraper_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/skyscraper.json",
+      "type": 5
+    },
+    {
+      "name": "sleepy-players_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/sleepy-players.json",
+      "type": 5
+    },
+    {
+      "name": "slidings_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/slidings.json",
+      "type": 5
+    },
+    {
+      "name": "slime-swap_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/slime-swap.json",
+      "type": 5
+    },
+    {
+      "name": "snakehole_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/snakehole.json",
+      "type": 5
+    },
+    {
+      "name": "snowman-decorator_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/snowman-decorator.json",
+      "type": 5
+    },
+    {
+      "name": "sokobond_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/sokobond.json",
+      "type": 5
+    },
+    {
+      "name": "sokoboros_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/sokoboros.json",
+      "type": 5
+    },
+    {
+      "name": "sokofun-clone_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/sokofun-clone.json",
+      "type": 5
+    },
+    {
+      "name": "some-lines-crossed_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/some-lines-crossed.json",
+      "type": 5
+    },
+    {
+      "name": "some-pits_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/some-pits.json",
+      "type": 5
+    },
+    {
+      "name": "spacekoban_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/spacekoban.json",
+      "type": 5
+    },
+    {
+      "name": "spider-s-hollow_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/spider-s-hollow.json",
+      "type": 5
+    },
+    {
+      "name": "spikes-n-stuff_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/spikes-n-stuff.json",
+      "type": 5
+    },
+    {
+      "name": "spooky-pumpkin-game_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/spooky-pumpkin-game.json",
+      "type": 5
+    },
+    {
+      "name": "square-colours_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/square-colours.json",
+      "type": 5
+    },
+    {
+      "name": "stairs_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/stairs.json",
+      "type": 5
+    },
+    {
+      "name": "stairways_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/stairways.json",
+      "type": 5
+    },
+    {
+      "name": "stand-off_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/stand-off.json",
+      "type": 5
+    },
+    {
+      "name": "statues_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/statues.json",
+      "type": 5
+    },
+    {
+      "name": "sticky_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/sticky.json",
+      "type": 5
+    },
+    {
+      "name": "sumoban_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/sumoban.json",
+      "type": 5
+    },
+    {
+      "name": "swap_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/swap.json",
+      "type": 5
+    },
+    {
+      "name": "swapbot_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/swapbot.json",
+      "type": 5
+    },
+    {
+      "name": "symbols_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/symbols.json",
+      "type": 5
+    },
+    {
+      "name": "take-heart-lass_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/take-heart-lass.json",
+      "type": 5
+    },
+    {
+      "name": "telefrag_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/telefrag.json",
+      "type": 5
+    },
+    {
+      "name": "teleporters_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/teleporters.json",
+      "type": 5
+    },
+    {
+      "name": "the-art-of-cloning_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/the-art-of-cloning.json",
+      "type": 5
+    },
+    {
+      "name": "the-art-of-storage_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/the-art-of-storage.json",
+      "type": 5
+    },
+    {
+      "name": "the-big-dig_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/the-big-dig.json",
+      "type": 5
+    },
+    {
+      "name": "the-copying_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/the-copying.json",
+      "type": 5
+    },
+    {
+      "name": "the-fire-calls_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/the-fire-calls.json",
+      "type": 5
+    },
+    {
+      "name": "the-laser_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/the-laser.json",
+      "type": 5
+    },
+    {
+      "name": "the-packing-crate_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/the-packing-crate.json",
+      "type": 5
+    },
+    {
+      "name": "the-switch_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/the-switch.json",
+      "type": 5
+    },
+    {
+      "name": "the-workshop_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/the-workshop.json",
+      "type": 5
+    },
+    {
+      "name": "then-another_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/then-another.json",
+      "type": 5
+    },
+    {
+      "name": "tiaradventur_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/tiaradventur.json",
+      "type": 5
+    },
+    {
+      "name": "tidy-the-cafe_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/tidy-the-cafe.json",
+      "type": 5
+    },
+    {
+      "name": "tiny-treasure-hunt_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/tiny-treasure-hunt.json",
+      "type": 5
+    },
+    {
+      "name": "to-nothing-and-back_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/to-nothing-and-back.json",
+      "type": 5
+    },
+    {
+      "name": "train-braining_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/train-braining.json",
+      "type": 5
+    },
+    {
+      "name": "train_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/train.json",
+      "type": 5
+    },
+    {
+      "name": "triple-match_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/triple-match.json",
+      "type": 5
+    },
+    {
+      "name": "tunnel-rat_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/tunnel-rat.json",
+      "type": 5
+    },
+    {
+      "name": "unconventional-guns_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/unconventional-guns.json",
+      "type": 5
+    },
+    {
+      "name": "vacuum_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/vacuum.json",
+      "type": 5
+    },
+    {
+      "name": "vines_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/vines.json",
+      "type": 5
+    },
+    {
+      "name": "wall-bonding_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/wall-bonding.json",
+      "type": 5
+    },
+    {
+      "name": "wall-shuffle_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/wall-shuffle.json",
+      "type": 5
+    },
+    {
+      "name": "white-pillars_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/white-pillars.json",
+      "type": 5
+    },
+    {
+      "name": "world-generation_json",
+      "path": "assets/game/game1/puzzlescript-master 2/game-solutions/world-generation.json",
+      "type": 5
+    },
+    {
+      "name": "package_json",
+      "path": "assets/game/game1/puzzlescript-master 2/package.json",
+      "type": 5
+    },
+    {
+      "name": "pwa-manifest_json",
+      "path": "assets/game/game1/puzzlescript-master 2/pwa-manifest.json",
+      "type": 5
+    },
+    {
+      "name": "tsconfig_json",
+      "path": "assets/game/game1/puzzlescript-master 2/tsconfig.json",
+      "type": 5
+    },
+    {
+      "name": "tslint_json",
+      "path": "assets/game/game1/puzzlescript-master 2/tslint.json",
+      "type": 5
+    },
+    {
       "name": "test_json",
       "path": "assets/test/test.json",
       "type": 2,
@@ -9,6 +894,38 @@
         "block2",
         "block3",
         "block4"
+      ]
+    },
+    {
+      "name": "main_json",
+      "path": "assets/textures/main.json",
+      "type": 2,
+      "frames": [
+        "bg",
+        "font1_0",
+        "font1_1",
+        "font1_2",
+        "font1_3",
+        "font1_4",
+        "font1_5",
+        "font1_6",
+        "font1_7",
+        "font1_8",
+        "font1_9",
+        "gray_1",
+        "tag0_0",
+        "tag0_1",
+        "tag1_0",
+        "tag1_1",
+        "tag2_0",
+        "tag2_1",
+        "tag3_0",
+        "tag3_1",
+        "tag4_0",
+        "tag4_1",
+        "top_info_bg",
+        "gold",
+        "heart"
       ]
     },
     {
@@ -37,8 +954,3368 @@
       "type": 4
     },
     {
+      "name": "game1-5_txt",
+      "path": "assets/game/game1/game1-5.txt",
+      "type": 4
+    },
+    {
+      "name": "game1-6_txt",
+      "path": "assets/game/game1/game1-6.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/1-2-3-ban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/2d-whale-world/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/2d-whale-world/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/9x9-go/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/a-sneeze-a-day/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/aaaah-i-m-being-attacked/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/aaaah-i-m-being-attacked/script.txt",
+      "type": 4
+    },
+    {
+      "name": "broken-script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/airport-aggression/broken-script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/airport-aggression/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/alien-disco/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/alternatey/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/always-magnets/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/atlas-shrank/gist-6994394/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/atlas-shrank/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/atlas-shrank/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/aunt-flora-s-mansion/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/baba-is-you/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/baguettes/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/bal-ru-s-curse/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/bal-ru-s-curse/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/barrier-trail/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/beam-islands/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/beam-islands/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/becoming-one/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/block-touching/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/blocker-snake/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/bomb-n-grouping/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/bomb-n-ice/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/botsket-ball/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/bouncers/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/bouncers/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/boxes-and-balloons/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/boxes-love-bloxing-gloves/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/bruised/script.txt",
+      "type": 4
+    },
+    {
+      "name": "puzzlebutler_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/bubble-butler/puzzlebutler.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/bubble-butler/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/car-crash/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/castlemouse/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/castlemouse/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/chasm/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/climbing-cubes/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/closure-demake/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/coin-counter/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/collapsable-sokoban/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/collapsable-sokoban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/collapse/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/collapse/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/collapsing-tiles/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/colour-chained/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/colour-chained/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/colour-move/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/compressed/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/consumed-to-1/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/copy-pellets/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/count-mover/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/count-mover/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/covering-holes/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/crate-cables/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/cratopia/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/cratopia/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/cubes-barrier/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/cubes-medusa/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/cute-train/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/cute-train/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/cyber-lasso/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/dang-i-m-huge/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/dang-i-m-huge/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/dangerous-dungeon/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/dark-pellets/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/dharma-dojo-demake/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/dharma-dojo-demake/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/directional/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/drop-swap/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/drop-swap/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/duality/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/dungeon-janitor/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/dungeon-janitor/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/dup-block/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/easy-enigma/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/ebony-and-ivory/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/ebony-and-ivory/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/electric-wire/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/element-walkers/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/enclosed/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/enqueue/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/enqueue/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/entanglement-one/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/entanglement-two/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/esl-puzzle-game/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/esl-puzzle-game/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/esl-puzzle-game-challenge-mode/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/esl-puzzle-game-challenge-mode/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/explod/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/explod/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/extra-lives/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/extra-push/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/extra-step/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/fatigued-square-maze/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/feeling-like-filling/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/finding-my-body/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/fire-in-winter/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/fish-friend/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/flower-dance/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/flower-dance/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/flying-kick/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/flying-kick/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/freeform-bal-ru-s-curse/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/freeform-bal-ru-s-curse/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/fuse-to-green/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/fused-copy/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/fused-pieces/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/garten-der-medusen/script.txt",
+      "type": 4
+    },
+    {
+      "name": "realtime_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/gist-1688e839e0a8b86fe356d5fb4667f15c/realtime.txt",
+      "type": 4
+    },
+    {
+      "name": "broken-script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/gist-2b27eb9b034b30391207f326a7d5877f/broken-script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/gist-2b27eb9b034b30391207f326a7d5877f/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "mininum_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/gist-5e0cf1235c030f0c1402196d631d49c4/mininum.txt",
+      "type": 4
+    },
+    {
+      "name": "script-broken-toolongparsing_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/gist-7511684/script-broken-toolongparsing.txt",
+      "type": 4
+    },
+    {
+      "name": "GhostHunters_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/gist-b24aaa4eae7b640077ed11f4242b94ae/GhostHunters.txt",
+      "type": 4
+    },
+    {
+      "name": "toobig-script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/gist-z_on-board_itch/toobig-script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/gobble-rush/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/gobble-rush/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/grouping/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/guiding-blocks/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/hack-the-net/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/hazard-golf/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/hazard-golf/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/herding-hero/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/heroes-of-sokoban-iii/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/heroes-of-sokoban-iii/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/hue-change/script.txt",
+      "type": 4
+    },
+    {
+      "name": "i herd u liek water templs_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/i-herd-u-liek-water-templs/i herd u liek water templs.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/i-herd-u-liek-water-templs/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/ice-cream-stick/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/ice-cream-stick/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/ice-path/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/icecrates/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/icecrates/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/inbetween/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/infected/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/interconnection/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/islands/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/it-dies-in-the-light/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/it-dies-in-the-light/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/jam3-game/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/jam3-game/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/kettle/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/kettle/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/knightoban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/life-is-hard/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/lights-down/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/lil-purple/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/lime-rick/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/lime-rick/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/line-of-sight/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/linked/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/liquid-war-alpha/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/love-and-pieces/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/love-and-pieces/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/maera-public-works/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/magik/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/magik/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/magnetic/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/magnetized/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/manic-ammo/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/manic-ammo/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/marble-shoot/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/marble-shoot/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/matchpub/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/mazezam/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/mc-escher-s-equestrian-armageddon/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/mc-escher-s-equestrian-armageddon/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/microban/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/microban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/midas/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/midas/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/mirror-isles/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/mirror-mines/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/miss-direction/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/modality/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/modality/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/monkey-ruins/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/monster-mess/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/movement-garden/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/moving-target/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/mowing/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/multi-word-dictionary-game/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/multi-word-dictionary-game/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/n-little-indians/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/n-little-indians/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/net/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/newton-s-crates/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/newton-s-crates/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/okosban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/on-and-off/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/oskars-maze/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/out-of-bounds/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/out-of-bounds-2/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/out-there/gist-fb4b0867bc3daa6835b9286e59cbcd2c/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/out-there/gist-fb4b0867bc3daa6835b9286e59cbcd2c/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/out-there/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/out-there/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/outward-force/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/overstep/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/pants-shirt-cap/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/pants-shirt-cap/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/paralands/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/paralands/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/path-lines/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/pathmaker/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/pit-trails/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/ponies-jumping/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/ponies-jumping/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/pornography-for-beginners/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/pornography-for-beginners/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/portal-ban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/positional/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/pot-wash-panic/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/pretender-to-the-crown/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/pretender-to-the-crown/script.txt",
+      "type": 4
+    },
+    {
+      "name": "broken-expected1charforspritename-script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/princess-of-isometria/broken-expected1charforspritename-script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/programaze/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/pull-and-push/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/punt-mazes/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/purple/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/push/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/push/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/pushcat-jr/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/pushcat-jr/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/rainbow-keys-plus/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/robot-repairs-1-2/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/rock-paper-scissors/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/rock-paper-scissors/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/roll-those-sixes/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/rose/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/rose/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/rotaters-cause/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/rows-and-columns/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/scaling-walls/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/season-finale/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/season-finale/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/self-alteration/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/separation/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/shifting/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/side-painting/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/singleton-traffic/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/singleton-traffic/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/skippa/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/skipping-stones/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/skyscraper/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/sleepy-players/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/sliding-ground/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/slidings/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/slidings/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/slime-saga/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/slime-swap/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/smother/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/smother/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/snakehole/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/snowman-decorator/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/sok7/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/sok7/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/sokobond/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/sokobond/spacekoban_6a6c07f71d7039e4155e/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/sokoboros/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/sokoboros/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/sokofun-clone/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/some-lines-crossed/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/some-lines-crossed/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/some-pits/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/spacekoban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/spider-s-hollow/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/spider-s-hollow/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/spikes-n-stuff/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/spooky-pumpkin-game/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/square-colours/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/stairs/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/stairways/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/stairways/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/stalemate-yourself/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/stand-off/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/stand-off/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/statues/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/sticky/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/sumoban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/swap/script.txt",
+      "type": 4
+    },
+    {
+      "name": "aswapbot_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/swapbot/aswapbot.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/swapbot/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/symbols/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/take-heart-lass/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/telefrag/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/telefrag/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/teleporters/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/test-gist-script/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/the-art-of-cloning/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/the-art-of-storage/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/the-big-dig/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/the-copying/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/the-fire-calls/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/the-flames/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/the-laser/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/the-packing-crate/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/the-saga-of-the-candy-scroll/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/the-saga-of-the-candy-scroll/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/the-switch/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/the-walls-you-leave-behind/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/the-workshop/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/then-another/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/tiaradventur/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/tidy-the-cafe/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/tile-step/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/tiny-treasure-hunt/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/to-nothing-and-back/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/train/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/train-braining/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/triple-match/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/tunnel-rat/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/tunnel-rat/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/two-and-a-half/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/unclean-residues/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/unconventional-guns/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/unconventional-guns/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/using-pushers/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/vacuum/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/vacuum/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/vines/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/vines/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/wall-bonding/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/wall-movement/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/wall-shuffle/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/wall-virus/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/white-pillars/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/world-generation/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/yin-yang/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/zzz-swapbot-scratchwork/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/game/game1/puzzlescript-master 2/games/zzz-swapbot-scratchwork/script.txt",
+      "type": 4
+    },
+    {
       "name": "test_txt",
       "path": "assets/game/test.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/1-2-3-ban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/2d-whale-world/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/2d-whale-world/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/9x9-go/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/a-sneeze-a-day/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/aaaah-i-m-being-attacked/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/aaaah-i-m-being-attacked/script.txt",
+      "type": 4
+    },
+    {
+      "name": "broken-script_txt",
+      "path": "assets/games/airport-aggression/broken-script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/airport-aggression/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/alien-disco/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/alternatey/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/always-magnets/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/atlas-shrank/gist-6994394/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/atlas-shrank/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/atlas-shrank/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/aunt-flora-s-mansion/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/baba-is-you/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/baguettes/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/bal-ru-s-curse/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/bal-ru-s-curse/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/barrier-trail/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/beam-islands/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/beam-islands/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/becoming-one/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/block-touching/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/blocker-snake/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/bomb-n-grouping/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/bomb-n-ice/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/botsket-ball/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/bouncers/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/bouncers/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/boxes-and-balloons/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/boxes-love-bloxing-gloves/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/bruised/script.txt",
+      "type": 4
+    },
+    {
+      "name": "puzzlebutler_txt",
+      "path": "assets/games/bubble-butler/puzzlebutler.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/bubble-butler/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/car-crash/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/castlemouse/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/castlemouse/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/chasm/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/climbing-cubes/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/closure-demake/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/coin-counter/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/collapsable-sokoban/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/collapsable-sokoban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/collapse/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/collapse/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/collapsing-tiles/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/colour-chained/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/colour-chained/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/colour-move/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/compressed/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/consumed-to-1/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/copy-pellets/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/count-mover/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/count-mover/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/covering-holes/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/crate-cables/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/cratopia/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/cratopia/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/cubes-barrier/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/cubes-medusa/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/cute-train/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/cute-train/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/cyber-lasso/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/dang-i-m-huge/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/dang-i-m-huge/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/dangerous-dungeon/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/dark-pellets/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/dharma-dojo-demake/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/dharma-dojo-demake/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/directional/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/drop-swap/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/drop-swap/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/duality/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/dungeon-janitor/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/dungeon-janitor/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/dup-block/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/easy-enigma/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/ebony-and-ivory/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/ebony-and-ivory/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/electric-wire/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/element-walkers/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/enclosed/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/enqueue/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/enqueue/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/entanglement-one/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/entanglement-two/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/esl-puzzle-game/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/esl-puzzle-game/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/esl-puzzle-game-challenge-mode/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/esl-puzzle-game-challenge-mode/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/explod/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/explod/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/extra-lives/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/extra-push/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/extra-step/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/fatigued-square-maze/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/feeling-like-filling/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/finding-my-body/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/fire-in-winter/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/fish-friend/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/flower-dance/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/flower-dance/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/flying-kick/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/flying-kick/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/freeform-bal-ru-s-curse/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/freeform-bal-ru-s-curse/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/fuse-to-green/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/fused-copy/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/fused-pieces/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/garten-der-medusen/script.txt",
+      "type": 4
+    },
+    {
+      "name": "realtime_txt",
+      "path": "assets/games/gist-1688e839e0a8b86fe356d5fb4667f15c/realtime.txt",
+      "type": 4
+    },
+    {
+      "name": "broken-script_txt",
+      "path": "assets/games/gist-2b27eb9b034b30391207f326a7d5877f/broken-script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/gist-2b27eb9b034b30391207f326a7d5877f/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "mininum_txt",
+      "path": "assets/games/gist-5e0cf1235c030f0c1402196d631d49c4/mininum.txt",
+      "type": 4
+    },
+    {
+      "name": "script-broken-toolongparsing_txt",
+      "path": "assets/games/gist-7511684/script-broken-toolongparsing.txt",
+      "type": 4
+    },
+    {
+      "name": "GhostHunters_txt",
+      "path": "assets/games/gist-b24aaa4eae7b640077ed11f4242b94ae/GhostHunters.txt",
+      "type": 4
+    },
+    {
+      "name": "toobig-script_txt",
+      "path": "assets/games/gist-z_on-board_itch/toobig-script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/gobble-rush/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/gobble-rush/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/grouping/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/guiding-blocks/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/hack-the-net/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/hazard-golf/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/hazard-golf/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/herding-hero/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/heroes-of-sokoban-iii/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/heroes-of-sokoban-iii/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/hue-change/script.txt",
+      "type": 4
+    },
+    {
+      "name": "i herd u liek water templs_txt",
+      "path": "assets/games/i-herd-u-liek-water-templs/i herd u liek water templs.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/i-herd-u-liek-water-templs/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/ice-cream-stick/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/ice-cream-stick/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/ice-path/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/icecrates/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/icecrates/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/inbetween/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/infected/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/interconnection/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/islands/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/it-dies-in-the-light/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/it-dies-in-the-light/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/jam3-game/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/jam3-game/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/kettle/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/kettle/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/knightoban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/life-is-hard/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/lights-down/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/lil-purple/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/lime-rick/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/lime-rick/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/line-of-sight/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/linked/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/liquid-war-alpha/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/love-and-pieces/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/love-and-pieces/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/maera-public-works/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/magik/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/magik/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/magnetic/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/magnetized/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/manic-ammo/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/manic-ammo/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/marble-shoot/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/marble-shoot/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/matchpub/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/mazezam/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/mc-escher-s-equestrian-armageddon/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/mc-escher-s-equestrian-armageddon/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/microban/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/microban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/midas/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/midas/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/mirror-isles/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/mirror-mines/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/miss-direction/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/modality/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/modality/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/monkey-ruins/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/monster-mess/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/movement-garden/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/moving-target/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/mowing/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/multi-word-dictionary-game/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/multi-word-dictionary-game/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/n-little-indians/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/n-little-indians/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/net/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/newton-s-crates/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/newton-s-crates/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/okosban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/on-and-off/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/oskars-maze/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/out-of-bounds/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/out-of-bounds-2/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/out-there/gist-fb4b0867bc3daa6835b9286e59cbcd2c/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/out-there/gist-fb4b0867bc3daa6835b9286e59cbcd2c/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/out-there/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/out-there/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/outward-force/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/overstep/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/pants-shirt-cap/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/pants-shirt-cap/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/paralands/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/paralands/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/path-lines/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/pathmaker/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/pit-trails/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/ponies-jumping/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/ponies-jumping/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/pornography-for-beginners/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/pornography-for-beginners/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/portal-ban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/positional/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/pot-wash-panic/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/pretender-to-the-crown/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/pretender-to-the-crown/script.txt",
+      "type": 4
+    },
+    {
+      "name": "broken-expected1charforspritename-script_txt",
+      "path": "assets/games/princess-of-isometria/broken-expected1charforspritename-script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/programaze/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/pull-and-push/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/punt-mazes/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/purple/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/push/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/push/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/pushcat-jr/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/pushcat-jr/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/rainbow-keys-plus/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/robot-repairs-1-2/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/rock-paper-scissors/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/rock-paper-scissors/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/roll-those-sixes/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/rose/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/rose/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/rotaters-cause/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/rows-and-columns/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/scaling-walls/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/season-finale/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/season-finale/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/self-alteration/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/separation/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/shifting/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/side-painting/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/singleton-traffic/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/singleton-traffic/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/skippa/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/skipping-stones/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/skyscraper/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/sleepy-players/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/sliding-ground/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/slidings/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/slidings/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/slime-saga/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/slime-swap/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/smother/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/smother/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/snakehole/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/snowman-decorator/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/sok7/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/sok7/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/sokobond/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/sokobond/spacekoban_6a6c07f71d7039e4155e/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/sokoboros/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/sokoboros/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/sokofun-clone/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/some-lines-crossed/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/some-lines-crossed/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/some-pits/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/spacekoban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/spider-s-hollow/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/spider-s-hollow/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/spikes-n-stuff/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/spooky-pumpkin-game/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/square-colours/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/stairs/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/stairways/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/stairways/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/stalemate-yourself/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/stand-off/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/stand-off/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/statues/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/sticky/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/sumoban/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/swap/script.txt",
+      "type": 4
+    },
+    {
+      "name": "aswapbot_txt",
+      "path": "assets/games/swapbot/aswapbot.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/swapbot/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/symbols/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/take-heart-lass/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/telefrag/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/telefrag/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/teleporters/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/test-gist-script/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/the-art-of-cloning/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/the-art-of-storage/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/the-big-dig/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/the-copying/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/the-fire-calls/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/the-flames/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/the-laser/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/the-packing-crate/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/the-saga-of-the-candy-scroll/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/the-saga-of-the-candy-scroll/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/the-switch/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/the-walls-you-leave-behind/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/the-workshop/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/then-another/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/tiaradventur/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/tidy-the-cafe/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/tile-step/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/tiny-treasure-hunt/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/to-nothing-and-back/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/train/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/train-braining/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/triple-match/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/tunnel-rat/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/tunnel-rat/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/two-and-a-half/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/unclean-residues/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/unconventional-guns/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/unconventional-guns/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/using-pushers/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/vacuum/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/vacuum/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/vines/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/vines/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/wall-bonding/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/wall-movement/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/wall-shuffle/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/wall-virus/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/white-pillars/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/world-generation/script.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/yin-yang/script.txt",
+      "type": 4
+    },
+    {
+      "name": "readme_txt",
+      "path": "assets/games/zzz-swapbot-scratchwork/readme.txt",
+      "type": 4
+    },
+    {
+      "name": "script_txt",
+      "path": "assets/games/zzz-swapbot-scratchwork/script.txt",
       "type": 4
     },
     {
@@ -49,6 +4326,136 @@
     {
       "name": "block_merge_png",
       "path": "assets/block_merge.png",
+      "type": 1
+    },
+    {
+      "name": "apple-touch-icon-114x114_png",
+      "path": "assets/game/game1/puzzlescript-master 2/apple-touch-icon-114x114.png",
+      "type": 1
+    },
+    {
+      "name": "apple-touch-icon-120x120_png",
+      "path": "assets/game/game1/puzzlescript-master 2/apple-touch-icon-120x120.png",
+      "type": 1
+    },
+    {
+      "name": "apple-touch-icon-152x152_png",
+      "path": "assets/game/game1/puzzlescript-master 2/apple-touch-icon-152x152.png",
+      "type": 1
+    },
+    {
+      "name": "apple-touch-icon-180x180_png",
+      "path": "assets/game/game1/puzzlescript-master 2/apple-touch-icon-180x180.png",
+      "type": 1
+    },
+    {
+      "name": "apple-touch-icon-57x57_png",
+      "path": "assets/game/game1/puzzlescript-master 2/apple-touch-icon-57x57.png",
+      "type": 1
+    },
+    {
+      "name": "apple-touch-icon-60x60_png",
+      "path": "assets/game/game1/puzzlescript-master 2/apple-touch-icon-60x60.png",
+      "type": 1
+    },
+    {
+      "name": "apple-touch-icon-72x72_png",
+      "path": "assets/game/game1/puzzlescript-master 2/apple-touch-icon-72x72.png",
+      "type": 1
+    },
+    {
+      "name": "apple-touch-icon-76x76_png",
+      "path": "assets/game/game1/puzzlescript-master 2/apple-touch-icon-76x76.png",
+      "type": 1
+    },
+    {
+      "name": "pwa-icon-144_png",
+      "path": "assets/game/game1/puzzlescript-master 2/pwa-icon-144.png",
+      "type": 1
+    },
+    {
+      "name": "pwa-icon-192_png",
+      "path": "assets/game/game1/puzzlescript-master 2/pwa-icon-192.png",
+      "type": 1
+    },
+    {
+      "name": "pwa-icon-512_png",
+      "path": "assets/game/game1/puzzlescript-master 2/pwa-icon-512.png",
+      "type": 1
+    },
+    {
+      "name": "blue-bg-scroller_png",
+      "path": "assets/icon/blue-bg-scroller.png",
+      "type": 1
+    },
+    {
+      "name": "blue-bg_png",
+      "path": "assets/icon/blue-bg.png",
+      "type": 1
+    },
+    {
+      "name": "icon-share_png",
+      "path": "assets/icon/icon-share.png",
+      "type": 1
+    },
+    {
+      "name": "icon-video_png",
+      "path": "assets/icon/icon-video.png",
+      "type": 1
+    },
+    {
+      "name": "num_28_39_0_png",
+      "path": "assets/num_28_39/num_28_39_0.png",
+      "type": 1
+    },
+    {
+      "name": "num_28_39_1_png",
+      "path": "assets/num_28_39/num_28_39_1.png",
+      "type": 1
+    },
+    {
+      "name": "num_28_39_2_png",
+      "path": "assets/num_28_39/num_28_39_2.png",
+      "type": 1
+    },
+    {
+      "name": "num_28_39_3_png",
+      "path": "assets/num_28_39/num_28_39_3.png",
+      "type": 1
+    },
+    {
+      "name": "num_28_39_4_png",
+      "path": "assets/num_28_39/num_28_39_4.png",
+      "type": 1
+    },
+    {
+      "name": "num_28_39_5_png",
+      "path": "assets/num_28_39/num_28_39_5.png",
+      "type": 1
+    },
+    {
+      "name": "num_28_39_6_png",
+      "path": "assets/num_28_39/num_28_39_6.png",
+      "type": 1
+    },
+    {
+      "name": "num_28_39_7_png",
+      "path": "assets/num_28_39/num_28_39_7.png",
+      "type": 1
+    },
+    {
+      "name": "num_28_39_8_png",
+      "path": "assets/num_28_39/num_28_39_8.png",
+      "type": 1
+    },
+    {
+      "name": "num_28_39_9_png",
+      "path": "assets/num_28_39/num_28_39_9.png",
+      "type": 1
+    },
+    {
+      "name": "top_info_bg_png",
+      "path": "assets/textures/top_info_bg.png",
       "type": 1
     }
   ]

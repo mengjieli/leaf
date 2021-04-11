@@ -65,6 +65,15 @@ declare namespace leaf {
     }
 }
 declare namespace leaf {
+    class RectMask extends ecs.Component {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        init(x?: number, y?: number, w?: number, h?: number): void;
+    }
+}
+declare namespace leaf {
 }
 declare namespace leaf {
 }
@@ -144,6 +153,24 @@ declare namespace leaf {
         readonly textHeight: number;
         onDestroy(): void;
         static useScaleFont: boolean;
+    }
+}
+declare namespace leaf {
+    class ScrollBitmap extends Render {
+        shader: ScrollerShaderTask;
+        private _resource;
+        private _res;
+        texture: Texture;
+        resource: string;
+        private _tint;
+        tint: number;
+        scrollX: number;
+        scrollY: number;
+        readonly width: number;
+        readonly height: number;
+        preRender(): void;
+        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader): void;
+        onDestroy(): void;
     }
 }
 declare namespace leaf {
@@ -463,6 +490,60 @@ declare namespace leaf {
         reset(): void;
         private static _shader;
         static readonly shader: NormalShaderTask;
+    }
+}
+declare namespace leaf {
+    var $size: number;
+    class ScrollerShaderTask extends Shader {
+        private a_Position;
+        private a_TexCoord;
+        private a_Alpha;
+        private a_Sampler;
+        private u_PMatrix;
+        private u_Samplers;
+        private u_Color;
+        private u_offx;
+        private u_offy;
+        constructor();
+        /**
+         * 初始化作色器、program
+         * 1. 初始化 shader
+         * 2. 初始化 program
+         * 目前没有加 filter (滤镜) 的功能，后续可以继续扩展这两个 shader
+         * @param gl
+         */
+        private initProgram;
+        private projectionMatrix;
+        /**
+         * 初始化作色器固定变量 和 获取作色器中得变量
+         * 主要初始化投影矩阵，投影矩阵不用每次调用都初始化，只要设置一次即可，除非舞台 (Stage) 的大小改变 (glViewPort)
+         * 获取一些变量。
+         * @param gl
+         * @param width
+         * @param height
+         */
+        private initAttriLocation;
+        private offxs;
+        private offys;
+        private textures;
+        private count;
+        private positionData;
+        private blendMode;
+        private indiceData;
+        private tints;
+        private newAddNew;
+        addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode, tint: number, offx: number, offy: number): void;
+        renderCounts: number[];
+        lastRenderCount: number;
+        renderIndex: number;
+        startNewTask(): void;
+        /**
+         * 渲染
+         */
+        render(): void;
+        reset(): void;
+        private static _shader;
+        static readonly shader: ScrollerShaderTask;
     }
 }
 declare namespace leaf {

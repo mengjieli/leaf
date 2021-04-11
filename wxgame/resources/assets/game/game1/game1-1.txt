@@ -87,8 +87,8 @@ RULES
 ======
 
 [ >  Player | CrateAll ] -> [  >  Player | > CrateAll  ]
-[ Crate Target ] -> [ CrateRed Target ]
-[ CrateRed no Target ] -> [ Crate no Target ]
+late [ Crate Target ] -> [ CrateRed Target ]
+late [ CrateRed no Target ] -> [ Crate no Target ]
 
 ==============
 WINCONDITIONS
@@ -191,15 +191,3 @@ LEVELS
 #.*OOO##
 ####..#.
 ...####.
-
-=======
-FACE
-=======
-
-####..
-#.O#..
-#..###
-#@P..#
-#..*.#
-#..###
-####..

@@ -67,8 +67,6 @@ R = CrateRed and Target
 
 CrateAll = Crate or CrateRed
 
-
-
 =======
 SOUNDS
 =======
@@ -88,8 +86,8 @@ RULES
 ======
 
 [ >  Player | CrateAll ] -> [  >  Player | > CrateAll  ]
-[ Crate Target ] -> [ CrateRed Target ]
-[ CrateRed no Target ] -> [ Crate no Target ]
+late [ Crate Target ] -> [ CrateRed Target ]
+late [ CrateRed no Target ] -> [ Crate no Target ]
 
 ==============
 WINCONDITIONS
@@ -700,14 +698,3 @@ W.CPC.W
 W..C..W
 WO...OW
 WWWWWWW
-
-=======
-FACE
-=======
-
-WWWWWW
-W.O..W
-W.CP.W
-W.WCOW
-W.C.OW
-WWWWWW

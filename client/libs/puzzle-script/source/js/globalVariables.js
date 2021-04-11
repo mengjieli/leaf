@@ -43,6 +43,7 @@ var autotick=0;
 var autotickinterval=0;
 var winning=false;
 var againing=false;
+window.againing = againing;
 var againinterval=150;
 var norepeat_action=false;
 var oldflickscreendat=[];//used for buffering old flickscreen/scrollscreen positions, in case player vanishes

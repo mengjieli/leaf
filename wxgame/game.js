@@ -11,7 +11,6 @@ import './js/libs/sync-data'
 import './js/libs/behavior-tree'
 import './js/libs/tween'
 import './js/libs/puzzle-script'
-import './js/libs/symbol'
 
 import './js/main'
 
@@ -31,8 +30,6 @@ window.wxloadText = function (url, onComplete) {
   })
 }
 
-new window.Main();
-
 wx.onShareAppMessage(function () {
   // 用户点击了“转发”按钮
   return {
@@ -46,9 +43,18 @@ wx.showShareMenu({
   menus: ['shareAppMessage', 'shareTimeline']
 })
 
+let debug = false;
+
+orange.debug = debug;
 
 
+wx.cloud.init({
+  env: debug ? "debug-6g9awi179fc698c1" : "elimination-u6401"
+  // env 参数说明：
+  //   env 参数决定接下来小程序发起的云开发调用（wx.cloud.xxx）会默认请求到哪个云环境的资源
+  //   此处请填入环境 ID, 环境 ID 可打开云控制台查看
+  //   如不填则使用默认环境（第一个创建的环境）
+  // env: 'my-env-id',
+})
 
-// wx.shareAppMessage({
-//   title: '老婆在家千万不能开...'
-// })
+new window.Main();

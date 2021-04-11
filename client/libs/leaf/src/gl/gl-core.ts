@@ -10,7 +10,7 @@ namespace leaf {
 
         static textureId: number = 0;
 
-        static get scale():number {
+        static get scale(): number {
             return leaf.world ? leaf.world.root.transform.scaleX : 1;
         }
 
@@ -21,6 +21,21 @@ namespace leaf {
 
         static init() {
             var canvas = (window["canvas"] || document.getElementById('leaf')) as HTMLCanvasElement;
+            var backingStore = 1//window.devicePixelRatio || 1;
+            let canvasScaleFactor = backingStore;
+
+            let w = canvas.width * backingStore;
+            let h = canvas.height * backingStore;
+
+            // let m = new ecs.Matrix();
+            // m.identity();
+            // m.scale(1 / canvasScaleFactor, 1 / canvasScaleFactor);
+            // var transform = "matrix(" + m.a + "," + m.b + "," + m.c + "," + m.d + "," + m.tx + "," + m.ty + ")";
+            // canvas.style.transformOrigin = "0% 0% 0px";
+            // canvas.style["transform"] = transform;
+            // canvas.width *= canvasScaleFactor;
+            // canvas.height *= canvasScaleFactor;
+
             if (window["wx"]) {
                 window["wx"].onTouchStart((e) => {
                     for (let t of e.changedTouches) {
@@ -54,8 +69,10 @@ namespace leaf {
                     }
                 })
             }
-            this.width = canvas.width;
-            this.height = canvas.height;
+
+
+            this.width = w;
+            this.height = h;
             var names = ["experimental-webgl", "webgl"];
             var options = { "antialias": true, "stencil": true };
             var gl: WebGLRenderingContext;
@@ -67,10 +84,11 @@ namespace leaf {
                     gl.disable(gl.DEPTH_TEST);
                     gl.disable(gl.CULL_FACE);
                     gl.enable(gl.BLEND);
+                    gl.clear(gl.STENCIL_BUFFER_BIT);
                     gl.enable(gl.STENCIL_TEST);
                     gl.blendColor(1.0, 1.0, 1.0, 1.0);
-                    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-                    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+                    // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+                    gl.clearColor(1.0, 1.0, 1.0, 1.0);
                 } catch (e) {
                 }
                 if (gl) {

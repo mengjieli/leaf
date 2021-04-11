@@ -1,0 +1,149 @@
+{
+    // Place your Area di lavoro webgl-image-processing snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and
+    // description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope
+    // is left empty or omitted, the snippet gets applied to all languages. The prefix is what is
+    // used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+    // $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders.
+    // Placeholders with the same ids are connected.
+    // Example:
+    // "Print to console": {
+    // 	"scope": "javascript,typescript",
+    // 	"prefix": "log",
+    // 	"body": [
+    // 		"console.log('$1');",
+    // 		"$2"
+    // 	],
+    // 	"description": "Log output to console"
+    // }
+    "Starter": {
+        "prefix": "starter",
+        "body": [
+            "const gui = new dat.GUI();",
+            "const canvas = document.createElement(\"canvas\");",
+            "document.body.appendChild(canvas);",
+            "",
+            "const gl = canvas.getContext(\"webgl\");",
+            "",
+            "const filters = {",
+            "    brightness: 0,",
+            "    contrast: 0, ",
+            "    saturation: 0",
+            "};",
+            "",
+            "const draw = requestAnimationFrame.bind(null, () => {",
+            "    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);",
+            "    gl.clearColor(1, 0, 0, 1);",
+            "    gl.clear(gl.COLOR_BUFFER_BIT);",
+            "});",
+            "",
+            "// Draw the scene",
+            "draw();",
+            "",
+            "// Setup GUI",
+            "for (const name of Object.keys(filters)) {",
+            "    gui.add(filters, name, -1, 1, 0.01).onChange(draw);",
+            "}"
+        ],
+        "description": "Starter"
+    },
+    "Setup GUI": {
+        "scope": "javascript",
+        "prefix": "gui",
+        "body": [
+            "for (const name of Object.keys(filters)) {",
+            "    gui.add(filters, name, -1, 1, 0.01).onChange(draw);",
+            "}"
+        ]
+    },
+    "Create Shader": {
+        "scope": "javascript",
+        "prefix": "newshader",
+        "body": [
+            "const $1 = gl.createShader($2);",
+            "gl.shaderSource($1, ``);",
+            "gl.compileShader($1);"
+        ]
+    },
+    "Create program": {
+        "scope": "javascript",
+        "prefix": "newprogram",
+        "body": [
+            "const program = gl.createProgram();",
+            "gl.attachShader(program, vertexShader);",
+            "gl.attachShader(program, fragmentShader);"
+        ]
+    },
+    "Texture wrapping": {
+        "scope": "javascript",
+        "prefix": "texwrap",
+        "body": [
+            "gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, $1);",
+            "gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, $1);"
+        ]
+    },
+    "Texture filters": {
+        "scope": "javascript",
+        "prefix": "texfilters",
+        "body": [
+            "gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, $1);",
+            "gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, $1);"
+        ]
+    },
+    "Compile status": {
+        "prefix": "shaderstatus",
+        "body": [
+            "if (!gl.getShaderParameter($0, gl.COMPILE_STATUS) ) {",
+            "    const info = gl.getShaderInfoLog($0);",
+            "    throw 'Could not compile WebGL program. \\n\\n' + info;",
+            "}"
+        ],
+        "description": "Compile status"
+    },
+    "Vertex buffer": {
+        "prefix": "vertbuffer",
+        "body": [
+            "const planeVertices = new Float32Array([",
+            "    -1, -1,",
+            "    -1, 1,",
+            "    1, 1,",
+            "",
+            "    1, 1,",
+            "    -1, -1,",
+            "    1, -1",
+            "]);",
+            "const vertexBuffer = gl.createBuffer();",
+            "gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);",
+            "gl.bufferData(gl.ARRAY_BUFFER, planeVertices, gl.STATIC_DRAW);"
+        ],
+        "description": "Vertex buffer"
+    },
+    "Draw": {
+        "prefix": "draw",
+        "body": [
+            "const draw = requestAnimationFrame.bind(null, () => {",
+            "    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);",
+            "    gl.clearColor(1, 0, 0, 1);",
+            "    gl.clear(gl.COLOR_BUFFER_BIT);",
+            "",
+            "    for (const [name, value] of Object.entries(uniforms)) {",
+            "        const uniformLocation = gl.getUniformLocation(program, name);",
+            "        gl.uniform1f(uniformLocation, value);",
+            "    }",
+            "",
+            "    gl.drawArrays(gl.TRIANGLES, 0, 6);",
+            "});"
+        ],
+        "description": "Draw"
+    },
+    "Load image": {
+        "prefix": "loadimg",
+        "body": [
+            "const image = new Image();",
+            "image.onload = () => {",
+            "    ",
+            "};",
+            "image.src = '$1';"
+        ],
+        "description": "Load image"
+    }
+}

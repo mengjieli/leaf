@@ -253,7 +253,7 @@ namespace leaf {
         public render(): void {
             var _this = this;
             var gl = GLCore.gl;
-            var max = this.renderCounts.pop();
+            var max = this.renderCounts.shift();
             gl.useProgram(_this.program);
             //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
             gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -265,7 +265,7 @@ namespace leaf {
             //开始渲染任务
             for (var len = _this.textures.length; i < len && i < max; i++) {
                 //切换混合模式
-                BlendModeFunc.changeBlendMode(this.blendMode[i]);
+                // BlendModeFunc.changeBlendMode(this.blendMode[i]);
                 gl.uniform4f(this.u_Color, (this.tints[i] >> 16) / 255.0, ((this.tints[i] >> 8) & 0xFF) / 255.0, (this.tints[i] & 0xFF) / 255.0, 1);
                 //绑定当前需要渲染的纹理
                 for (let t = 0; t < _this.textures[i].length; t++) {

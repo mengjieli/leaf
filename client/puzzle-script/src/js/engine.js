@@ -646,12 +646,14 @@ function setGameState(_state, command, randomseed) {
     }
     //set sprites
     sprites = [];
-    for (var n in state.objects) {
+	state.sprites = sprites;
+	for (var n in state.objects) {
         if (state.objects.hasOwnProperty(n)) {
             var object = state.objects[n];
             var sprite = {
                 colors: object.colors,
-                dat: object.spritematrix
+				dat: object.spritematrix,
+				name:n
             };
             sprites[object.id] = sprite;
         }
@@ -809,7 +811,7 @@ function RebuildLevelArrays() {
 	_o9 = new BitVec(STRIDE_OBJ);
 	_o10 = new BitVec(STRIDE_OBJ);
 	_o11 = new BitVec(STRIDE_OBJ);
-	_o12 = new BitVec(STRIDE_OBJ);
+ window._o12 =	_o12 = new BitVec(STRIDE_OBJ);
 	_m1 = new BitVec(STRIDE_MOV);
 	_m2 = new BitVec(STRIDE_MOV);
 	_m3 = new BitVec(STRIDE_MOV);
@@ -2265,9 +2267,12 @@ function calculateRowColMasks() {
 	}
 }
 
+var cc = 0;
+
 /* returns a bool indicating if anything changed */
 function processInput(dir,dontDoWin,dontModify) {
-	console.error(dir);
+	console.error(dir,cc);
+	cc++;
 	againing = false;
 
 	if (verbose_logging) { 
@@ -2534,6 +2539,7 @@ function processInput(dir,dontDoWin,dontModify) {
 	return modified;
 }
 
+
 function checkWin(dontDoWin) {
 
 	if (levelEditorOpened) {
@@ -2621,6 +2627,7 @@ function checkWin(dontDoWin) {
 		}
 	}
 }
+
 
 function DoWin() {
 	if (winning) {

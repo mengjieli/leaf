@@ -132,7 +132,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var puzzle_script_scene_1 = __webpack_require__(/*! ./modules/puzzle-script/puzzle-script-scene */ "../src/modules/puzzle-script/puzzle-script-scene.ts");
+var main_scene_1 = __webpack_require__(/*! ./modules/main/main-scene */ "../src/modules/main/main-scene.ts");
 var Main = /** @class */ (function () {
     function Main() {
         this.init();
@@ -162,14 +162,14 @@ var Main = /** @class */ (function () {
                         _a.sent();
                         _a.label = 2;
                     case 2:
+                        orange.debug = false;
                         leaf.init();
-                        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 256;
-                        console.error(leaf.GLCore.width, leaf.world.root.transform.scaleX);
+                        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 640;
                         leaf.Res.loadResources().then(function () {
                             leaf.Res.getRes("block_png").load().then(function () {
+                                new main_scene_1.MainScene();
+                                // new FaceScene(true);
                                 // new PuzzleScene();
-                                // new FaceScene();
-                                new puzzle_script_scene_1.PuzzleScriptScene();
                             });
                         });
                         return [2 /*return*/];
@@ -185,10 +185,10 @@ window["Main"] = Main;
 
 /***/ }),
 
-/***/ "../src/modules/puzzle-script/components/puzzle-script-game-key-board.ts":
-/*!*******************************************************************************!*\
-  !*** ../src/modules/puzzle-script/components/puzzle-script-game-key-board.ts ***!
-  \*******************************************************************************/
+/***/ "../src/modules/main/components/main-ui.ts":
+/*!*************************************************!*\
+  !*** ../src/modules/main/components/main-ui.ts ***!
+  \*************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -208,47 +208,32 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var puzzle_script_game_1 = __webpack_require__(/*! ./puzzle-script-game */ "../src/modules/puzzle-script/components/puzzle-script-game.ts");
-var PuzzleScriptGameKeyBoard = /** @class */ (function (_super) {
-    __extends(PuzzleScriptGameKeyBoard, _super);
-    function PuzzleScriptGameKeyBoard() {
+var top_info_view_1 = __webpack_require__(/*! ./top-info-view */ "../src/modules/main/components/top-info-view.ts");
+orange.autoloadLink("MainScene");
+var MainUI = /** @class */ (function (_super) {
+    __extends(MainUI, _super);
+    function MainUI() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    PuzzleScriptGameKeyBoard.prototype.awake = function () {
-        var _this = this;
-        window.onkeydown = function (e) {
-            console.error(e.keyCode);
-            if (e.keyCode === 87 || e.keyCode === 38) {
-                _this.getComponent(puzzle_script_game_1.PuzzleScriptGame).data.run("up");
-            }
-            else if (e.keyCode === 83 || e.keyCode === 40) {
-                _this.getComponent(puzzle_script_game_1.PuzzleScriptGame).data.run("down");
-            }
-            else if (e.keyCode === 65 || e.keyCode === 37) {
-                _this.getComponent(puzzle_script_game_1.PuzzleScriptGame).data.run("left");
-            }
-            else if (e.keyCode === 68 || e.keyCode === 39) {
-                _this.getComponent(puzzle_script_game_1.PuzzleScriptGame).data.run("right");
-            }
-            else if (e.keyCode === 90) {
-                _this.getComponent(puzzle_script_game_1.PuzzleScriptGame).data.run("undo");
-            }
-            else if (e.keyCode === 82) {
-                _this.getComponent(puzzle_script_game_1.PuzzleScriptGame).data.run("restart");
-            }
-        };
+    MainUI.prototype.init = function () {
+        // let bg = ecs.Entity.create().addComponent(leaf.Bitmap);
+        // bg.resource = "bg";
+        // bg.parent = this.entity;
+        // bg.transform.scaleX = leaf.getStageWidth();
+        // bg.transform.scaleY = leaf.getStageHeight();
+        ecs.Entity.create().addComponent(top_info_view_1.TopInfoView).parent = this.entity;
     };
-    return PuzzleScriptGameKeyBoard;
+    return MainUI;
 }(ecs.Component));
-exports.PuzzleScriptGameKeyBoard = PuzzleScriptGameKeyBoard;
+exports.MainUI = MainUI;
 
 
 /***/ }),
 
-/***/ "../src/modules/puzzle-script/components/puzzle-script-game.ts":
-/*!*********************************************************************!*\
-  !*** ../src/modules/puzzle-script/components/puzzle-script-game.ts ***!
-  \*********************************************************************/
+/***/ "../src/modules/main/components/top-info-view.ts":
+/*!*******************************************************!*\
+  !*** ../src/modules/main/components/top-info-view.ts ***!
+  \*******************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -267,270 +252,62 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __values = (this && this.__values) || function(o) {
-    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-    if (m) return m.call(o);
-    if (o && typeof o.length === "number") return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var puzzle_script_game_data_1 = __webpack_require__(/*! ../data/puzzle-script-game-data */ "../src/modules/puzzle-script/data/puzzle-script-game-data.ts");
-var puzzle_script_game_key_board_1 = __webpack_require__(/*! ./puzzle-script-game-key-board */ "../src/modules/puzzle-script/components/puzzle-script-game-key-board.ts");
-orange.autoloadLink("PuzzleScriptScene");
-var PuzzleScriptGame = /** @class */ (function (_super) {
-    __extends(PuzzleScriptGame, _super);
-    function PuzzleScriptGame() {
+var system_1 = __webpack_require__(/*! ../../../utils/system */ "../src/utils/system.ts");
+orange.autoloadLink("MainScene");
+var TopInfoView = /** @class */ (function (_super) {
+    __extends(TopInfoView, _super);
+    function TopInfoView() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    PuzzleScriptGame.prototype.init = function (game, level) {
-        if (level === void 0) { level = 0; }
-        this.level = level;
-        this.gridsRoot = ecs.Entity.create();
-        this.gridsRoot.parent = this.entity;
-        this.data = puzzle_script_game_data_1.PuzzleScriptGameData.getGameData(game);
-        if (!this.data.data) {
-            this.data.onComplete.on(this.onDataReady, this);
-            this.data.load();
-        }
-        else {
-            this.onDataReady();
-        }
+    TopInfoView.prototype.init = function () {
+        this.entity.transform.y = system_1.System.topHeight;
+        var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
+        bg.resource = "top_info_bg_png";
+        bg.transform.x = 17;
+        bg.parent = this.entity;
+        var heart = ecs.Entity.create().addComponent(leaf.Bitmap);
+        heart.resource = "heart";
+        heart.transform.x = bg.transform.x + 15;
+        heart.transform.y = 4;
+        heart.parent = this.entity;
+        var heartCount = ecs.Entity.create().addComponent(leaf.Label);
+        heartCount.transform.x = heart.transform.x + 65;
+        heartCount.transform.y = 13;
+        heartCount.text = "9999";
+        heartCount.fontSize = 40;
+        heartCount.fontColor = 0x777777;
+        heartCount.bold = true;
+        heartCount.parent = this.entity;
+        bg = ecs.Entity.create().addComponent(leaf.Bitmap);
+        bg.resource = "top_info_bg";
+        bg.transform.x = 220;
+        bg.parent = this.entity;
+        var gold = ecs.Entity.create().addComponent(leaf.Bitmap);
+        gold.resource = "gold";
+        gold.transform.x = bg.transform.x + 15;
+        gold.transform.y = 4;
+        gold.parent = this.entity;
+        var goldCount = ecs.Entity.create().addComponent(leaf.Label);
+        goldCount.transform.x = gold.transform.x + 65;
+        goldCount.transform.y = 13;
+        goldCount.text = "9999";
+        goldCount.fontSize = 40;
+        goldCount.fontColor = 0x777777;
+        goldCount.bold = true;
+        goldCount.parent = this.entity;
     };
-    PuzzleScriptGame.prototype.onDataReady = function () {
-        this.createLevel();
-        //创建纹理
-        this.gridsRoot.transform.scaleX = this.gridsRoot.transform.scaleY = 2;
-        this.bitmaps = [];
-        for (var l = 0; l < this.data.data.collisionLayers.length; l++) {
-            this.bitmaps[l] = [];
-            for (var y = 0; y < this.height; y++) {
-                this.bitmaps[l][y] = [];
-            }
-        }
-        this.addComponent(puzzle_script_game_key_board_1.PuzzleScriptGameKeyBoard);
-    };
-    PuzzleScriptGame.prototype.update = function () {
-        var e_1, _a;
-        if (this.bitmaps) {
-            for (var l = 0; l < this.data.data.collisionLayers.length; l++) {
-                for (var y = 0; y < this.height; y++) {
-                    for (var x = 0; x < this.width; x++) {
-                        if (this.bitmaps[l][y][x]) {
-                            this.bitmaps[l][y][x].texture = null;
-                        }
-                        var index = y + x * this.height;
-                        var mask = window["level"].objects[index];
-                        try {
-                            for (var _b = (e_1 = void 0, __values(this.data.data.collisionLayers[l])), _c = _b.next(); !_c.done; _c = _b.next()) {
-                                var name_1 = _c.value;
-                                var objMask = this.data.data.objectMasks[name_1].data;
-                                var flag = true;
-                                for (var i = 0; i < objMask.length; i++) {
-                                    if (!(objMask[i] & mask))
-                                        flag = false;
-                                }
-                                if (flag) {
-                                    if (!this.bitmaps[l][y][x]) {
-                                        this.bitmaps[l][y][x] = ecs.Entity.create().addComponent(leaf.Bitmap);
-                                        this.bitmaps[l][y][x].parent = this.gridsRoot;
-                                        this.bitmaps[l][y][x].transform.x = x * this.data.blockWidth;
-                                        this.bitmaps[l][y][x].transform.y = y * this.data.blockHeight;
-                                    }
-                                    var bm = this.bitmaps[l][y][x];
-                                    bm.texture = this.data.getObjectTexture(name_1);
-                                    break;
-                                }
-                            }
-                        }
-                        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-                        finally {
-                            try {
-                                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-                            }
-                            finally { if (e_1) throw e_1.error; }
-                        }
-                    }
-                }
-            }
-        }
-    };
-    PuzzleScriptGame.prototype.createLevel = function () {
-        this.data.start(this.level);
-    };
-    Object.defineProperty(PuzzleScriptGame.prototype, "width", {
-        get: function () {
-            return window["level"].width;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(PuzzleScriptGame.prototype, "height", {
-        get: function () {
-            return window["level"].height;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    PuzzleScriptGame.prototype.onDestroy = function () {
-        this.data.onComplete.remove(this.onDataReady, this);
-        this.data = null;
-        this.gridsRoot = null;
-        this.bitmaps = null;
-    };
-    return PuzzleScriptGame;
+    return TopInfoView;
 }(ecs.Component));
-exports.PuzzleScriptGame = PuzzleScriptGame;
+exports.TopInfoView = TopInfoView;
 
 
 /***/ }),
 
-/***/ "../src/modules/puzzle-script/data/puzzle-script-game-data.ts":
-/*!********************************************************************!*\
-  !*** ../src/modules/puzzle-script/data/puzzle-script-game-data.ts ***!
-  \********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var PuzzleScriptGameData = /** @class */ (function () {
-    function PuzzleScriptGameData(name) {
-        this.blockWidth = 5;
-        this.blockHeight = 5;
-        this.objectTexture = {};
-        this.isLoading = false;
-        this.onComplete = new ecs.Broadcast();
-        this.name = name;
-    }
-    Object.defineProperty(PuzzleScriptGameData.prototype, "data", {
-        get: function () {
-            return this._data;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(PuzzleScriptGameData.prototype, "levels", {
-        get: function () {
-            return this._levels;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(PuzzleScriptGameData.prototype, "objects", {
-        get: function () {
-            return this.data.objects;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    PuzzleScriptGameData.prototype.start = function (level) {
-        window["loadLevelFromState"](this._data, this.levels[level].index);
-    };
-    PuzzleScriptGameData.prototype.getObjectTexture = function (name) {
-        if (this.objectTexture[name])
-            return this.objectTexture[name];
-        var colors = [];
-        var colorTable = [];
-        var obj = this.data.objects[name];
-        for (var o = 0; o < obj.colors.length; o++) {
-            colorTable[o] = 0;
-            var cstr = this.data.objects[name].colors[o];
-            cstr = cstr.slice(1, cstr.length);
-            var nums = { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, a: 10, A: 10, b: 11, B: 11, c: 12, C: 12, d: 13, D: 13, e: 14, E: 14, f: 15, F: 15 };
-            for (var i = 0; i < cstr.length; i++) {
-                var char = cstr.charAt(cstr.length - 1 - i);
-                colorTable[o] += (nums[char]) * Math.pow(16, i);
-            }
-        }
-        var colorSum = '';
-        var source = this.data.objects[name].spritematrix;
-        for (var y = 0; y < source.length; y++) {
-            colors[y] = [];
-            for (var x = 0; x < source[y].length; x++) {
-                var index = +source[y][x];
-                var color = null;
-                if (index >= 0 || index < colorTable.length)
-                    color = colorTable[index];
-                colors[y][x] = color;
-                colorSum += (color || '.') + "_";
-            }
-            colorSum += "|";
-        }
-        return this.objectTexture[name] = leaf.RectTexture.getTexture(colors, colorSum);
-    };
-    PuzzleScriptGameData.prototype.run = function (op) {
-        if (op === "up") {
-            window["processInput"](0);
-        }
-        else if (op === "down") {
-            window["processInput"](2);
-        }
-        else if (op === "left") {
-            window["processInput"](1);
-        }
-        else if (op === "right") {
-            window["processInput"](3);
-        }
-        else if (op === "undo") {
-            window["processInput"]("undo");
-            window["DoUndo"](false, true);
-        }
-        else if (op === 'restart') {
-            window["processInput"]("restart");
-            window["DoRestart"]();
-        }
-        else {
-            window["processInput"](4);
-        }
-    };
-    PuzzleScriptGameData.prototype.load = function (call) {
-        var _this = this;
-        if (this._data) {
-            call && call(this);
-            return;
-        }
-        call && this.onComplete.on(call);
-        if (this.isLoading)
-            return;
-        console.error("load game", this.name);
-        this.isLoading = true;
-        leaf.Res.getRes(this.name).load().then(function (r) {
-            _this.isLoading = false;
-            _this._data = compile(["restart"], r.data);
-            _this._levels = [];
-            for (var i = 0; i < _this._data.levels.length; i++) {
-                if (_this._data.levels[i] && !_this._data.levels[i].message) {
-                    _this._data.levels[i].index = i;
-                    _this._levels.push(_this._data.levels[i]);
-                }
-            }
-            _this.onComplete.dispatch(_this.data);
-        });
-    };
-    PuzzleScriptGameData.getGameData = function (name) {
-        if (!this.games[name]) {
-            this.games[name] = new PuzzleScriptGameData(name);
-        }
-        return this.games[name];
-    };
-    PuzzleScriptGameData.games = {};
-    return PuzzleScriptGameData;
-}());
-exports.PuzzleScriptGameData = PuzzleScriptGameData;
-
-
-/***/ }),
-
-/***/ "../src/modules/puzzle-script/puzzle-script-scene.ts":
-/*!***********************************************************!*\
-  !*** ../src/modules/puzzle-script/puzzle-script-scene.ts ***!
-  \***********************************************************/
+/***/ "../src/modules/main/main-scene.ts":
+/*!*****************************************!*\
+  !*** ../src/modules/main/main-scene.ts ***!
+  \*****************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -557,31 +334,50 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var module_scene_1 = __webpack_require__(/*! ../../utils/ui/module-scene */ "../src/utils/ui/module-scene.ts");
-var puzzle_script_game_1 = __webpack_require__(/*! ./components/puzzle-script-game */ "../src/modules/puzzle-script/components/puzzle-script-game.ts");
-var puzzle_script_game_ui_1 = __webpack_require__(/*! ./ui/puzzle-script-game-ui */ "../src/modules/puzzle-script/ui/puzzle-script-game-ui.ts");
-var PuzzleScriptScene = /** @class */ (function (_super) {
-    __extends(PuzzleScriptScene, _super);
-    function PuzzleScriptScene(game, level) {
-        if (game === void 0) { game = 'game1-4_txt'; }
-        if (level === void 0) { level = 1; }
+var main_ui_1 = __webpack_require__(/*! ./components/main-ui */ "../src/modules/main/components/main-ui.ts");
+var MainScene = /** @class */ (function (_super) {
+    __extends(MainScene, _super);
+    function MainScene() {
         var _this = _super.call(this) || this;
-        ecs.Entity.create().addComponent(puzzle_script_game_1.PuzzleScriptGame, game, level).addComponent(puzzle_script_game_ui_1.PuzzleScriptGameUI).parent = _this.scene;
+        ecs.Entity.create().addComponent(main_ui_1.MainUI).parent = _this.scene;
         return _this;
     }
-    PuzzleScriptScene = __decorate([
-        orange.autoload("PuzzleScriptScene")
-    ], PuzzleScriptScene);
-    return PuzzleScriptScene;
+    MainScene = __decorate([
+        orange.autoload("MainScene")
+    ], MainScene);
+    return MainScene;
 }(module_scene_1.ModuleScene));
-exports.PuzzleScriptScene = PuzzleScriptScene;
+exports.MainScene = MainScene;
 
 
 /***/ }),
 
-/***/ "../src/modules/puzzle-script/ui/puzzle-script-game-ui.ts":
-/*!****************************************************************!*\
-  !*** ../src/modules/puzzle-script/ui/puzzle-script-game-ui.ts ***!
-  \****************************************************************/
+/***/ "../src/utils/system.ts":
+/*!******************************!*\
+  !*** ../src/utils/system.ts ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var System = /** @class */ (function () {
+    function System() {
+    }
+    System.hasTop = true;
+    System.topHeight = 73;
+    return System;
+}());
+exports.System = System;
+
+
+/***/ }),
+
+/***/ "../src/utils/ui/module-scene.ts":
+/*!***************************************!*\
+  !*** ../src/utils/ui/module-scene.ts ***!
+  \***************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -601,186 +397,35 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var puzzle_script_game_1 = __webpack_require__(/*! ../components/puzzle-script-game */ "../src/modules/puzzle-script/components/puzzle-script-game.ts");
-orange.autoloadLink("PuzzleScene");
-var PuzzleScriptGameUI = /** @class */ (function (_super) {
-    __extends(PuzzleScriptGameUI, _super);
-    function PuzzleScriptGameUI() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    PuzzleScriptGameUI.prototype.awake = function () {
-        var _this = this;
-        this.game = this.getComponent(puzzle_script_game_1.PuzzleScriptGame);
-        this.uiRoot = ecs.Entity.create();
-        this.uiRoot.parent = this.entity;
-        // let upBtn = [
-        //     [0]
-        // ]
-        var dirGroup = ecs.Entity.create();
-        dirGroup.parent = this.uiRoot;
-        var arrGroup = ecs.Entity.create();
-        arrGroup.parent = dirGroup;
-        var upBtn = ecs.Entity.create().addComponent(leaf.Bitmap);
-        upBtn.texture = leaf.RectTexture.getTexture(leaf.RectTexture.formatColors(0xffffff + "," + 0xaa0000 + "\n" +
-            '...0...\n' +
-            '..000..\n' +
-            '.00000.\n' +
-            '0..0..0\n' +
-            '...0...\n' +
-            '...0...\n' +
-            '...0...'));
-        upBtn.transform.x = 9;
-        upBtn.parent = arrGroup;
-        var rightBtn = ecs.Entity.create().addComponent(leaf.Bitmap);
-        rightBtn.texture = leaf.RectTexture.getTexture(leaf.RectTexture.formatColors(0xffffff + "," + 0xaa0000 + "\n" +
-            '...0...\n' +
-            '..0....\n' +
-            '.00....\n' +
-            '0000000\n' +
-            '.00....\n' +
-            '..0....\n' +
-            '...0...\n'));
-        rightBtn.transform.angle = Math.PI * 180 / 180;
-        rightBtn.transform.x = 25;
-        rightBtn.transform.y = 17;
-        rightBtn.parent = arrGroup;
-        var leftBtn = ecs.Entity.create().addComponent(leaf.Bitmap);
-        leftBtn.texture = leaf.RectTexture.getTexture(leaf.RectTexture.formatColors(0xffffff + "," + 0xaa0000 + "\n" +
-            '...0...\n' +
-            '..0....\n' +
-            '.00....\n' +
-            '0000000\n' +
-            '.00....\n' +
-            '..0....\n' +
-            '...0...\n'));
-        leftBtn.transform.x = 0;
-        leftBtn.transform.y = 10;
-        leftBtn.parent = arrGroup;
-        var downBtn = ecs.Entity.create().addComponent(leaf.Bitmap);
-        downBtn.texture = leaf.RectTexture.getTexture(leaf.RectTexture.formatColors(0xffffff + "," + 0xaa0000 + "\n" +
-            '...0...\n' +
-            '..000..\n' +
-            '.00000.\n' +
-            '0..0..0\n' +
-            '...0...\n' +
-            '...0...\n' +
-            '...0...'));
-        downBtn.transform.angle = Math.PI * 180 / 180;
-        downBtn.transform.x = 16;
-        downBtn.transform.y = 26;
-        downBtn.parent = arrGroup;
-        var rect = ecs.Entity.create().addComponent(leaf.Bitmap);
-        rect.texture = leaf.PointTexture.getTexture(0xff0000);
-        rect.transform.scaleX = rect.transform.scaleY = 33;
-        rect.parent = arrGroup;
-        rect.transform.x = -4;
-        rect.transform.alpha = 0;
-        rect.transform.y = -4;
-        rect.addComponent(leaf.TouchComponent).onTouchStart.on(function (e) {
-            var rot = Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI;
-            leftBtn.transform.alpha = rightBtn.transform.alpha
-                = upBtn.transform.alpha = downBtn.transform.alpha = 1;
-            if (rot <= 45 && rot >= -45) {
-                rightBtn.transform.alpha = 0.5;
-            }
-            else if (rot >= -135 && rot < -45) {
-                upBtn.transform.alpha = 0.5;
-            }
-            else if (rot >= 45 && rot <= 135) {
-                downBtn.transform.alpha = 0.5;
-            }
-            else {
-                leftBtn.transform.alpha = 0.5;
-            }
-        });
-        rect.getComponent(leaf.TouchComponent).onTouchEnd.on(function (e) {
-            leftBtn.transform.alpha = rightBtn.transform.alpha
-                = upBtn.transform.alpha = downBtn.transform.alpha = 1;
-            var rot = Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI;
-            var dir = "right";
-            if (rot <= 45 && rot >= -45) {
-                dir = "right";
-            }
-            else if (rot >= -135 && rot < -45) {
-                dir = "up";
-            }
-            else if (rot >= 45 && rot <= 135) {
-                dir = "down";
-            }
-            else {
-                dir = "left";
-            }
-            _this.game.data.run(dir);
-            console.error(dir);
-            // console.error(e.localX, e.localY, Math.atan2(e.localY - 0.5, e.localX - 0.5) * 180 / Math.PI);
-        });
-        arrGroup.transform.x = 5;
-        arrGroup.transform.y = 0;
-        dirGroup.transform.x = 2;
-        dirGroup.transform.y = -5;
-        dirGroup.transform.scaleX = dirGroup.transform.scaleY = 1.3;
-        var xBtn = ecs.Entity.create().addComponent(leaf.Bitmap);
-        xBtn.texture = leaf.RectTexture.getTexture(leaf.RectTexture.formatColors(0xffffff + "," + 0xaa0000 + "\n" +
-            '...0...\n' +
-            '..0.0..\n' +
-            '.00000.\n' +
-            '0.....0'));
-        xBtn.transform.scaleY = 2;
-        xBtn.transform.x = 40;
-        xBtn.transform.y = 10;
-        xBtn.parent = dirGroup;
-        var zBtn = ecs.Entity.create().addComponent(leaf.Bitmap);
-        zBtn.texture = leaf.RectTexture.getTexture(leaf.RectTexture.formatColors(0xffffff + "," + 0xaa0000 + "\n" +
-            '000....\n' +
-            '0..0...\n' +
-            '0000...\n' +
-            '0..0...\n' +
-            '000....\n'));
-        zBtn.transform.scaleY = 1.6;
-        zBtn.transform.x = 55;
-        zBtn.transform.y = 10;
-        zBtn.parent = dirGroup;
-        leftBtn.entity.name = 'h';
-        this.entity.name = 'w';
-        this.uiRoot.transform.y = leaf.getStageHeight() - 100;
-        this.uiRoot.transform.scaleX = this.uiRoot.transform.scaleY = 3;
-        this.addClick(xBtn, function () {
-            _this.game.getComponent(puzzle_script_game_1.PuzzleScriptGame).data.run("undo");
-        });
-        this.addClick(zBtn, function () {
-            _this.game.getComponent(puzzle_script_game_1.PuzzleScriptGame).data.run("restart");
-        });
-    };
-    PuzzleScriptGameUI.prototype.addClick = function (btn, call) {
-        btn.addComponent(leaf.TouchComponent).onTouchStart.on(function () {
-            btn.transform.alpha = 0.8;
-        });
-        btn.getComponent(leaf.TouchComponent).onTouchEnd.on(function () {
-            btn.transform.alpha = 1;
-            call && call();
-        });
-    };
-    return PuzzleScriptGameUI;
-}(ecs.Component));
-exports.PuzzleScriptGameUI = PuzzleScriptGameUI;
-
-
-/***/ }),
-
-/***/ "../src/utils/ui/module-scene.ts":
-/*!***************************************!*\
-  !*** ../src/utils/ui/module-scene.ts ***!
-  \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 var ModuleScene = /** @class */ (function () {
-    function ModuleScene() {
+    function ModuleScene(scrollSpeed) {
+        if (scrollSpeed === void 0) { scrollSpeed = 1; }
+        ModuleScene.instance = this;
+        if (leaf.world.scene) {
+            leaf.world.scene.destroy();
+        }
         this.scene = new ecs.Scene();
         leaf.world.scene = this.scene;
+        // let bg = ecs.Entity.create().addComponent(leaf.Bitmap);
+        // bg.texture = leaf.PointTexture.getTexture(0x3f459f);//"blue-bg_png";
+        // bg.parent = this.scene;
+        // bg.transform.scaleX = leaf.getStageWidth();
+        // bg.transform.scaleY = leaf.getStageHeight();
+        // let scale = 90 / 274;
+        // let w = 90;
+        // let h = scale * 292;
+        // for (let y = 0; y < Math.ceil(leaf.getStageHeight() / h); y++) {
+        //     for (let x = 0; x < Math.ceil(leaf.getStageWidth() / w); x++) {
+        //         let sc = ecs.Entity.create().addComponent(leaf.ScrollBitmap);
+        //         sc.resource = "blue-bg-scroller_png";
+        //         sc.parent = this.scene;
+        //         sc.transform.scaleX = sc.transform.scaleY = scale;
+        //         sc.transform.x = w * x;
+        //         sc.transform.y = h * y;
+        //         sc.transform.alpha = 0.35;
+        //         sc.addComponent(Scroll, scrollSpeed);
+        //     }
+        // }
     }
     ModuleScene.prototype.close = function () {
         if (this.scene) {
@@ -794,6 +439,21 @@ var ModuleScene = /** @class */ (function () {
     return ModuleScene;
 }());
 exports.ModuleScene = ModuleScene;
+var Scroll = /** @class */ (function (_super) {
+    __extends(Scroll, _super);
+    function Scroll() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Scroll.prototype.init = function (scrollSpeed) {
+        this.scrollSpeed = scrollSpeed;
+    };
+    Scroll.prototype.update = function () {
+        var sc = this.getComponent(leaf.ScrollBitmap);
+        sc.scrollX += 0.005 * this.scrollSpeed;
+        sc.scrollY -= 0.005 * this.scrollSpeed;
+    };
+    return Scroll;
+}(ecs.Component));
 
 
 /***/ })

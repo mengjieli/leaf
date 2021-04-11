@@ -1,193 +1,350 @@
-title Simple Block Pushing Game
-author David Skinner
-homepage www.puzzlescript.net
+title Lime Rick
+author Tommi Tuovinen
+homepage http://www.kissmaj7.com/
+
+(
+
+Ported with the very gracious permission of Tommi Touvinen
+
+The first ten levels of a neato game - you can play the full version here
+
+http://www.kongregate.com/games/KissMaj7/lime-rick
+
+the full version includes some mechanics that aren't covered in the levels here, but they are supported.
+)
 
 ========
 OBJECTS
 ========
 
 Background
-LIGHTGREEN GREEN
-11111
-11111
-11111
-11111
-11111
+Black
 
-
-Target
-DarkBlue
-.....
+Exit
+Red
 .000.
-.0.0.
+00000
+00000
+00000
 .000.
-.....
 
-Wall
-BROWN DARKBROWN
-00010
-11111
-01000
-11111
-00010
-
-Player
-Black Orange White Blue
+Apple
+Blue
 .000.
-.111.
-22222
-.333.
-.3.3.
+00000
+00000
+00000
+.000.
+
+PlayerBodyH
+Green
+.000.
+00000
+0...0
+00000
+.000.
+
+PlayerBodyV
+Green
+.000.
+00.00
+00.00
+00.00
+.000.
+
 
 Crate
-Orange Yellow
+Orange
 00000
 0...0
 0...0
 0...0
 00000
 
-CrateRed
-#ff5555
+PlayerHead1
+LightGreen
+.000.
+0.0.0
 00000
-0...0
-0...0
-0...0
 00000
+.000.
+
+PlayerHead2
+Yellow
+.000.
+0.0.0
+00000
+00000
+.000.
+
+
+PlayerHead3
+Orange
+.000.
+0.0.0
+00000
+00000
+.000.
+
+
+PlayerHead4
+Red
+.000.
+0.0.0
+00000
+00000
+.000.
+
+
+
+Wall
+Brown
 
 =======
 LEGEND
 =======
 
+Player = PlayerHead1 or PlayerHead2 or PlayerHead3 or PlayerHead4
+Obstacle = PlayerBodyH or PlayerBodyV or Wall or Crate or Player
+PlayerBody = PlayerBodyH or PlayerBodyV
 . = Background
+P = PlayerHead1
 # = Wall
-P = Player
-* = Crate
-@ = CrateRed and Target
-O = Target
+E = Exit
+A = Apple
+C = Crate
 
-CrateAll = Crate or CrateRed
-
-=======
+=========
 SOUNDS
-=======
-
-Crate MOVE 36772507
+=========
+sfx0  3295707 (player jump)
+sfx1 3538707 (player jump to max)
+sfx2 42451307 (player move horizontally)
+endlevel 96434300
+startgame 49875902
 
 ================
 COLLISIONLAYERS
 ================
 
 Background
-Target
-Player, Wall, Crate, CrateRed
+Exit, Apple
+PlayerBody
+Player, Wall, Crate
+
 
 ======
 RULES
 ======
 
-[ >  Player | CrateAll ] -> [  >  Player | > CrateAll  ]
-[ Crate Target ] -> [ CrateRed Target ]
-[ CrateRed no Target ] -> [ Crate no Target ]
+(this game handles all the movement stuff itself - it removes all movements before the movement phase has a chance to tick at all)
+
+UP [ UP PlayerHead4 ] -> [ PlayerHead4 ]
+UP [ UP PlayerHead3 | No Obstacle ] -> [ PlayerBodyV | PlayerHead4 ] sfx1
+UP [ UP PlayerHead2 | No Obstacle ] -> [ PlayerBodyV | PlayerHead3 ] sfx0
+UP [ UP PlayerHead1 | No Obstacle ] -> [ PlayerBodyV | PlayerHead2 ] sfx0
+
+Horizontal [ > Player | Crate | No Obstacle ] -> [ PlayerBodyH | PlayerHead1 | Crate ] sfx2
+
+Horizontal [ > Player | No Obstacle ] -> [ PlayerBodyH  | PlayerHead1 ] sfx2
+
+[ Player Apple ] [ PlayerBody ] -> [ Player Apple ] [ ]
+[ Player Apple ] -> [ Player ]
+
+[ > Player ] -> [ Player ]
+
+DOWN [ Player | No Obstacle ] -> [ PlayerBodyV | PlayerHead1 ]
+DOWN [ Crate | No Obstacle ] -> [  | Crate ]
 
 ==============
 WINCONDITIONS
 ==============
-
-All Target on CrateAll
+some player on exit
 
 =======
 LEVELS
 =======
 
-..###...
-..#O#...
-..#.####
-###*.*O#
-#O.*P###
-####*#..
-...#O#..
-...###..
+message level 1 of 10
 
-#####....
-#P..#....
-#.**#.###
-#.*.#.#O#
-###.###O#
-.##....O#
-.#...#..#
-.#...####
-.#####...
+###################
+#.................#
+#.................#
+#............#....#
+#............#....#
+#.......#...##....#
+#..P....#...##..E.#
+###################
+###################
+..#...#...#...#...#
+#...#...#...#...#..
+###################
+###################
+###################
+###################
 
-.#######..
-.#.....###
-##*###...#
-#.P.*..*.#
-#.OO#.*.##
-##OO#...#.
-.########.
+message level 2 of 10
 
-.####.
-##..#.
-#.P*#.
-##*.##
-##.*.#
-#O*..#
-#OO@O#
-######
+###################
+#.................#
+#.................#
+#.................#
+#..P............E.#
+#####.........#####
+#####.............#
+#####.............#
+#####.............#
+#####.............#
+#####.....#########
+#####.............#
+#####.............#
+#####.............#
+###################
+###################
+###################
 
-.####...
-.#..###.
-.#P*..#.
-###.#.##
-#O#.#..#
-#O*..#.#
-#O...*.#
-########
+message level 3 of 10
 
-...#######...
-####.....#...
-#...O###.#...
-#.#.#....##..
-#.#.*.*#O.#..
-#.#.....#.#..
-#.O#*.*.#.#..
-##....#.#.###
-.#.###O...P.#
-.#..........#
-.############
+###################
+#........#........#
+#........#........#
+###.............###
+#.................#
+#.....P.....E.....#
+#....###...###....#
+#..######.######..#
+#.......#.#.......#
+#.......###.......#
+###.............###
+#.................#
+#.................#
+######.......######
+###################
 
-...#######
-..##..#.P#
-..#...#..#
-..#*.*.*.#
-..#.*##..#
-###.*.#.##
-#OOOOO..#.
-#########.
+message level 4 of 10
 
-...######.
-.###....#.
-##O.*##.##
-#OO*.*..P#
-#OO.*.*.##
-######..#.
-.....####.
+###################
+#..#...........#..#
+#..#.....E.....#..#
+#..#....###....#..#
+#..#...........#..#
+#..#...........#..#
+#..#...........#..#
+#..#...........#..#
+#..#...........#..#
+#..#...........#..#
+#..#...........#..#
+#..#...........#..#
+#..#...........#..#
+#..#.....P.....#..#
+###################
 
-.#########.
-.#..##...#.
-.#...*...#.
-.#*.###.*#.
-.#.#OOO#.#.
-##.#OOO#.##
-#.*..*..*.#
-#.....#.P.#
-###########
+message level 5 of 10
 
-..######
-..#....#
-###***.#
-#P.*OO.#
-#.*OOO##
-####..#.
-...####.
+###################
+#.................#
+#.................#
+#.................#
+#...C........C....#
+#..###......###...#
+#.................#
+#...P........E....#
+#########.##.#.####
+###################
+#.................#
+#.................#
+#.................#
+###################
+
+message level 6 of 10
+
+###################
+#..#.#....#..#....#
+#..#.#.E..#..######
+#########.#..#....#
+#....#..#.####....#
+#....#..#....######
+#########....#.#..#
+#....#..#....#.#..#
+#########.#########
+#....#....#..#....#
+######....#..#....#
+#.#..#....#########
+#.#..####.#..#..#.#
+#.#..#..#P#..#..#.#
+###################
+
+message level 7 of 10
+
+###################
+#.................#
+#...............C.#
+#............####.#
+#.................#
+#.......#...#.#...#
+#..P....#...#.#E..#
+#.###############.#
+#.###############.#
+#.#...#...#...#...#
+#...#...#...#...#.#
+###################
+#.................#
+#.................#
+###################
+
+message level 8 of 10
+
+###################
+#.................#
+#......C...C......#
+#.....###.###.....#
+#.................#
+#......C...C......#
+#.....###.###.....#
+#.................#
+#..E...C...C...P..#
+#.#######.#######.#
+#.##...##.##...##.#
+#.##.#.##.##.#.##.#
+#.##.#.#####.#.##.#
+#.................#
+###################
+
+message level 9 of 10
+
+###################
+#.................#
+#...C.............#
+#...C.............#
+#...C.............#
+#...CCC...........#
+#...CCC.C.........#
+#..CCCC.CC.......E#
+#..CCCC.CC.......C#
+#..CCCCCCC.....C.C#
+#..CCCCCCC...C.C.C#
+#.CCCCCCCCC..C.C.C#
+#.CCCCCCCCC..C.C.C#
+#PCCCCCCCCCCCC.CCC#
+###################
+
+message level 10 of 10
+
+###################
+#.................#
+#.................#
+#.................#
+#.................#
+#.E..........C....#
+####.##.....###...#
+#######.....###...#
+#.................#
+#.................#
+#...P.............#
+#..#############..#
+###################
+#.................#
+###################
+
+
+message congratulations!

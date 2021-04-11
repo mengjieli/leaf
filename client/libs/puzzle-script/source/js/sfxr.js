@@ -609,6 +609,7 @@ SoundEffect.prototype.getBuffer = function() {
 
 //unlock bullshit
 function ULBS(){   
+  return;
   if (AUDIO_CONTEXT.state === 'suspended')
   {
       var unlock = function()
