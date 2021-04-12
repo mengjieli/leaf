@@ -196,14 +196,16 @@ var leaf;
         });
         GLCore.init = function () {
             var canvas = (window["canvas"] || document.getElementById('leaf'));
-            var backingStore = window.devicePixelRatio || 1;
+            var backingStore = 1; //window.devicePixelRatio || 1;
             var canvasScaleFactor = backingStore;
-            var m = new ecs.Matrix();
-            m.identity();
-            m.scale(1 / canvasScaleFactor, 1 / canvasScaleFactor);
-            var transform = "matrix(" + m.a + "," + m.b + "," + m.c + "," + m.d + "," + m.tx + "," + m.ty + ")";
-            canvas.style.transformOrigin = "0% 0% 0px";
-            canvas.style["transform"] = transform;
+            var w = canvas.width * backingStore;
+            var h = canvas.height * backingStore;
+            // let m = new ecs.Matrix();
+            // m.identity();
+            // m.scale(1 / canvasScaleFactor, 1 / canvasScaleFactor);
+            // var transform = "matrix(" + m.a + "," + m.b + "," + m.c + "," + m.d + "," + m.tx + "," + m.ty + ")";
+            // canvas.style.transformOrigin = "0% 0% 0px";
+            // canvas.style["transform"] = transform;
             // canvas.width *= canvasScaleFactor;
             // canvas.height *= canvasScaleFactor;
             if (window["wx"]) {
@@ -306,8 +308,8 @@ var leaf;
                     }
                 });
             }
-            this.width = canvas.width;
-            this.height = canvas.height;
+            this.width = w;
+            this.height = h;
             var names = ["experimental-webgl", "webgl"];
             var options = { "antialias": true, "stencil": true };
             var gl;
@@ -322,8 +324,8 @@ var leaf;
                     gl.clear(gl.STENCIL_BUFFER_BIT);
                     gl.enable(gl.STENCIL_TEST);
                     gl.blendColor(1.0, 1.0, 1.0, 1.0);
-                    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-                    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+                    // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+                    gl.clearColor(1.0, 1.0, 1.0, 1.0);
                 }
                 catch (e) {
                 }
@@ -420,7 +422,7 @@ var leaf;
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             //清除舞台，这句如果和 3d 合并之后应该去掉
             gl.clear(gl.COLOR_BUFFER_BIT);
-            gl.clear(gl.STENCIL_BUFFER_BIT);
+            // gl.clear(gl.STENCIL_BUFFER_BIT);
             var tasks = [];
             this.matrix.identity();
             this.cc = 0;
@@ -2835,7 +2837,7 @@ var leaf;
             //开始渲染任务
             for (var len = _this.textures.length; i < len && i < max; i++) {
                 //切换混合模式
-                leaf.BlendModeFunc.changeBlendMode(this.blendMode[i]);
+                // BlendModeFunc.changeBlendMode(this.blendMode[i]);
                 gl.uniform4f(this.u_Color, (this.tints[i] >> 16) / 255.0, ((this.tints[i] >> 8) & 0xFF) / 255.0, (this.tints[i] & 0xFF) / 255.0, 1);
                 //绑定当前需要渲染的纹理
                 for (var t = 0; t < _this.textures[i].length; t++) {
@@ -3753,6 +3755,7 @@ var leaf;
             _this.onTouchEnd = new ecs.Broadcast();
             _this.touchEnabled = true;
             _this.touchChildrenEnabled = true;
+            _this.stopChildrenEvent = false;
             return _this;
         }
         TouchComponent.prototype.onDestroy = function () {
@@ -3823,6 +3826,7 @@ var leaf;
                 list.push(target);
                 target = target.parent;
             }
+            var startIndex = -1;
             for (var i = list.length - 1, x = 0, y = 0; i >= 0; i--) {
                 var m = list[i].transform.reverse;
                 x = m.a * (touchX + m.tx) + m.c * touchY;
@@ -3830,8 +3834,15 @@ var leaf;
                 touchX = x;
                 touchY = y;
                 locals.push([x, y]);
+                if (startIndex === -1) {
+                    if (list[i].getComponent(leaf.TouchComponent) && list[i].getComponent(leaf.TouchComponent).stopChildrenEvent) {
+                        startIndex = i;
+                    }
+                }
             }
             for (var i = 0; i < list.length; i++) {
+                if (startIndex != -1 && i < startIndex)
+                    continue;
                 e.localX = locals[list.length - 1 - i][0];
                 e.localY = locals[list.length - 1 - i][1];
                 e.currentTarget = list[i];
@@ -3870,6 +3881,400 @@ var leaf;
         return TouchManager;
     }());
     leaf.TouchManager = TouchManager;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var ListItemRenderer = /** @class */ (function (_super) {
+        __extends(ListItemRenderer, _super);
+        function ListItemRenderer() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        ListItemRenderer.prototype.onDestroy = function () {
+            this.data = null;
+        };
+        return ListItemRenderer;
+    }(ecs.Component));
+    leaf.ListItemRenderer = ListItemRenderer;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var List = /** @class */ (function (_super) {
+        __extends(List, _super);
+        function List() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Object.defineProperty(List.prototype, "viewPort", {
+            get: function () {
+                return this.listRoot.transform;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        List.prototype.init = function (data, itemRenderClass, width, height, virtual) {
+            if (virtual === void 0) { virtual = true; }
+            this._data = data;
+            this.itemRenderClass = itemRenderClass;
+            this.width = width;
+            this.height = height;
+            this.virtual = virtual;
+            this.items = [];
+            this.listRoot = ecs.Entity.create();
+            this.listRoot.parent = this.entity;
+            this.addComponent(leaf.RectMask, 0, 0, width, height);
+        };
+        Object.defineProperty(List.prototype, "data", {
+            get: function () {
+                return this._data;
+            },
+            set: function (val) {
+                this.viewPort.y = 0;
+                this._data = val;
+                this.updateContentRect();
+                this.refresh();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        List.prototype.awake = function () {
+            this.updateContentRect();
+            this.refresh();
+        };
+        List.prototype.updateContentRect = function () {
+            this.contentWidth = this.contentHeight = 0;
+            var layout = this.getComponent(leaf.Layout);
+            if (!layout)
+                return;
+            var endX = 0;
+            var endY = 0;
+            for (var i = 0; i < this._data.length; i++) {
+                if (layout) {
+                    var p = layout.getPosition(i, this._data.length, this.width, this.height);
+                    if (i === 0) {
+                        this.contentWidth = layout.itemWidth;
+                        this.contentHeight = layout.itemHeight;
+                        endX = p.x + layout.itemWidth;
+                        endY = p.y = layout.itemHeight;
+                    }
+                    else {
+                        if (p.x + layout.itemWidth > endX)
+                            endX = p.x + layout.itemWidth;
+                        if (p.y + layout.itemHeight > endY)
+                            endY = p.y + layout.itemHeight;
+                    }
+                }
+            }
+            this.contentWidth = endX;
+            this.contentHeight = endY;
+        };
+        List.prototype.refresh = function () {
+            if (this.virtual) {
+                var layout = this.getComponent(leaf.Layout);
+                var index = 0;
+                for (var i = 0; i < this._data.length; i++) {
+                    if (layout) {
+                        var p = layout.getPosition(i, this._data.length, this.width, this.height);
+                        p.x += this.viewPort.x;
+                        p.y += this.viewPort.y;
+                        if (p.x + layout.itemWidth < 0 || p.x > this.width || p.y + layout.itemHeight < 0 || p.y > this.height) {
+                            for (var f = 0; f < this.items.length; f++) {
+                                if (this.items[f].data === this._data[i]) {
+                                    var item_1 = this.items.splice(f, 1)[0];
+                                    item_1.entity.destroy();
+                                    break;
+                                }
+                            }
+                            continue;
+                        }
+                    }
+                    var item = void 0;
+                    for (var f = 0; f < this.items.length; f++) {
+                        if (this.items[f].data === this._data[i]) {
+                            if (f != index) {
+                                item = this.items.splice(f, 1)[0];
+                                this.items.splice(index, 0, item);
+                            }
+                            else {
+                                item = this.items[f];
+                            }
+                            break;
+                        }
+                    }
+                    if (!item) {
+                        if (this.items[index]) {
+                            this.items[this.items.length] = this.items[index];
+                        }
+                        item = ecs.Entity.create().addComponent(this.itemRenderClass);
+                        item.data = null;
+                        item.parent = this.listRoot;
+                        this.items[index] = item;
+                    }
+                    if (layout)
+                        layout.updatePosition(item.entity, i, this._data.length, this.width, this.height);
+                    item.data = this._data[i];
+                    item.onData(this._data[i]);
+                    index++;
+                }
+            }
+            else {
+                var layout = this.getComponent(leaf.Layout);
+                for (var i = 0; i < this._data.length; i++) {
+                    var item = void 0;
+                    if (i < this.items.length) {
+                        item = this.items[i];
+                    }
+                    else {
+                        item = ecs.Entity.create().addComponent(this.itemRenderClass);
+                        item.data = null;
+                        item.parent = this.listRoot;
+                        this.items[i] = item;
+                    }
+                    if (layout)
+                        layout.updatePosition(item.entity, i, this._data.length, this.width, this.height);
+                    item.data = this._data[i];
+                    item.onData(this._data[i]);
+                }
+            }
+            while (this.items.length > this._data.length) {
+                this.items.pop().entity.destroy();
+            }
+        };
+        List.prototype.onDestroy = function () {
+            this._data = null;
+            this.itemRenderClass = null;
+            this.items = null;
+        };
+        return List;
+    }(ecs.Component));
+    leaf.List = List;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var Scroller = /** @class */ (function (_super) {
+        __extends(Scroller, _super);
+        function Scroller() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.startGapH = 30;
+            _this.startGapV = 30;
+            _this.speedH = 1;
+            _this.speedV = 1;
+            return _this;
+        }
+        Scroller.prototype.init = function (target, scrollHEnable, scrollVEnable) {
+            if (scrollHEnable === void 0) { scrollHEnable = true; }
+            this.target = target;
+            this.onTouchStart.on(this.touchStart, this);
+            this.onTouchMove.on(this.touchMove, this);
+            this.onTouchEnd.on(this.touchEnd, this);
+            this.scrollHEnable = scrollHEnable;
+            this.scrollVEnable = scrollVEnable;
+            this.startScrollV = false;
+            this.startScrollH = false;
+            this.scrollReady = false;
+            this.speedH = this.speedV = 1;
+            this.startGapV = this.startGapH = 30;
+        };
+        Scroller.prototype.touchStart = function (e) {
+            if (!this.target.viewPort) {
+                this.scrollReady = false;
+                return;
+            }
+            this.startScrollV = false;
+            this.startScrollH = false;
+            this.startX = this.target.viewPort.x;
+            this.startY = this.target.viewPort.y;
+            this.startLocalX = e.localX;
+            this.startLocalY = e.localY;
+            this.scrollReady = true;
+            this.stopChildrenEvent = false;
+        };
+        Scroller.prototype.touchMove = function (e) {
+            if (!this.scrollReady || !this.target.viewPort)
+                return;
+            if (this.scrollHEnable) {
+                if (!this.startScrollH) {
+                    if (Math.abs(e.localX - this.startLocalX) > this.startGapH) {
+                        this.stopChildrenEvent = true;
+                        this.startScrollH = true;
+                        this.startX = this.target.viewPort.x;
+                        this.startLocalX = e.localX;
+                    }
+                }
+                if (this.startScrollH) {
+                    this.target.viewPort.x = (e.localX - this.startLocalX) * this.speedH + this.startX;
+                    this.checkRange();
+                    this.target.refresh && this.target.refresh();
+                }
+            }
+            if (this.scrollVEnable) {
+                if (!this.startScrollV) {
+                    if (Math.abs(e.localY - this.startLocalY) > this.startGapV) {
+                        this.stopChildrenEvent = true;
+                        this.startScrollV = true;
+                        this.startY = this.target.viewPort.y;
+                        this.startLocalY = e.localY;
+                    }
+                }
+                if (this.startScrollV) {
+                    this.target.viewPort.y = (e.localY - this.startLocalY) * this.speedV + this.startY;
+                    this.checkRange();
+                    this.target.refresh && this.target.refresh();
+                }
+            }
+        };
+        Scroller.prototype.touchEnd = function (e) {
+            this.scrollReady = false;
+            this.startScrollV = false;
+            this.startScrollH = false;
+            this.stopChildrenEvent = false;
+        };
+        Scroller.prototype.checkRange = function () {
+            if (!this.target.viewPort)
+                return;
+            if (this.scrollVEnable && this.target.viewPort.y + this.target.contentHeight < this.target.height) {
+                this.target.viewPort.y = this.target.height - this.target.contentHeight;
+            }
+            if (this.scrollVEnable && this.target.viewPort.y > 0)
+                this.target.viewPort.y = 0;
+            if (this.scrollHEnable && this.target.viewPort.x + this.target.contentWidth < this.target.width) {
+                this.target.viewPort.x = this.target.width - this.target.contentWidth;
+            }
+            if (this.scrollHEnable && this.target.viewPort.x > 0)
+                this.target.viewPort.x = 0;
+        };
+        return Scroller;
+    }(leaf.TouchComponent));
+    leaf.Scroller = Scroller;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var Layout = /** @class */ (function (_super) {
+        __extends(Layout, _super);
+        function Layout() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return Layout;
+    }(ecs.Component));
+    leaf.Layout = Layout;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var HorizontalLayout = /** @class */ (function (_super) {
+        __extends(HorizontalLayout, _super);
+        function HorizontalLayout() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Object.defineProperty(HorizontalLayout.prototype, "itemWidth", {
+            get: function () {
+                return this.itemSize;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(HorizontalLayout.prototype, "itemHeight", {
+            get: function () {
+                return this.itemHeight;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        HorizontalLayout.prototype.init = function (itemSize, gap) {
+            if (itemSize === void 0) { itemSize = 0; }
+            if (gap === void 0) { gap = 0; }
+            this._gap = gap;
+            this.itemSize = itemSize;
+        };
+        HorizontalLayout.prototype.updatePosition = function (item, index, max, width, height) {
+            item.transform.x = this.getPosition(index, max, width, height).x;
+        };
+        HorizontalLayout.prototype.getPosition = function (index, max, width, height) {
+            return { x: index * (this.itemSize + this._gap), y: 0 };
+        };
+        return HorizontalLayout;
+    }(leaf.Layout));
+    leaf.HorizontalLayout = HorizontalLayout;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var TileLayout = /** @class */ (function (_super) {
+        __extends(TileLayout, _super);
+        function TileLayout() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Object.defineProperty(TileLayout.prototype, "itemWidth", {
+            get: function () {
+                return this._itemWidth;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(TileLayout.prototype, "itemHeight", {
+            get: function () {
+                return this._itemHeight;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        TileLayout.prototype.init = function (itemWidth, itemHeight, gapv, gaph) {
+            if (itemWidth === void 0) { itemWidth = 0; }
+            if (gapv === void 0) { gapv = 0; }
+            if (gaph === void 0) { gaph = 0; }
+            this._gapv = gapv;
+            this._gaph = gaph;
+            this._itemWidth = itemWidth;
+            this._itemHeight = itemHeight;
+        };
+        TileLayout.prototype.updatePosition = function (item, index, max, width, height) {
+            var p = this.getPosition(index, max, width, height);
+            item.transform.x = p.x;
+            item.transform.y = p.y;
+        };
+        TileLayout.prototype.getPosition = function (index, max, width, height) {
+            var maxWidth = ~~((width + this._gaph) / (this.itemWidth + this._gaph)) || 1;
+            return {
+                x: (index % maxWidth) * (this.itemWidth + this._gaph),
+                y: (~~(index / maxWidth)) * (this.itemHeight + this._gapv)
+            };
+        };
+        return TileLayout;
+    }(leaf.Layout));
+    leaf.TileLayout = TileLayout;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var VerticalLayout = /** @class */ (function (_super) {
+        __extends(VerticalLayout, _super);
+        function VerticalLayout() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Object.defineProperty(VerticalLayout.prototype, "itemWidth", {
+            get: function () {
+                return this.itemSize;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(VerticalLayout.prototype, "itemHeight", {
+            get: function () {
+                return this.itemHeight;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        VerticalLayout.prototype.init = function (itemSize, gap) {
+            if (itemSize === void 0) { itemSize = 0; }
+            if (gap === void 0) { gap = 0; }
+            this._gap = gap;
+            this.itemSize = itemSize;
+        };
+        VerticalLayout.prototype.updatePosition = function (item, index, max, width, height) {
+            item.transform.y = this.getPosition(index, max, width, height).y;
+        };
+        VerticalLayout.prototype.getPosition = function (index, max, width, height) {
+            return { y: index * (this.itemSize + this._gap), x: 0 };
+        };
+        return VerticalLayout;
+    }(leaf.Layout));
+    leaf.VerticalLayout = VerticalLayout;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {

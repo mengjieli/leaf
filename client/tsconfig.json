@@ -4,6 +4,8 @@
     "outDir": "bin-debug",
     "experimentalDecorators": true,
     "downlevelIteration": true,
+    "skipLibCheck": true,
+		"allowSyntheticDefaultImports": true,
     "lib": [
       "es5",
       "dom",
@@ -15,6 +17,6 @@
   "include": [
     "src",
     "libs/**/*.d.ts",
-    "web/**/*.d.ts",
+    "web/**/*.d.ts", "libs/leaf/src/ui/layout.ts", "libs/leaf/src/ui/scroller.ts",
   ]
 }

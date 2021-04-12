@@ -45,6 +45,7 @@ namespace leaf {
                 list.push(target)
                 target = target.parent;
             }
+            let startIndex = -1;
             for (let i = list.length - 1, x = 0, y = 0; i >= 0; i--) {
                 let m = list[i].transform.reverse;
                 x = m.a * (touchX + m.tx) + m.c * touchY;
@@ -52,8 +53,14 @@ namespace leaf {
                 touchX = x;
                 touchY = y;
                 locals.push([x, y]);
+                if (startIndex === -1) {
+                    if (list[i].getComponent(TouchComponent) && list[i].getComponent(TouchComponent).stopChildrenEvent) {
+                        startIndex = i;
+                    }
+                }
             }
             for (let i = 0; i < list.length; i++) {
+                if (startIndex != -1 && i < startIndex) continue;
                 e.localX = locals[list.length - 1 - i][0];
                 e.localY = locals[list.length - 1 - i][1];
                 e.currentTarget = list[i];

@@ -4329,6 +4329,46 @@
       "type": 1
     },
     {
+      "name": "bull1-1-1_png",
+      "path": "assets/bull/bull1-1-1.png",
+      "type": 1
+    },
+    {
+      "name": "bull1-1-2_png",
+      "path": "assets/bull/bull1-1-2.png",
+      "type": 1
+    },
+    {
+      "name": "bull1-2-1_png",
+      "path": "assets/bull/bull1-2-1.png",
+      "type": 1
+    },
+    {
+      "name": "bull1-2-2_png",
+      "path": "assets/bull/bull1-2-2.png",
+      "type": 1
+    },
+    {
+      "name": "bull1-3-1_png",
+      "path": "assets/bull/bull1-3-1.png",
+      "type": 1
+    },
+    {
+      "name": "bull1-3-2_png",
+      "path": "assets/bull/bull1-3-2.png",
+      "type": 1
+    },
+    {
+      "name": "bull1-4-1_png",
+      "path": "assets/bull/bull1-4-1.png",
+      "type": 1
+    },
+    {
+      "name": "bull1-4-2_png",
+      "path": "assets/bull/bull1-4-2.png",
+      "type": 1
+    },
+    {
       "name": "apple-touch-icon-114x114_png",
       "path": "assets/game/game1/puzzlescript-master 2/apple-touch-icon-114x114.png",
       "type": 1
@@ -4381,6 +4421,31 @@
     {
       "name": "pwa-icon-512_png",
       "path": "assets/game/game1/puzzlescript-master 2/pwa-icon-512.png",
+      "type": 1
+    },
+    {
+      "name": "game1_png",
+      "path": "assets/game-icon/game1.png",
+      "type": 1
+    },
+    {
+      "name": "game2_png",
+      "path": "assets/game-icon/game2.png",
+      "type": 1
+    },
+    {
+      "name": "game3_png",
+      "path": "assets/game-icon/game3.png",
+      "type": 1
+    },
+    {
+      "name": "game4_png",
+      "path": "assets/game-icon/game4.png",
+      "type": 1
+    },
+    {
+      "name": "game5_png",
+      "path": "assets/game-icon/game5.png",
       "type": 1
     },
     {
@@ -4451,6 +4516,16 @@
     {
       "name": "num_28_39_9_png",
       "path": "assets/num_28_39/num_28_39_9.png",
+      "type": 1
+    },
+    {
+      "name": "resource1_png",
+      "path": "assets/resource-icon/resource1.png",
+      "type": 1
+    },
+    {
+      "name": "resource2_png",
+      "path": "assets/resource-icon/resource2.png",
       "type": 1
     },
     {

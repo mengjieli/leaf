@@ -86,6 +86,58 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "../src/config/game-config.ts":
+/*!************************************!*\
+  !*** ../src/config/game-config.ts ***!
+  \************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var EMGameType;
+(function (EMGameType) {
+    EMGameType["PUZZLE"] = "puzzle";
+    EMGameType["VIEW"] = "view";
+})(EMGameType = exports.EMGameType || (exports.EMGameType = {}));
+exports.gameConfigs = {
+    "1": {
+        id: 1,
+        type: EMGameType.PUZZLE,
+        name: "初级推箱子",
+        desc: "难度相对比较简单，尽情的闯关吧！"
+    },
+    "2": {
+        id: 2,
+        type: EMGameType.PUZZLE,
+        name: "经典推箱子",
+        desc: "经典的推箱子玩法，难度适中"
+    },
+    "3": {
+        id: 3,
+        type: EMGameType.PUZZLE,
+        name: "勇闯迷宫",
+        desc: "敢问路在何方～～",
+    },
+    "4": {
+        id: 4,
+        type: EMGameType.PUZZLE,
+        name: "青蛇与红苹果",
+        desc: "小蛇看上了红红的大苹果？"
+    },
+    "5": {
+        id: 5,
+        type: EMGameType.PUZZLE,
+        name: "收藏有礼",
+        desc: "收藏游戏后可立即获得丰富奖励",
+        isActive: true
+    }
+};
+
+
+/***/ }),
+
 /***/ "../src/main.ts":
 /*!**********************!*\
   !*** ../src/main.ts ***!
@@ -185,6 +237,180 @@ window["Main"] = Main;
 
 /***/ }),
 
+/***/ "../src/modules/main/components/game-item-renderer.ts":
+/*!************************************************************!*\
+  !*** ../src/modules/main/components/game-item-renderer.ts ***!
+  \************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var game_config_1 = __webpack_require__(/*! ../../../config/game-config */ "../src/config/game-config.ts");
+orange.autoloadLink("MainScene");
+var GameItemRenderer = /** @class */ (function (_super) {
+    __extends(GameItemRenderer, _super);
+    function GameItemRenderer() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    GameItemRenderer.prototype.init = function () {
+        var _this = this;
+        this.addComponent(leaf.TouchComponent).onTouchEnd.on(function () {
+            console.error("click", _this.data);
+        });
+    };
+    GameItemRenderer.prototype.onData = function (d) {
+        var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
+        bg.texture = leaf.PointTexture.getTexture(0xffffff);
+        bg.transform.scaleX = 300;
+        bg.transform.scaleY = 300;
+        bg.parent = this.entity;
+        var cfg = game_config_1.gameConfigs[d.id];
+        var shortCut = ecs.Entity.create().addComponent(leaf.Bitmap);
+        shortCut.resource = "game" + d.id + "_png";
+        shortCut.transform.x = (300 - 282) / 2;
+        shortCut.transform.y = (300 - 282) / 2;
+        shortCut.parent = this.entity;
+        var nameLabel = ecs.Entity.create().addComponent(leaf.Label);
+        nameLabel.text = cfg.name;
+        nameLabel.transform.x = shortCut.transform.x;
+        nameLabel.transform.y = 250;
+        nameLabel.fontColor = 0;
+        nameLabel.fontSize = 20;
+        nameLabel.parent = this.entity;
+    };
+    return GameItemRenderer;
+}(leaf.ListItemRenderer));
+exports.GameItemRenderer = GameItemRenderer;
+
+
+/***/ }),
+
+/***/ "../src/modules/main/components/main-top.ts":
+/*!**************************************************!*\
+  !*** ../src/modules/main/components/main-top.ts ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+orange.autoloadLink("MainScene");
+var MainTop = /** @class */ (function (_super) {
+    __extends(MainTop, _super);
+    function MainTop() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.onChangeMenu = new ecs.Broadcast();
+        return _this;
+    }
+    Object.defineProperty(MainTop.prototype, "selected", {
+        get: function () {
+            return this._selected;
+        },
+        set: function (val) {
+            if (this._selected === val)
+                return;
+            if (val < 0)
+                return;
+            if (val >= this.menuRoot.children.length)
+                return;
+            this._selected = val;
+            this.onChangeMenu.dispatch(val);
+            for (var i = 0; i < this.menuRoot.children.length; i++) {
+                if (i === val) {
+                    this.menuRoot.children[i].children[1].getComponent(leaf.Label).transform.alpha = 0;
+                    this.menuRoot.children[i].children[2].getComponent(leaf.Label).transform.alpha = 1;
+                }
+                else {
+                    this.menuRoot.children[i].children[1].getComponent(leaf.Label).transform.alpha = 1;
+                    this.menuRoot.children[i].children[2].getComponent(leaf.Label).transform.alpha = 0;
+                }
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+    MainTop.prototype.init = function () {
+        this.menuIndex = 0;
+        this.menuRoot = ecs.Entity.create();
+        this.menuRoot.parent = this.entity;
+        this.menuRoot.transform.y = 200;
+        this.addMenu("收藏");
+        this.addMenu("活动");
+        this.addMenu("热门");
+        this.addMenu("推荐");
+        this.addMenu("其它");
+    };
+    MainTop.prototype.addMenu = function (name) {
+        var _this = this;
+        var index = this.menuIndex++;
+        var p = ecs.Entity.create();
+        p.transform.x = 17 + index * 121;
+        p.parent = this.menuRoot;
+        var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
+        bg.texture = leaf.PointTexture.getTexture(0);
+        bg.parent = p;
+        bg.transform.scaleX = 120;
+        bg.transform.scaleY = 50;
+        bg.transform.alpha = 0;
+        var label1 = ecs.Entity.create().addComponent(leaf.Label);
+        label1.fontSize = 28;
+        label1.fontColor = 0x777777;
+        label1.text = name;
+        label1.parent = p;
+        label1.transform.x = 33;
+        label1.transform.y = 10;
+        var label2 = ecs.Entity.create().addComponent(leaf.Label);
+        label2.fontSize = 31;
+        label2.fontColor = 0xfb76a3;
+        label2.text = name;
+        label2.parent = p;
+        label2.transform.x = label1.transform.x - 3;
+        label2.transform.y = label1.transform.y - 3;
+        label2.transform.alpha = 0;
+        p.addComponent(leaf.TouchComponent).onTouchStart.on(function () {
+            _this.selected = index;
+        });
+    };
+    MainTop.prototype.onDestroy = function () {
+        this.onChangeMenu.removeAll();
+        this.menuRoot = null;
+    };
+    return MainTop;
+}(ecs.Component));
+exports.MainTop = MainTop;
+
+
+/***/ }),
+
 /***/ "../src/modules/main/components/main-ui.ts":
 /*!*************************************************!*\
   !*** ../src/modules/main/components/main-ui.ts ***!
@@ -207,21 +433,121 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var top_info_view_1 = __webpack_require__(/*! ./top-info-view */ "../src/modules/main/components/top-info-view.ts");
+var main_top_1 = __webpack_require__(/*! ./main-top */ "../src/modules/main/components/main-top.ts");
+var game_item_renderer_1 = __webpack_require__(/*! ./game-item-renderer */ "../src/modules/main/components/game-item-renderer.ts");
+var game_config_1 = __webpack_require__(/*! ../../../config/game-config */ "../src/config/game-config.ts");
+var game_tag_1 = __webpack_require__(/*! ../../../net/game-tag */ "../src/net/game-tag.ts");
 orange.autoloadLink("MainScene");
 var MainUI = /** @class */ (function (_super) {
     __extends(MainUI, _super);
     function MainUI() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.top = 255;
+        _this.bottom = 50;
+        return _this;
     }
     MainUI.prototype.init = function () {
+        this.addBg();
+        ecs.Entity.create().addComponent(top_info_view_1.TopInfoView).parent = this.entity;
+        var top = this.addComponent(main_top_1.MainTop);
+        top.selected = 0;
+        top.onChangeMenu.on(this.refresh, this);
+        var list = this.list = ecs.Entity.create().addComponent(leaf.List, [], game_item_renderer_1.GameItemRenderer, 640, leaf.getStageHeight() - this.top - this.bottom);
+        list.addComponent(leaf.TileLayout, 300, 300, 10, 10).addComponent(leaf.Scroller, list, false, true).speedV = 3;
+        list.parent = this.entity;
+        list.transform.y = this.top + 10;
+        list.transform.x = 15;
+        this.refresh(top.selected);
+    };
+    MainUI.prototype.refresh = function (index) {
+        var e_1, _a, e_2, _b;
+        if (this.emptyLabel) {
+            this.emptyLabel.entity.destroy();
+            this.emptyLabel = null;
+        }
+        var data = [];
+        if (index === 2) {
+            try {
+                for (var _c = __values(game_tag_1.GameTag.tags.hot.gameIds), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var id = _d.value;
+                    if (game_config_1.gameConfigs[id]) {
+                        data.push(game_config_1.gameConfigs[id]);
+                    }
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+        }
+        else if (index === 3) {
+            try {
+                for (var _e = __values(game_tag_1.GameTag.tags.push.gameIds), _f = _e.next(); !_f.done; _f = _e.next()) {
+                    var id = _f.value;
+                    if (game_config_1.gameConfigs[id]) {
+                        data.push(game_config_1.gameConfigs[id]);
+                    }
+                }
+            }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            finally {
+                try {
+                    if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                }
+                finally { if (e_2) throw e_2.error; }
+            }
+        }
+        else {
+            for (var k in game_config_1.gameConfigs) {
+                var cfg = game_config_1.gameConfigs[k];
+                if (index === 4) {
+                    if (!cfg.isActive)
+                        data.push(cfg);
+                }
+                if (index === 1) {
+                    if (cfg.isActive)
+                        data.push(cfg);
+                }
+            }
+        }
+        this.list.data = data;
+        if (!data.length) {
+            this.emptyLabel = ecs.Entity.create().addComponent(leaf.Label);
+            this.emptyLabel.fontColor = 0x777777;
+            this.emptyLabel.text = "列表暂时是空的，看看其它分类吧~";
+            this.emptyLabel.parent = this.entity;
+            this.emptyLabel.transform.x = (leaf.getStageWidth() - this.emptyLabel.textWidth) / 2;
+            this.emptyLabel.transform.y = this.top + (leaf.getStageHeight() - this.top - this.emptyLabel.textHeight) / 2;
+        }
+    };
+    MainUI.prototype.addBg = function () {
         var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
         bg.resource = "bg";
         bg.parent = this.entity;
         bg.transform.scaleX = leaf.getStageWidth();
         bg.transform.scaleY = leaf.getStageHeight();
-        ecs.Entity.create().addComponent(top_info_view_1.TopInfoView).parent = this.entity;
+        var bg2 = ecs.Entity.create().addComponent(leaf.Bitmap);
+        bg2.texture = leaf.PointTexture.getTexture(0xf4f4f4);
+        bg2.parent = this.entity;
+        bg2.transform.scaleX = leaf.getStageWidth();
+        bg2.transform.y = this.top;
+        bg2.transform.scaleY = leaf.getStageHeight() - bg2.transform.y;
     };
     return MainUI;
 }(ecs.Component));
@@ -263,26 +589,39 @@ var TopInfoView = /** @class */ (function (_super) {
     TopInfoView.prototype.init = function () {
         this.entity.transform.y = system_1.System.topHeight;
         var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
-        bg.resource = "top_info_bg";
+        bg.resource = "top_info_bg_png";
         bg.transform.x = 17;
         bg.parent = this.entity;
         var heart = ecs.Entity.create().addComponent(leaf.Bitmap);
-        console.error(heart.id);
         heart.resource = "heart";
-        heart.transform.x = bg.transform.x + 18;
-        heart.transform.y = 2;
+        heart.transform.x = bg.transform.x + 15;
+        heart.transform.y = 4;
         heart.parent = this.entity;
+        var heartCount = ecs.Entity.create().addComponent(leaf.Label);
+        heartCount.transform.x = heart.transform.x + 65;
+        heartCount.transform.y = 13;
+        heartCount.text = "9999";
+        heartCount.fontSize = 40;
+        heartCount.fontColor = 0x777777;
+        heartCount.bold = true;
+        heartCount.parent = this.entity;
         bg = ecs.Entity.create().addComponent(leaf.Bitmap);
         bg.resource = "top_info_bg";
         bg.transform.x = 220;
         bg.parent = this.entity;
-        var label = ecs.Entity.create().addComponent(leaf.Label);
-        label.text = "好";
-        label.fontSize = 20;
-        label.fontColor = 0;
-        label.transform.x = 10;
-        label.transform.y = 100;
-        label.parent = this.entity;
+        var gold = ecs.Entity.create().addComponent(leaf.Bitmap);
+        gold.resource = "gold";
+        gold.transform.x = bg.transform.x + 15;
+        gold.transform.y = 4;
+        gold.parent = this.entity;
+        var goldCount = ecs.Entity.create().addComponent(leaf.Label);
+        goldCount.transform.x = gold.transform.x + 65;
+        goldCount.transform.y = 13;
+        goldCount.text = "9999";
+        goldCount.fontSize = 40;
+        goldCount.fontColor = 0x777777;
+        goldCount.bold = true;
+        goldCount.parent = this.entity;
     };
     return TopInfoView;
 }(ecs.Component));
@@ -335,6 +674,37 @@ var MainScene = /** @class */ (function (_super) {
     return MainScene;
 }(module_scene_1.ModuleScene));
 exports.MainScene = MainScene;
+
+
+/***/ }),
+
+/***/ "../src/net/game-tag.ts":
+/*!******************************!*\
+  !*** ../src/net/game-tag.ts ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var GameTag = /** @class */ (function () {
+    function GameTag() {
+        this.gameIds = [];
+    }
+    GameTag.tags = {
+        hot: {
+            name: "hot",
+            gameIds: [1, 4]
+        },
+        push: {
+            name: "push",
+            gameIds: [2]
+        }
+    };
+    return GameTag;
+}());
+exports.GameTag = GameTag;
 
 
 /***/ }),

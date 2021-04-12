@@ -4384,6 +4384,31 @@
       "type": 1
     },
     {
+      "name": "game1_png",
+      "path": "assets/game-icon/game1.png",
+      "type": 1
+    },
+    {
+      "name": "game2_png",
+      "path": "assets/game-icon/game2.png",
+      "type": 1
+    },
+    {
+      "name": "game3_png",
+      "path": "assets/game-icon/game3.png",
+      "type": 1
+    },
+    {
+      "name": "game4_png",
+      "path": "assets/game-icon/game4.png",
+      "type": 1
+    },
+    {
+      "name": "game5_png",
+      "path": "assets/game-icon/game5.png",
+      "type": 1
+    },
+    {
       "name": "blue-bg-scroller_png",
       "path": "assets/icon/blue-bg-scroller.png",
       "type": 1
@@ -4451,6 +4476,16 @@
     {
       "name": "num_28_39_9_png",
       "path": "assets/num_28_39/num_28_39_9.png",
+      "type": 1
+    },
+    {
+      "name": "resource1_png",
+      "path": "assets/resource-icon/resource1.png",
+      "type": 1
+    },
+    {
+      "name": "resource2_png",
+      "path": "assets/resource-icon/resource2.png",
       "type": 1
     },
     {

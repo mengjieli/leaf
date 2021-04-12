@@ -695,6 +695,7 @@ declare namespace leaf {
         readonly onTouchEnd: ecs.Broadcast<TouchEvent>;
         touchEnabled: boolean;
         touchChildrenEnabled: boolean;
+        stopChildrenEvent: boolean;
         onDestroy(): void;
     }
 }
@@ -716,6 +717,121 @@ declare namespace leaf {
         static end(touchId: number, touchX: number, touchY: number): void;
         private static dispatchTouchEvent;
         private static findTarget;
+    }
+}
+declare namespace leaf {
+    abstract class ListItemRenderer<T> extends ecs.Component {
+        data: T;
+        onData?(data?: T): any;
+        onDestroy(): void;
+    }
+}
+declare namespace leaf {
+    class List<T> extends ecs.Component implements ScollerTarget {
+        private _data;
+        private itemRenderClass;
+        private virtual;
+        private items;
+        private listRoot;
+        contentWidth: number;
+        contentHeight: number;
+        width: number;
+        height: number;
+        readonly viewPort: ecs.Transform;
+        init(data: any[], itemRenderClass: any, width: number, height: number, virtual?: boolean): void;
+        data: T[];
+        awake(): void;
+        updateContentRect(): void;
+        refresh(): void;
+        onDestroy(): void;
+    }
+}
+declare namespace leaf {
+    class Scroller extends leaf.TouchComponent {
+        target: ScollerTarget;
+        init(target: ScollerTarget, scrollHEnable: boolean, scrollVEnable: boolean): void;
+        startGapH: number;
+        startGapV: number;
+        scrollVEnable: boolean;
+        scrollHEnable: boolean;
+        speedH: number;
+        speedV: number;
+        private startX;
+        private startY;
+        private startLocalX;
+        private startLocalY;
+        private scrollReady;
+        private startScrollV;
+        private startScrollH;
+        touchStart(e: leaf.TouchEvent): void;
+        touchMove(e: leaf.TouchEvent): void;
+        touchEnd(e: leaf.TouchEvent): void;
+        checkRange(): void;
+    }
+}
+declare namespace leaf {
+    interface ScollerTarget extends ecs.Component {
+        viewPort: ecs.Transform;
+        contentWidth: number;
+        contentHeight: number;
+        width: number;
+        height: number;
+        refresh?: Function;
+    }
+}
+declare namespace leaf {
+    class Layout extends ecs.Component {
+        readonly itemWidth: number;
+        readonly itemHeight: number;
+        updatePosition?(item: ecs.Entity, index: number, max: number, width: number, height: number): any;
+        getPosition?(index: number, max: number, width: number, height: number): {
+            x: number;
+            y: number;
+        };
+    }
+}
+declare namespace leaf {
+    class HorizontalLayout extends Layout {
+        private _gap;
+        private itemSize;
+        readonly itemWidth: number;
+        readonly itemHeight: number;
+        init(itemSize?: number, gap?: number): void;
+        updatePosition(item: ecs.Entity, index: number, max: number, width: number, height: number): void;
+        getPosition(index: number, max: number, width: number, height: number): {
+            x: number;
+            y: number;
+        };
+    }
+}
+declare namespace leaf {
+    class TileLayout extends Layout {
+        private _gapv;
+        private _gaph;
+        private _itemWidth;
+        private _itemHeight;
+        readonly itemWidth: number;
+        readonly itemHeight: number;
+        init(itemWidth: number, itemHeight: any, gapv?: number, gaph?: number): void;
+        updatePosition(item: ecs.Entity, index: number, max: number, width: number, height: number): void;
+        getPosition(index: number, max: number, width: number, height: number): {
+            x: number;
+            y: number;
+        };
+    }
+}
+declare namespace leaf {
+    class VerticalLayout extends Layout {
+        private _gap;
+        private itemSize;
+        readonly itemWidth: number;
+        readonly itemHeight: number;
+        init(itemSize?: number, gap?: number): void;
+        updatePosition(item: ecs.Entity, index: number, max: number, width: number, height: number): void;
+        getPosition(index: number, max: number, width: number, height: number): {
+            x: number;
+            y: number;
+        };
     }
 }
 declare namespace leaf {

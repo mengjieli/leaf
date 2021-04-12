@@ -14,6 +14,8 @@ namespace leaf {
 
         touchChildrenEnabled = true;
 
+        stopChildrenEvent = false;
+
         onDestroy() {
             this.touchEnabled = this.touchChildrenEnabled = true;
             this.onTouchStart.removeAll();
