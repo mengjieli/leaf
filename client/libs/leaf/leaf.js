@@ -14,7 +14,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -318,9 +318,9 @@ var leaf;
                     gl = canvas.getContext(names[i], options);
                     gl.colorMask(true, true, true, true);
                     gl.viewport(0, 0, GLCore.width, GLCore.height);
-                    gl.disable(gl.DEPTH_TEST);
-                    gl.disable(gl.CULL_FACE);
-                    gl.enable(gl.BLEND);
+                    // gl.enable(gl.DEPTH_TEST);
+                    // gl.enable(gl.CULL_FACE);
+                    // gl.enable(gl.BLEND);
                     gl.clear(gl.STENCIL_BUFFER_BIT);
                     gl.enable(gl.STENCIL_TEST);
                     gl.blendColor(1.0, 1.0, 1.0, 1.0);
@@ -2655,6 +2655,49 @@ var leaf;
         return CustomerShaderTask;
     }(leaf.Shader));
     leaf.CustomerShaderTask = CustomerShaderTask;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var Normal3DTask = /** @class */ (function (_super) {
+        __extends(Normal3DTask, _super);
+        function Normal3DTask() {
+            var _this = _super.call(this) || this;
+            _this.positionData = [];
+            _this.indexs = [];
+            //初始化作色器、program
+            _this.initProgram();
+            //初始化作色器固定变量 和 获取作色器中得变量
+            _this.initAttriLocation();
+            return _this;
+        }
+        Normal3DTask.prototype.initProgram = function () {
+            var gl = leaf.GLCore.gl;
+            var vertexSource = "\n        attribute vec3 a_Position;\n        uniform mat4 u_model;\n        uniform mat4 u_project;\n        void main() {\n          gl_Position = u_project * u_model * vec4(a_Position, 1.0);\n        }\n      ";
+            var fragmentSource = "\n        precision mediump float;\n        void main() {\n          gl_FragColor = vec4(0.0,1.0,0.0,1.0); //\u7EAF\u7EFF\u8272\n       }\n      ";
+            var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
+            var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
+            this.program = this.createWebGLProgram(vertexShader, fragmentShader);
+        };
+        Normal3DTask.prototype.initAttriLocation = function () {
+            var gl = leaf.GLCore.gl;
+            var program = this.program;
+            this.buffer = gl.createBuffer();
+            this.indexBuffer = gl.createBuffer();
+            gl.useProgram(program);
+            this.a_Position = gl.getAttribLocation(program, "a_Position");
+            gl.enableVertexAttribArray(this.a_Position);
+            gl.vertexAttribPointer(this.a_Position, 2, gl.FLOAT, false, leaf.$size * 6, 0);
+        };
+        Normal3DTask.prototype.addTask = function (positions, indexs) {
+            var index = this.positionData.length;
+            var positionData = this.positionData;
+            // positionData[index + 0] = x 
+        };
+        Normal3DTask.prototype.render = function () {
+        };
+        return Normal3DTask;
+    }(leaf.Shader));
+    leaf.Normal3DTask = Normal3DTask;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {

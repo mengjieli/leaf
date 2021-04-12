@@ -81,9 +81,9 @@ namespace leaf {
                     gl = <any>canvas.getContext(names[i], options);
                     gl.colorMask(true, true, true, true);
                     gl.viewport(0, 0, GLCore.width, GLCore.height);
-                    gl.disable(gl.DEPTH_TEST);
-                    gl.disable(gl.CULL_FACE);
-                    gl.enable(gl.BLEND);
+                    // gl.enable(gl.DEPTH_TEST);
+                    // gl.enable(gl.CULL_FACE);
+                    // gl.enable(gl.BLEND);
                     gl.clear(gl.STENCIL_BUFFER_BIT);
                     gl.enable(gl.STENCIL_TEST);
                     gl.blendColor(1.0, 1.0, 1.0, 1.0);

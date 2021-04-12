@@ -443,6 +443,18 @@ declare namespace leaf {
     }
 }
 declare namespace leaf {
+    class Normal3DTask extends Shader {
+        private a_Position;
+        constructor();
+        initProgram(): void;
+        initAttriLocation(): void;
+        positionData: number[];
+        indexs: number[];
+        addTask(positions: number[], indexs: number[]): void;
+        render(): void;
+    }
+}
+declare namespace leaf {
     var $size: number;
     class NormalShaderTask extends Shader {
         private a_Position;

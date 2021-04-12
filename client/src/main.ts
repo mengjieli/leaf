@@ -5,6 +5,7 @@ import { PlayerData } from "./net/player-data";
 import { Platform } from "./utils/platform";
 import { MainScene } from "./modules/main/main-scene";
 import { BullScene } from "./modules/bull/bull-scene";
+import { Test3dScene } from "./modules/test3d/test3d-scene";
 
 export class Main {
 
@@ -34,7 +35,8 @@ export class Main {
         leaf.Res.loadResources().then(() => {
             leaf.Res.getRes("block_png").load().then(
                 () => {
-                    new BullScene();
+                    new Test3dScene();
+                    // new BullScene();
                     // new MainScene();
                     // new FaceScene(true);
                     // new PuzzleScene();
@@ -42,7 +44,6 @@ export class Main {
             )
         })
     }
-
 }
 
 window["Main"] = Main;
