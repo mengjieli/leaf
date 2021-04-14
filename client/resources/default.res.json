@@ -4329,13 +4329,18 @@
       "type": 1
     },
     {
+      "name": "bull1-1-0_png",
+      "path": "assets/bull/bull1-1-0.png",
+      "type": 1
+    },
+    {
       "name": "bull1-1-1_png",
       "path": "assets/bull/bull1-1-1.png",
       "type": 1
     },
     {
-      "name": "bull1-1-2_png",
-      "path": "assets/bull/bull1-1-2.png",
+      "name": "bull1-2-0_png",
+      "path": "assets/bull/bull1-2-0.png",
       "type": 1
     },
     {
@@ -4344,8 +4349,8 @@
       "type": 1
     },
     {
-      "name": "bull1-2-2_png",
-      "path": "assets/bull/bull1-2-2.png",
+      "name": "bull1-3-0_png",
+      "path": "assets/bull/bull1-3-0.png",
       "type": 1
     },
     {
@@ -4354,18 +4359,13 @@
       "type": 1
     },
     {
-      "name": "bull1-3-2_png",
-      "path": "assets/bull/bull1-3-2.png",
+      "name": "bull1-4-0_png",
+      "path": "assets/bull/bull1-4-0.png",
       "type": 1
     },
     {
       "name": "bull1-4-1_png",
       "path": "assets/bull/bull1-4-1.png",
-      "type": 1
-    },
-    {
-      "name": "bull1-4-2_png",
-      "path": "assets/bull/bull1-4-2.png",
       "type": 1
     },
     {

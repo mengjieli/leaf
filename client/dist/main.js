@@ -283,7 +283,7 @@ var BullCore = /** @class */ (function (_super) {
         _this.normalSpeed = 100;
         _this.winSpeed = 50;
         _this.specialSpeed = 200;
-        _this.lengths = [84 - 16, 100 - 13, 107 - 3, 124 - 19];
+        _this.lengths = [64, 100 - 13, 107 - 3, 124 - 19];
         _this.strengths = [5, 10, 20, 40];
         _this.atks = [1, 2, 3, 4];
         _this.skills = [0, 0, 0, 0];
@@ -292,6 +292,17 @@ var BullCore = /** @class */ (function (_super) {
         return _this;
     }
     BullCore.prototype.init = function () {
+        // let rng = new RngSource();
+        // let str = "";
+        // // for (let i = 0; i < 100; i++) {
+        // //     rng.Seed(i);
+        // //     for (let c = 0; c < 10; c++) {
+        // //         str += rng.Int63() + ",";
+        // //     }
+        // // }
+        // rng.Seed(0);
+        // console.error(rng.vec);
+        // return;
         this.transform.x = 200;
         this.transform.y = 150;
         this.runFlag = true;
@@ -301,13 +312,15 @@ var BullCore = /** @class */ (function (_super) {
             return;
         this.time += 16;
         var _a = __read(this.runBullGame([
-            { time: 0, team: 0, raceIndex: 0 }
-        ], 4, this.raceLength, [60, 60, 30, 10], [150, 150, 150, 150], [100, 100, 100, 100], [100, 100], this.lengths, this.strengths, this.atks, this.skills, Math.min(this.time, this.raceTime * 1000)), 5), win = _a[0], teamHps = _a[1], bullTypes = _a[2], bullTeams = _a[3], bullYs = _a[4];
+            { time: 0, team: 0, raceIndex: 0 },
+            { time: 0, team: 1, raceIndex: 0 },
+        ], 4, this.raceLength, [60, 60, 30, 10], [150, 150, 150, 150], [100, 100, 100, 100], [84 - 16, 100 - 13, 107 - 3, 124 - 19], [1, 2, 3, 4], [4, 3, 2, 1], [0, 0, 0, 0], [60, 60, 30, 10], [150, 150, 150, 150], [100, 100, 100, 100], [84 - 16, 100 - 13, 107 - 3, 124 - 19], [1, 2, 3, 4], [4, 3, 2, 1], [0, 0, 0, 0], [100, 100], Math.min(this.time, this.raceTime * 1000)), 6), win = _a[0], teamHps = _a[1], bullTypes = _a[2], bullTeams = _a[3], bullYs = _a[4], lens = _a[5];
         var bulls = [];
         for (var i = 0; i < bullTypes.length; i++) {
             bulls.push({
                 type: bullTypes[i],
                 team: bullTeams[i],
+                length: lens[i],
                 y: bullYs[i]
             });
         }
@@ -346,6 +359,7 @@ var BullCore = /** @class */ (function (_super) {
         //牛的 id 计数器
         var id = 0;
         var winTeam = -1;
+        var idTypeMap = {};
         //牛的4个动态属性 id、单头牛的长度、合起来后的长度、队伍、坐标、速度、数量、解冻的绝对时间
         var bullIds0 = [];
         var bullLengths0 = [];
@@ -367,46 +381,60 @@ var BullCore = /** @class */ (function (_super) {
         var bigBullIds = [];
         //合体牛的长度
         var bigBullLength = [];
+        //合体牛每个的 team
+        var bigBullTeams = [];
+        //合体牛的组合长度
+        var bigBullMergeLength = [];
         //合体牛的力量 team0 strength 为正， team1 strength 为负
         var bigBullStrength = [];
         //合体牛的位置
         var bigBullY = [];
         //合体牛的速度
         var bigBullSpeed = [];
+        //合体牛的方向 0|1 与  team 的牛方向相同
+        var bigBullDir = [];
+        //合体牛的冰冻时间
+        var bigBullIces = [];
         //每条赛道的时间
         var raceTime = [];
         for (var i = 0; i < raceCount; i++) {
             bullIds0[i] = [];
             bullLengths0[i] = [];
-            bullMergeLengths0 = [];
+            bullMergeLengths0[i] = [];
             bullTeams0[i] = [];
             bullYs0[i] = [];
-            bullSpeeds0[i] = 0;
+            bullSpeeds0[i] = [];
             bullCounts0[i] = 0;
+            bullIces0[i] = [];
             bullIds1[i] = [];
             bullMergeLengths1[i] = [];
             bullLengths1[i] = [];
             bullTeams1[i] = [];
             bullYs1[i] = [];
-            bullSpeeds1[i] = 0;
+            bullSpeeds1[i] = [];
+            bullIces1[i] = [];
             bullCounts1[i] = 0;
             bigBullIds[i] = [];
-            bigBullLength[i] = 0;
+            bigBullLength[i] = [];
+            bigBullTeams[i] = [];
+            bigBullMergeLength[i] = 0;
             bigBullStrength[i] = 0;
             bigBullY[i] = 0;
             bigBullSpeed[i] = 0;
+            bigBullDir[i] = 0;
+            bigBullIces[i] = [];
             raceTime[i] = 0;
         }
         //当前跨度
         var curTime = 0;
         //当前执行过的操作索引
         var opIndex = 0;
+        var hasNew = true;
         //最大执行次数
-        var maxWhileCount = Math.ceil(time / 16); //ceil 取上限
-        var maxWhileIndex = 0;
-        while (maxWhileIndex < maxWhileCount && winTeam === -1 && curTime <= time) {
+        while (winTeam === -1 && (curTime < time || hasNew && curTime === time)) {
+            hasNew = false;
             //预测下一个事件点
-            maxWhileIndex++;
+            var realTime = curTime;
             curTime += 1000 * 1000;
             //操作事件
             if (opIndex < ops.length) {
@@ -416,59 +444,180 @@ var BullCore = /** @class */ (function (_super) {
                 }
             }
             for (var k = 0; k < raceCount; k++) {
-                raceTime[k] = curTime + 1000 * 1000;
-                if (bigBullLength[k] > 0) { //合体牛相关事件
-                    raceTime[k] = Math.min(raceTime[k], this.getBullToEndTime(raceTime[k], bigBullSpeed[k], raceLength), bullIds0[k].length ? raceTime[k] : this.getBullToEndTime(raceTime[k], bullSpeeds0[k][0] - bigBullSpeed[k], bigBullY[k] - bigBullLength[k] - bullYs0[k][0]), bullIds1[k].length ? raceTime[k] : this.getBullToEndTime(raceTime[k], bullSpeeds1[k][0] - bigBullSpeed[k], bigBullY[k] - bigBullLength[k] - bullYs1[k][0]));
+                raceTime[k] = realTime + 1000 * 1000;
+                for (var c = bullIds0[k].length - 1; c >= 0; c--) {
+                    if (c === 0) {
+                        raceTime[k] = Math.min(raceTime[k], this.getBullToEndTime(realTime, bullSpeeds0[k][c], raceLength - bullYs0[k][c]), this.getBullToEndTime(realTime, bigBullSpeed[k], raceLength), bigBullIds[k].length ? this.getBullToEndTime(realTime, bullSpeeds0[k][0] - bigBullSpeed[k], bigBullY[k] + (bigBullDir[k] === 0 ? -bigBullLength[k] : 0) - bullYs0[k][0]) : raceTime[k], bullIds1[k].length ? this.getBullToEndTime(realTime, bullSpeeds0[k][0] - bullSpeeds1[k][0], bullYs1[k][0] - bullYs0[k][0]) : raceTime[k]);
+                    }
+                    else {
+                        raceTime[k] = Math.min(raceTime[k], this.getBullToEndTime(realTime, bullSpeeds0[k][c], raceLength - bullYs0[k][c]), this.getBullToEndTime(realTime, bullSpeeds0[k][c] - bullSpeeds0[k][c - 1], bullYs0[k][c - 1] - bullMergeLengths0[k][c - 1] - bullYs0[k][c]));
+                    }
                 }
-                else { //无合体牛事件
-                    raceTime[k] = Math.min(raceTime[k], bullIds0[k].length && !bullIds1[k].length ? this.getBullToEndTime(raceTime[k], bullSpeeds0[k][0], raceLength - bullYs0[k][0]) : raceTime[k], !bullIds0[k].length && bullIds1[k].length ? this.getBullToEndTime(raceTime[k], bullSpeeds1[k][0], -bullYs1[k][0]) : raceTime[k], bullIds0[k].length && bullIds1[k].length ? this.getBullToEndTime(raceTime[k], bullSpeeds0[k][0] - bullSpeeds1[k][0], bullYs0[k][0] - bullYs1[k][0]) : raceTime[k]);
+                for (var c = bullIds1[k].length - 1; c >= 0; c--) {
+                    if (c === 0) {
+                        raceTime[k] = Math.min(raceTime[k], this.getBullToEndTime(realTime, bullSpeeds1[k][c], -bullYs1[k][c]), this.getBullToEndTime(realTime, bigBullSpeed[k], 0), bigBullIds[k].length ? this.getBullToEndTime(realTime, bullSpeeds1[k][0] - bigBullSpeed[k], bigBullY[k] + (bigBullDir[k] === 0 ? -bigBullLength[k] : 0) - bullYs1[k][0]) : raceTime[k]);
+                    }
+                    else {
+                        raceTime[k] = Math.min(raceTime[k], this.getBullToEndTime(realTime, bullSpeeds1[k][c], -bullYs1[k][c]), this.getBullToEndTime(realTime, bullSpeeds1[k][c] - bullSpeeds1[k][c - 1], bullYs1[k][c - 1] - bullMergeLengths1[k][c - 1] - bullYs1[k][c]));
+                    }
                 }
-                curTime = Math.min(curTime, raceTime[k]);
+                curTime = Math.min(curTime, raceTime[k], time);
             }
             if (opIndex < ops.length) {
-                var op = ops[opIndex];
+                hasNew = true;
+                var op = ops[opIndex++];
                 if (op.time <= curTime) { //放牛
                     if (op.team === 0) {
-                        var length_1 = lengths[this.random(lengthWeight)];
+                        var type = this.random(curTime, lengthWeight);
+                        idTypeMap[id] = type;
+                        var length_1 = lengths[type];
                         bullIds0[op.raceIndex].push([id++]);
                         bullLengths0[op.raceIndex].push([length_1]);
                         bullMergeLengths0[op.raceIndex].push(length_1);
                         bullTeams0[op.raceIndex].push(op.team);
                         bullYs0[op.raceIndex].push(0);
                         bullCounts0[op.raceIndex]++;
-                        bullSpeeds0[op.raceIndex] = normalSpeeds[Math.min(normalSpeeds.length - 1, bullCounts0[op.raceIndex])];
+                        bullSpeeds0[op.raceIndex].push(normalSpeeds[Math.min(normalSpeeds.length - 1, bullCounts0[op.raceIndex])]);
+                        bullIces0[op.raceIndex].push([0]);
                         if (bigBullLength[op.raceIndex] && bigBullSpeed[op.raceIndex] > 0)
                             bigBullSpeed[op.raceIndex] = bigSpeeds[Math.min(bigSpeeds.length - 1, bullCounts0[op.raceIndex])];
                     }
                     else {
+                        var type = this.random(curTime, lengthWeight1);
+                        idTypeMap[id] = type;
+                        var length_2 = lengths1[type];
                         bullIds1[op.raceIndex].push([id++]);
-                        bullLengths1[op.raceIndex].push([op.type]);
+                        bullLengths1[op.raceIndex].push([length_2]);
+                        bullMergeLengths1[op.raceIndex].push(length_2);
                         bullTeams1[op.raceIndex].push(op.team);
-                        bullYs1[op.raceIndex].push(0);
+                        bullYs1[op.raceIndex].push(raceLength);
                         bullCounts1[op.raceIndex]++;
-                        bullSpeeds1[op.raceIndex] = normalSpeeds[Math.min(normalSpeeds.length - 1, bullCounts1[op.raceIndex])];
-                        if (bigBullLength[op.raceIndex] && bigBullSpeed[op.raceIndex] > 0)
-                            bigBullSpeed[op.raceIndex] = bigSpeeds[Math.min(bigSpeeds.length - 1, bullCounts1[op.raceIndex])];
+                        bullSpeeds1[op.raceIndex].push(-normalSpeeds1[Math.min(normalSpeeds1.length - 1, bullCounts1[op.raceIndex])]);
+                        bullIces1[op.raceIndex].push([0]);
+                        if (bigBullLength[op.raceIndex] && bigBullSpeed[op.raceIndex] < 0)
+                            bigBullSpeed[op.raceIndex] = -bigSpeeds1[Math.min(bigSpeeds1.length - 1, bullCounts1[op.raceIndex])];
+                    }
+                }
+            }
+            if (curTime > realTime) {
+                var timeGap = curTime - realTime;
+                for (var k = 0; k < raceCount; k++) {
+                    for (var c = bullIds0[k].length - 1; c >= 0; c--) {
+                        if (bullSpeeds0[k][c]) {
+                            bullYs0[k][c] += bullSpeeds0[k][c] * timeGap;
+                        }
+                    }
+                    for (var c = bullIds1[k].length - 1; c >= 0; c--) {
+                        if (bullSpeeds1[k][c]) {
+                            bullYs1[k][c] += bullSpeeds1[k][c] * timeGap;
+                        }
+                    }
+                }
+            }
+            for (var k = 0; k < raceCount; k++) {
+                for (var c = bullIds0[k].length - 1; c >= 0; c--) {
+                    if (c === 0) {
+                        if (bullSpeeds0[k][c]) {
+                            if (bigBullIds[k].length && (bigBullDir[k] === 0 && bigBullY[k] - bigBullMergeLength[k] <= bullYs0[k][0] || bigBullDir[k] === 1 && bigBullY[k] <= bullYs0[k][0])) { //与大牛合体
+                            }
+                            else if (bullIds0[k].length && bullYs1[k][0] <= bullYs0[k][0]) { //双牛对撞
+                                bullSpeeds0[k][0] = 0;
+                                bullSpeeds1[k][0] = 0;
+                                var ids = bullIds0[k].shift().reverse();
+                                var len0 = ids.length;
+                                bigBullIds[k] = ids;
+                                bigBullLength[k] = bullLengths0[k].shift().reverse();
+                                bullMergeLengths0[k].shift();
+                                for (var i = 0; i < ids.length; i++) {
+                                    bigBullTeams[k][i] = 0;
+                                }
+                                bullTeams0[k].shift();
+                                var posy0 = bullYs0[k].shift();
+                                bullSpeeds0[k].shift();
+                                bullCounts0[k] -= ids.length;
+                                bigBullIces[k] = bullIces0[k].shift().reverse();
+                                ids = bullIds1[k].shift();
+                                bigBullIds[k] = bigBullIds[k].concat(ids);
+                                bigBullLength[k] = bigBullLength[k].concat(bullLengths1[k].shift());
+                                bullMergeLengths1[k].shift();
+                                for (var i = 0; i < ids.length; i++) {
+                                    bigBullTeams[k][len0 + i] = 0;
+                                }
+                                bullTeams1[k].shift();
+                                var posy1 = bullYs1[k].shift();
+                                bullSpeeds1[k].shift();
+                                bullCounts1[k] -= ids.length;
+                                bigBullIces[k] = bigBullIces[k].concat(bullIces1[k].shift());
+                                bigBullSpeed[k] = 0;
+                                bigBullMergeLength[k] = 0;
+                                bigBullStrength[k] = 0;
+                                for (var i = 0; i < bigBullIds[k].length; i++) {
+                                    bigBullMergeLength[k] += bigBullLength[k][i];
+                                    // bigBullStrength[k] += 
+                                }
+                                for (var i = 0; i < bigBullLength[k].length; i++) {
+                                    bigBullMergeLength[k] += bigBullLength[k][i];
+                                }
+                                // bigBullStrength[i] = 0;
+                                // bigBullY[i] = 0;
+                                // bigBullSpeed[i] = 0;
+                                // bigBullDir[i] = 0;
+                            }
+                        }
+                    }
+                    else {
+                    }
+                }
+                for (var c = bullIds1[k].length - 1; c >= 0; c--) {
+                    if (c === 0) {
+                    }
+                    else {
                     }
                 }
             }
         }
         var bulls = [];
-        // for (let n = 1; n < raceCount; n++) {
-        //     bullLengths0[0] = bullLengths0[0].concat(bullLengths0[n]);
-        //     bullTeams0[0] = bullTeams0[0].concat(bullTeams0[n]);
-        //     bullYs0[0] = bullYs0[0].concat(bullYs0[n]);
-        // }
         var types = [];
-        // for (let ts of bullLengths0) {
-        //     types = types.concat(ts);
-        // }
-        return [winTeam, teamHps, types, bullTeams0[0], bullYs0[0]];
+        var teams = [];
+        var lens = [];
+        var ys = [];
+        for (var r = 0; r < bullIds0.length; r++) {
+            for (var i = 0; i < bullIds0[r].length; i++) {
+                var y = bullYs0[r][i];
+                for (var j = 0; j < bullIds0[r][i].length; j++) {
+                    var id_1 = bullIds0[r][i][j];
+                    types.push(idTypeMap[id_1]);
+                    teams.push(bullTeams0[r][i]);
+                    lens.push(lengths[idTypeMap[id_1]]);
+                    ys.push(y);
+                    y -= lengths[idTypeMap[id_1]];
+                }
+            }
+        }
+        for (var r = 0; r < bullIds1.length; r++) {
+            for (var i = 0; i < bullIds1[r].length; i++) {
+                var y = bullYs1[r][i];
+                for (var j = 0; j < bullIds1[r][i].length; j++) {
+                    var id_2 = bullIds1[r][i][j];
+                    types.push(idTypeMap[id_2]);
+                    teams.push(bullTeams1[r][i]);
+                    lens.push(lengths1[idTypeMap[id_2]]);
+                    ys.push(y);
+                    y += lengths1[idTypeMap[id_2]];
+                }
+            }
+        }
+        return [winTeam, teamHps, types, teams, ys, lens];
     };
     BullCore.prototype.bullAttack = function (atk, skill, teamHps) {
     };
-    BullCore.prototype.random = function (weights) {
-        var r = Math.random();
+    BullCore.prototype.random = function (time, weights) {
+        var r = (time % 1000) / 1000; // float 0 ~ 0.999
+        var s = 0; //weight sum
+        for (var i = 0; i < weights.length; i++) {
+            s += weights[i];
+        }
+        r = ~~(r * s); //int 0 ~ s - 1
         for (var i = 0; i < weights.length; i++) {
             if (r < weights[i])
                 return i;
@@ -487,7 +636,7 @@ var BullCore = /** @class */ (function (_super) {
         var timeGap = 16;
         var time = curTime + 1000 * 1000;
         if (!speed)
-            time;
+            return time;
         if (!distance)
             return curTime;
         if (distance > 0 && speed < 0 || distance < 0 && speed > 0)
@@ -548,16 +697,22 @@ var BullCore = /** @class */ (function (_super) {
         return time;
     };
     BullCore.prototype.render = function (bulls) {
+        var offsets = {
+            "bull1-1-1_png": 17,
+            "bull1-2-1_png": 12,
+            "bull1-4-1_png": 13,
+        };
         while (this.entity.children.length) {
             this.entity.children[0].destroy();
         }
         var list = bulls.concat();
-        list.sort(function (a, b) { return a.y - b.y; });
+        list.sort(function (a, b) { return (a.team === 0 ? a.y / 1000 : a.y / 1000 + a.length) - (b.team === 0 ? b.y / 1000 : b.y / 1000 + b.length); });
         for (var i = 0; i < list.length; i++) {
             var b = ecs.Entity.create().addComponent(leaf.Bitmap);
-            b.resource = "bull1-" + this.sizes[list[i].type] + "-" + (list[i].team + 1) + "_png";
+            var src = "bull1-" + this.sizes[list[i].type] + "-" + list[i].team + "_png";
+            b.resource = src;
             b.parent = this.entity;
-            b.transform.y = list[i].y / 1000;
+            b.transform.y = list[i].y / 1000 + (-offsets[src] || 0) + (list[i].team === 0 ? -list[i].length : 0);
         }
     };
     return BullCore;
