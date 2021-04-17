@@ -3,6 +3,7 @@ import { ModuleScene } from "../../utils/ui/module-scene";
 @orange.autoload("Test3dScene")
 export class Test3dScene extends ModuleScene {
 
+
   constructor() {
     super();
 
@@ -18,13 +19,16 @@ export class Test3dScene extends ModuleScene {
     // t1.transform.y = 0;
 
     let cb = ecs.Entity.create().addComponent(leaf.Cube);
-    cb.size = 300;
+    cb.size = 100;
     cb.transform.x = 320;
     cb.transform.y = 500;
+    cb.transform.z = -500;
     cb.entity.parent = this.scene;
+    cb.addComponent(Rotate);
     // cb.transform.angleX = 45;
     // cb.transform.angleY = 45;
     // cb.transform.angleZ = 45;
+    cb.color = 0xff0000;
 
     x = 0;
     y = 0;
@@ -57,6 +61,16 @@ export class Test3dScene extends ModuleScene {
     t.parent = this.scene;
 
     return t;
+  }
+
+}
+
+class Rotate extends ecs.Component {
+
+  update() {
+    this.transform.angleX += 0.1;
+    this.transform.angleY += 0.1;
+    this.transform.angleZ += 0.1;
   }
 
 }

@@ -231,13 +231,16 @@ var Test3dScene = /** @class */ (function (_super) {
         // t1.transform.x = 0;
         // t1.transform.y = 0;
         var cb = ecs.Entity.create().addComponent(leaf.Cube);
-        cb.size = 300;
+        cb.size = 100;
         cb.transform.x = 320;
         cb.transform.y = 500;
+        cb.transform.z = -500;
         cb.entity.parent = _this.scene;
+        cb.addComponent(Rotate);
         // cb.transform.angleX = 45;
         // cb.transform.angleY = 45;
         // cb.transform.angleZ = 45;
+        cb.color = 0xff0000;
         x = 0;
         y = 0;
         return _this;
@@ -270,6 +273,18 @@ var Test3dScene = /** @class */ (function (_super) {
     return Test3dScene;
 }(module_scene_1.ModuleScene));
 exports.Test3dScene = Test3dScene;
+var Rotate = /** @class */ (function (_super) {
+    __extends(Rotate, _super);
+    function Rotate() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Rotate.prototype.update = function () {
+        this.transform.angleX += 0.1;
+        this.transform.angleY += 0.1;
+        this.transform.angleZ += 0.1;
+    };
+    return Rotate;
+}(ecs.Component));
 
 
 /***/ }),
