@@ -72,9 +72,9 @@ namespace leaf {
             // (this.shader).addTask(this.texture, this.entity.transform.worldMatrix, this.entity.transform.worldAlpha, this.blendMode, this._tint);
         }
 
-        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader) {
+        preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader) {
             if (!this._texture) return;
-            matrix.reconcat(this.entity.transform.local);
+            matrix.concat(this.entity.transform.local);
             (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint,this.scrollX, this.scrollY);
         }
 

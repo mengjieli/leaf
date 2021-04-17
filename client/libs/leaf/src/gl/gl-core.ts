@@ -11,7 +11,8 @@ namespace leaf {
         static textureId: number = 0;
 
         static get scale(): number {
-            return leaf.world ? leaf.world.root.transform.scaleX : 1;
+            return this.width / fixWidth;
+            // return leaf.world ? leaf.world.root.transform.scaleX : 1;
         }
 
         /**
@@ -84,6 +85,7 @@ namespace leaf {
                     // gl.enable(gl.DEPTH_TEST);
                     // gl.enable(gl.CULL_FACE);
                     // gl.enable(gl.BLEND);
+                    gl.enable(gl.DEPTH_TEST);
                     gl.clear(gl.STENCIL_BUFFER_BIT);
                     gl.enable(gl.STENCIL_TEST);
                     gl.blendColor(1.0, 1.0, 1.0, 1.0);

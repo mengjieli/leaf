@@ -17,7 +17,7 @@ namespace leaf {
 
         }
 
-        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader) {
+        preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader) {
 
         }
 

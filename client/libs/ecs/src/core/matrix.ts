@@ -12,9 +12,6 @@ namespace ecs {
 
         id: number;
 
-        constructor() {
-        }
-
         identity() {
             this.a = 1;
             this.b = 0;

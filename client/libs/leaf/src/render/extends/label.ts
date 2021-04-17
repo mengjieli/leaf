@@ -88,11 +88,11 @@ namespace leaf {
             this.preRenderReal(this.entity.transform.worldMatrix, this.entity.transform.worldAlpha);
         }
 
-        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader) {
-            this.preRenderReal(matrix.reconcat(this.entity.transform.local), alpha * this.entity.transform.alpha, shader)
+        preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader) {
+            this.preRenderReal(matrix.concat(this.entity.transform.local), alpha * this.entity.transform.alpha, shader)
         }
 
-        private preRenderReal(w: ecs.Matrix, alpha: number, shader?: Shader) {
+        private preRenderReal(w: ecs.Matrix4, alpha: number, shader?: Shader) {
             let x = 0;
             let y = 0;
             let m = ecs.Matrix.$matrix;

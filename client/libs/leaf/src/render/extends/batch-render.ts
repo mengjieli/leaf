@@ -8,14 +8,14 @@ namespace leaf {
 
         private matrix = new ecs.Matrix();
 
-        preRender2(matrix: ecs.Matrix, alpha: number) {
+        preRender2(matrix: ecs.Matrix4, alpha: number) {
             let projectionMatrix = this.projectionMatrix;
-            projectionMatrix[0] = matrix.a;
-            projectionMatrix[1] = matrix.c;
-            projectionMatrix[3] = matrix.tx;
-            projectionMatrix[4] = matrix.b;
-            projectionMatrix[5] = matrix.d;
-            projectionMatrix[7] = matrix.ty;
+            // projectionMatrix[0] = matrix.a;
+            // projectionMatrix[1] = matrix.c;
+            // projectionMatrix[3] = matrix.tx;
+            // projectionMatrix[4] = matrix.b;
+            // projectionMatrix[5] = matrix.d;
+            // projectionMatrix[7] = matrix.ty;
 
             if (this.entity.children.length && !this.count.length) {
                 this.refresh();
@@ -42,7 +42,7 @@ namespace leaf {
                 let rd = c.getComponent(Render);
                 if (rd) {
                     matrix.save();
-                    rd.preRender2(matrix, alpha, this.shader);
+                    // rd.preRender2(matrix, alpha, this.shader);
                     matrix.restore();
                 }
             }

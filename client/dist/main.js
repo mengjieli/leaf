@@ -163,7 +163,7 @@ var Main = /** @class */ (function () {
                         _a.label = 2;
                     case 2:
                         leaf.init();
-                        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 640;
+                        // leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 640;
                         leaf.Res.loadResources().then(function () {
                             leaf.Res.getRes("block_png").load().then(function () {
                                 new test3d_scene_1.Test3dScene();
@@ -219,8 +219,51 @@ var module_scene_1 = __webpack_require__(/*! ../../utils/ui/module-scene */ "../
 var Test3dScene = /** @class */ (function (_super) {
     __extends(Test3dScene, _super);
     function Test3dScene() {
-        return _super.call(this) || this;
+        var _this = _super.call(this) || this;
+        var x = 0;
+        var y = 0;
+        // let t1 = this.addTriangle([
+        //   x, y, -1,
+        //   x + 640, y, -1,
+        //   x, y + 640, -1
+        // ]);
+        // t1.color = 0xff5555;
+        // t1.transform.x = 0;
+        // t1.transform.y = 0;
+        var cb = ecs.Entity.create().addComponent(leaf.Cube);
+        cb.size = 300;
+        cb.transform.x = 320;
+        cb.transform.y = 500;
+        cb.entity.parent = _this.scene;
+        // cb.transform.angleX = 45;
+        // cb.transform.angleY = 45;
+        // cb.transform.angleZ = 45;
+        x = 0;
+        y = 0;
+        return _this;
+        // let t2 = this.addTriangle([
+        //   x, y, -0.9,
+        //   x + 200, y, -1.1,
+        //   x, y + 200, -1
+        // ]);
+        // t2.color = 0x5555ff;
+        // console.error(t1.entity.id)
+        // console.error("scene 3d");
     }
+    Test3dScene.prototype.addTriangle = function (pos) {
+        var t = ecs.Entity.create().addComponent(leaf.Triangle);
+        t.point1.x = pos[0];
+        t.point1.y = pos[1];
+        t.point1.z = pos[2];
+        t.point2.x = pos[3];
+        t.point2.y = pos[4];
+        t.point2.z = pos[5];
+        t.point3.x = pos[6];
+        t.point3.y = pos[7];
+        t.point3.z = pos[8];
+        t.parent = this.scene;
+        return t;
+    };
     Test3dScene = __decorate([
         orange.autoload("Test3dScene")
     ], Test3dScene);

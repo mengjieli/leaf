@@ -50,7 +50,7 @@ export class PuzzleScriptGameUI extends ecs.Component {
             '..0....\n' +
             '...0...\n'
         ));
-        rightBtn.transform.angle = Math.PI * 180 / 180;
+        rightBtn.transform.angleZ = Math.PI * 180 / 180;
         rightBtn.transform.x = 25;
         rightBtn.transform.y = 17;
         rightBtn.parent = arrGroup;
@@ -82,7 +82,7 @@ export class PuzzleScriptGameUI extends ecs.Component {
             '...0...\n' +
             '...0...'
         ));
-        downBtn.transform.angle = Math.PI * 180 / 180;
+        downBtn.transform.angleZ = Math.PI * 180 / 180;
         downBtn.transform.x = 16;
         downBtn.transform.y = 26;
         downBtn.parent = arrGroup;

@@ -71,6 +71,8 @@ namespace leaf {
 
     var onTick: Function;
 
+    export var fixWidth = 640;
+
     /**
      * 初始化
      * @returns 

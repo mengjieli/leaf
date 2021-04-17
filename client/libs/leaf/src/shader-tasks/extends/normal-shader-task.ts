@@ -136,15 +136,16 @@ namespace leaf {
             }
 
             gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-
             this.a_Position = gl.getAttribLocation(program, "a_Position");
             gl.enableVertexAttribArray(this.a_Position);
             gl.vertexAttribPointer(this.a_Position, 2, gl.FLOAT, false, $size * 6, 0);
 
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
             this.a_TexCoord = gl.getAttribLocation(program, "a_TexCoord");
             gl.enableVertexAttribArray(this.a_TexCoord);
             gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, $size * 6, $size * 2);
 
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
             this.a_Alpha = gl.getAttribLocation(program, "a_Alpha");
             gl.enableVertexAttribArray(this.a_Alpha);
             gl.vertexAttribPointer(this.a_Alpha, 1, gl.FLOAT, false, $size * 6, $size * 4);

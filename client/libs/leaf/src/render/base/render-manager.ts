@@ -5,7 +5,7 @@ namespace leaf {
      */
     export class RenerManager {
 
-        matrix: ecs.Matrix = new ecs.Matrix();
+        matrix: ecs.Matrix4 = new ecs.Matrix4();
 
         cc = 0;
 
@@ -23,6 +23,7 @@ namespace leaf {
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             //清除舞台，这句如果和 3d 合并之后应该去掉
             gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.clear(gl.DEPTH_BUFFER_BIT);
             // gl.clear(gl.STENCIL_BUFFER_BIT);
             let tasks: Shader[] = [];
             this.matrix.identity();
@@ -60,11 +61,13 @@ namespace leaf {
                     let global = mask.transform.worldMatrix;
                     // global.save();
                     // global.translate(mask.x, mask.y);
-                    let x = global.tx + mask.x * global.a;
-                    let y = global.ty + mask.y * global.d;;
-                    let w = mask.width * global.a;
-                    let h = mask.height * global.d;
-                    gl.scissor(x, GLCore.height - y - h, w, h);
+
+                    // let x = global.tx + mask.x * global.a;
+                    // let y = global.ty + mask.y * global.d;;
+                    // let w = mask.width * global.a;
+                    // let h = mask.height * global.d;
+                    // gl.scissor(x, GLCore.height - y - h, w, h);
+
                     // execute drawing commands in the scissor box (e.g. clear)
                     // turn off scissor test again
                 }
@@ -79,7 +82,7 @@ namespace leaf {
             this.masks.length = 0;
         }
 
-        preRenderEntity(entity: ecs.Entity, matrix: ecs.Matrix, alpha: number, tasks: Shader[]) {
+        preRenderEntity(entity: ecs.Entity, matrix: ecs.Matrix4, alpha: number, tasks: Shader[]) {
             let mask = entity.getComponent(RectMask);
             if (mask) {
                 this.masks[tasks.length] = mask;
@@ -91,28 +94,32 @@ namespace leaf {
             }
             let rd = entity.getComponent(Render);
             if (!rd || rd.renderChildren) {
-                matrix.save();
-                matrix.reconcat(entity.transform.local);
-                for (let c of entity.children) {
-                    rd = c.getComponent(Render);
-                    if ((!rd || rd.renderChildren) && c.children.length) this.preRenderEntity(c, matrix, alpha * c.transform.alpha, tasks);
-                    if (rd) {
-                        let tk: Shader = rd.shader;
-                        if (tk) {
-                            if (tasks.length && tasks[tasks.length - 1] != tk) {
-                                tasks[tasks.length - 1].startNewTask();
+                if (entity.children.length) {
+                    let copy1 = matrix.elements.concat();
+                    matrix.concat(entity.transform.local);
+                    for (let c of entity.children) {
+                        rd = c.getComponent(Render);
+                        if ((!rd || rd.renderChildren) && c.children.length) this.preRenderEntity(c, matrix, alpha * c.transform.alpha, tasks);
+                        if (rd) {
+                            let tk: Shader = rd.shader;
+                            if (tk) {
+                                if (tasks.length && tasks[tasks.length - 1] != tk) {
+                                    tasks[tasks.length - 1].startNewTask();
+                                }
+                                if (!tasks.length || tasks[tasks.length - 1] != tk || this.newTask) {
+                                    this.newTask = false;
+                                    tasks.push(tk);
+                                }
                             }
-                            if (!tasks.length || tasks[tasks.length - 1] != tk || this.newTask) {
-                                this.newTask = false;
-                                tasks.push(tk);
-                            }
+                            let copy2 = matrix.elements.concat();
+                            rd.preRender2(matrix, alpha);
+                            matrix.elements = copy2;
                         }
-                        matrix.save();
-                        rd.preRender2(matrix, alpha);
-                        matrix.restore();
                     }
+                    matrix.elements = copy1;
+                } else {
+                    matrix.concat(entity.transform.local);
                 }
-                matrix.restore();
             }
             if (mask) {
                 if (tasks.length) {

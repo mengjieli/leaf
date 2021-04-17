@@ -29,6 +29,7 @@ declare namespace leaf {
     function play(): void;
     function getStageWidth(): number;
     function getStageHeight(): number;
+    var fixWidth: number;
     /**
      * 初始化
      * @returns
@@ -85,7 +86,7 @@ declare namespace leaf {
         renderChildren: boolean;
         onDestroy(): void;
         preRender(): void;
-        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader): void;
+        preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader): void;
         readonly width: number;
         readonly height: number;
     }
@@ -95,7 +96,7 @@ declare namespace leaf {
         shader: BatchShaderTask;
         renderChildren: boolean;
         private matrix;
-        preRender2(matrix: ecs.Matrix, alpha: number): void;
+        preRender2(matrix: ecs.Matrix4, alpha: number): void;
         refresh(): void;
         preRenderEntity(entity: ecs.Entity, matrix: ecs.Matrix, alpha: number): void;
         projectionMatrix: Float32Array;
@@ -121,7 +122,17 @@ declare namespace leaf {
         readonly width: number;
         readonly height: number;
         preRender(): void;
-        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader): void;
+        preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader): void;
+        onDestroy(): void;
+    }
+}
+declare namespace leaf {
+    class Cube extends Render {
+        shader: Normal3DTask;
+        size: number;
+        color: number;
+        preRender(): void;
+        preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader): void;
         onDestroy(): void;
     }
 }
@@ -145,7 +156,7 @@ declare namespace leaf {
         private _textWidth;
         private _textHeight;
         preRender(): void;
-        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader): void;
+        preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader): void;
         private preRenderReal;
         readonly width: number;
         readonly height: number;
@@ -169,7 +180,31 @@ declare namespace leaf {
         readonly width: number;
         readonly height: number;
         preRender(): void;
-        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader): void;
+        preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader): void;
+        onDestroy(): void;
+    }
+}
+declare namespace leaf {
+    class Triangle extends Render {
+        shader: Normal3DTask;
+        point1: {
+            x: number;
+            y: number;
+            z: number;
+        };
+        point2: {
+            x: number;
+            y: number;
+            z: number;
+        };
+        point3: {
+            x: number;
+            y: number;
+            z: number;
+        };
+        color: number;
+        preRender(): void;
+        preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader): void;
         onDestroy(): void;
     }
 }
@@ -444,14 +479,25 @@ declare namespace leaf {
 }
 declare namespace leaf {
     class Normal3DTask extends Shader {
-        private a_Position;
+        private a_position;
+        private a_color;
+        private a_normal;
+        private u_project;
+        private u_model;
         constructor();
         initProgram(): void;
         initAttriLocation(): void;
-        positionData: number[];
-        indexs: number[];
-        addTask(positions: number[], indexs: number[]): void;
+        model: number[][];
+        position: number[][];
+        normal: number[][];
+        color: number[][];
+        indexs: number[][];
+        counts: number[];
+        index: number;
+        addTask(matrix: ecs.Matrix4, positions: number[], normals: number[], colors: number[], indexs: number[]): void;
         render(): void;
+        private static _shader;
+        static readonly shader: Normal3DTask;
     }
 }
 declare namespace leaf {

@@ -66,6 +66,7 @@ var leaf;
     }
     leaf.getStageHeight = getStageHeight;
     var onTick;
+    leaf.fixWidth = 640;
     /**
      * 初始化
      * @returns
@@ -189,7 +190,8 @@ var leaf;
         }
         Object.defineProperty(GLCore, "scale", {
             get: function () {
-                return leaf.world ? leaf.world.root.transform.scaleX : 1;
+                return this.width / leaf.fixWidth;
+                // return leaf.world ? leaf.world.root.transform.scaleX : 1;
             },
             enumerable: true,
             configurable: true
@@ -321,6 +323,7 @@ var leaf;
                     // gl.enable(gl.DEPTH_TEST);
                     // gl.enable(gl.CULL_FACE);
                     // gl.enable(gl.BLEND);
+                    gl.enable(gl.DEPTH_TEST);
                     gl.clear(gl.STENCIL_BUFFER_BIT);
                     gl.enable(gl.STENCIL_TEST);
                     gl.blendColor(1.0, 1.0, 1.0, 1.0);
@@ -410,7 +413,7 @@ var leaf;
      */
     var RenerManager = /** @class */ (function () {
         function RenerManager() {
-            this.matrix = new ecs.Matrix();
+            this.matrix = new ecs.Matrix4();
             this.cc = 0;
             this.masks = [];
         }
@@ -422,6 +425,7 @@ var leaf;
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             //清除舞台，这句如果和 3d 合并之后应该去掉
             gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.clear(gl.DEPTH_BUFFER_BIT);
             // gl.clear(gl.STENCIL_BUFFER_BIT);
             var tasks = [];
             this.matrix.identity();
@@ -457,12 +461,11 @@ var leaf;
                     var global = mask.transform.worldMatrix;
                     // global.save();
                     // global.translate(mask.x, mask.y);
-                    var x = global.tx + mask.x * global.a;
-                    var y = global.ty + mask.y * global.d;
-                    ;
-                    var w = mask.width * global.a;
-                    var h = mask.height * global.d;
-                    gl.scissor(x, leaf.GLCore.height - y - h, w, h);
+                    // let x = global.tx + mask.x * global.a;
+                    // let y = global.ty + mask.y * global.d;;
+                    // let w = mask.width * global.a;
+                    // let h = mask.height * global.d;
+                    // gl.scissor(x, GLCore.height - y - h, w, h);
                     // execute drawing commands in the scissor box (e.g. clear)
                     // turn off scissor test again
                 }
@@ -489,39 +492,44 @@ var leaf;
             }
             var rd = entity.getComponent(leaf.Render);
             if (!rd || rd.renderChildren) {
-                matrix.save();
-                matrix.reconcat(entity.transform.local);
-                try {
-                    for (var _b = __values(entity.children), _c = _b.next(); !_c.done; _c = _b.next()) {
-                        var c = _c.value;
-                        rd = c.getComponent(leaf.Render);
-                        if ((!rd || rd.renderChildren) && c.children.length)
-                            this.preRenderEntity(c, matrix, alpha * c.transform.alpha, tasks);
-                        if (rd) {
-                            var tk = rd.shader;
-                            if (tk) {
-                                if (tasks.length && tasks[tasks.length - 1] != tk) {
-                                    tasks[tasks.length - 1].startNewTask();
+                if (entity.children.length) {
+                    var copy1 = matrix.elements.concat();
+                    matrix.concat(entity.transform.local);
+                    try {
+                        for (var _b = __values(entity.children), _c = _b.next(); !_c.done; _c = _b.next()) {
+                            var c = _c.value;
+                            rd = c.getComponent(leaf.Render);
+                            if ((!rd || rd.renderChildren) && c.children.length)
+                                this.preRenderEntity(c, matrix, alpha * c.transform.alpha, tasks);
+                            if (rd) {
+                                var tk = rd.shader;
+                                if (tk) {
+                                    if (tasks.length && tasks[tasks.length - 1] != tk) {
+                                        tasks[tasks.length - 1].startNewTask();
+                                    }
+                                    if (!tasks.length || tasks[tasks.length - 1] != tk || this.newTask) {
+                                        this.newTask = false;
+                                        tasks.push(tk);
+                                    }
                                 }
-                                if (!tasks.length || tasks[tasks.length - 1] != tk || this.newTask) {
-                                    this.newTask = false;
-                                    tasks.push(tk);
-                                }
+                                var copy2 = matrix.elements.concat();
+                                rd.preRender2(matrix, alpha);
+                                matrix.elements = copy2;
                             }
-                            matrix.save();
-                            rd.preRender2(matrix, alpha);
-                            matrix.restore();
                         }
                     }
-                }
-                catch (e_7_1) { e_7 = { error: e_7_1 }; }
-                finally {
-                    try {
-                        if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                    catch (e_7_1) { e_7 = { error: e_7_1 }; }
+                    finally {
+                        try {
+                            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                        }
+                        finally { if (e_7) throw e_7.error; }
                     }
-                    finally { if (e_7) throw e_7.error; }
+                    matrix.elements = copy1;
                 }
-                matrix.restore();
+                else {
+                    matrix.concat(entity.transform.local);
+                }
             }
             if (mask) {
                 if (tasks.length) {
@@ -680,12 +688,12 @@ var leaf;
         }
         BatchRender.prototype.preRender2 = function (matrix, alpha) {
             var projectionMatrix = this.projectionMatrix;
-            projectionMatrix[0] = matrix.a;
-            projectionMatrix[1] = matrix.c;
-            projectionMatrix[3] = matrix.tx;
-            projectionMatrix[4] = matrix.b;
-            projectionMatrix[5] = matrix.d;
-            projectionMatrix[7] = matrix.ty;
+            // projectionMatrix[0] = matrix.a;
+            // projectionMatrix[1] = matrix.c;
+            // projectionMatrix[3] = matrix.tx;
+            // projectionMatrix[4] = matrix.b;
+            // projectionMatrix[5] = matrix.d;
+            // projectionMatrix[7] = matrix.ty;
             if (this.entity.children.length && !this.count.length) {
                 this.refresh();
             }
@@ -711,7 +719,7 @@ var leaf;
                     var rd = c.getComponent(leaf.Render);
                     if (rd) {
                         matrix.save();
-                        rd.preRender2(matrix, alpha, this.shader);
+                        // rd.preRender2(matrix, alpha, this.shader);
                         matrix.restore();
                     }
                 }
@@ -821,12 +829,12 @@ var leaf;
         Bitmap.prototype.preRender = function () {
             if (!this._texture)
                 return;
-            (this.shader).addTask(this.texture, this.entity.transform.worldMatrix, this.entity.transform.worldAlpha, this.blendMode, this._tint);
+            // (this.shader).addTask(this.texture, this.entity.transform.worldMatrix, this.entity.transform.worldAlpha, this.blendMode, this._tint);
         };
         Bitmap.prototype.preRender2 = function (matrix, alpha, shader) {
             if (!this._texture)
                 return;
-            matrix.reconcat(this.entity.transform.local);
+            matrix.concat(this.entity.transform.local);
             (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
         };
         Bitmap.prototype.onDestroy = function () {
@@ -841,6 +849,102 @@ var leaf;
     }(leaf.Render));
     leaf.Bitmap = Bitmap;
 })(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var Cube = /** @class */ (function (_super) {
+        __extends(Cube, _super);
+        function Cube() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.shader = leaf.Normal3DTask.shader;
+            _this.size = 1;
+            _this.color = 0xffffff;
+            return _this;
+        }
+        Cube.prototype.preRender = function () {
+        };
+        Cube.prototype.preRender2 = function (matrix, alpha, shader) {
+            var hs = this.size / 2;
+            var m = matrix.concat(this.entity.transform.local);
+            this.shader.addTask(m, [
+                -hs, -hs, hs,
+                hs, -hs, hs,
+                hs, hs, hs,
+                -hs, hs, hs,
+            ], [
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1
+            ], [
+                this.color >> 16, (this.color >> 8) & 0xFF, this.color & 0xFF,
+                this.color >> 16, (this.color >> 8) & 0xFF, this.color & 0xFF,
+                this.color >> 16, (this.color >> 8) & 0xFF, this.color & 0xFF,
+                this.color >> 16, (this.color >> 8) & 0xFF, this.color & 0xFF
+            ], [
+                0, 1, 3,
+                1, 2, 3,
+            ]);
+            // (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
+        };
+        Cube.prototype.onDestroy = function () {
+            this.size = 1;
+        };
+        return Cube;
+    }(leaf.Render));
+    leaf.Cube = Cube;
+})(leaf || (leaf = {}));
+// namespace leaf {
+//   export class Cube extends Render {
+//     shader = Normal3DTask.shader;
+//     size: number = 1;
+//     color: number = 0xffffff;
+//     preRender() {
+//     }
+//     static vertices = [
+//       1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, // v0-v1-v2-v3 front
+//       1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, // v0-v3-v4-v5 right
+//       1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, // v0-v5-v6-v1 up
+//       -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, // v1-v6-v7-v2 left
+//       -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0, // v7-v4-v3-v2 down
+//       1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0  // v4-v7-v6-v5 back
+//     ];
+//     // Colors
+//     static colors = [
+//       1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,     // v0-v1-v2-v3 front
+//       1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,     // v0-v3-v4-v5 right
+//       1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,     // v0-v5-v6-v1 up
+//       1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,     // v1-v6-v7-v2 left
+//       1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,     // v7-v4-v3-v2 down
+//       1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0　    // v4-v7-v6-v5 back
+//     ];
+//     // Normal
+//     static normals = [
+//       0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,  // v0-v1-v2-v3 front
+//       1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,  // v0-v3-v4-v5 right
+//       0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,  // v0-v5-v6-v1 up
+//       -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0,  // v1-v6-v7-v2 left
+//       0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0,  // v7-v4-v3-v2 down
+//       0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0   // v4-v7-v6-v5 back
+//     ];
+//     static indices = [
+//       0, 1, 2, 0, 2, 3,    // front
+//       4, 5, 6, 4, 6, 7,    // right
+//       8, 9, 10, 8, 10, 11,    // up
+//       12, 13, 14, 12, 14, 15,    // left
+//       16, 17, 18, 16, 18, 19,    // down
+//       20, 21, 22, 20, 22, 23     // back
+//     ];
+//     preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader) {
+//       let hs = this.size / 2;
+//       let m = matrix.concat(this.entity.transform.local);
+//       this.shader.addTask(m, Cube.vertices , Cube.normals, Cube.colors, Cube.indices);
+//       // (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
+//     }
+//     onDestroy() {
+//       this.size = 1;
+//     }
+//   }
+// }
 var leaf;
 (function (leaf) {
     var Label = /** @class */ (function (_super) {
@@ -933,7 +1037,7 @@ var leaf;
             this.preRenderReal(this.entity.transform.worldMatrix, this.entity.transform.worldAlpha);
         };
         Label.prototype.preRender2 = function (matrix, alpha, shader) {
-            this.preRenderReal(matrix.reconcat(this.entity.transform.local), alpha * this.entity.transform.alpha, shader);
+            this.preRenderReal(matrix.concat(this.entity.transform.local), alpha * this.entity.transform.alpha, shader);
         };
         Label.prototype.preRenderReal = function (w, alpha, shader) {
             var x = 0;
@@ -1163,7 +1267,7 @@ var leaf;
         ScrollBitmap.prototype.preRender2 = function (matrix, alpha, shader) {
             if (!this._texture)
                 return;
-            matrix.reconcat(this.entity.transform.local);
+            matrix.concat(this.entity.transform.local);
             (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint, this.scrollX, this.scrollY);
         };
         ScrollBitmap.prototype.onDestroy = function () {
@@ -1178,6 +1282,38 @@ var leaf;
         return ScrollBitmap;
     }(leaf.Render));
     leaf.ScrollBitmap = ScrollBitmap;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var Triangle = /** @class */ (function (_super) {
+        __extends(Triangle, _super);
+        function Triangle() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.shader = leaf.Normal3DTask.shader;
+            _this.point1 = { x: 0, y: 0, z: 0 };
+            _this.point2 = { x: 0, y: 0, z: 0 };
+            _this.point3 = { x: 0, y: 0, z: 0 };
+            _this.color = 0xffffff;
+            return _this;
+        }
+        Triangle.prototype.preRender = function () {
+        };
+        Triangle.prototype.preRender2 = function (matrix, alpha, shader) {
+            this.shader.addTask(matrix.concat(this.entity.transform.local), [
+                this.point1.x, this.point1.y, this.point1.z,
+                this.point2.x, this.point2.y, this.point2.z,
+                this.point3.x, this.point3.y, this.point3.z,
+            ], [0, 1, 2], this.color);
+            // (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
+        };
+        Triangle.prototype.onDestroy = function () {
+            this.point1 = { x: 0, y: 0, z: 0 };
+            this.point2 = { x: 0, y: 0, z: 0 };
+            this.point3 = { x: 0, y: 0, z: 0 };
+        };
+        return Triangle;
+    }(leaf.Render));
+    leaf.Triangle = Triangle;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {
@@ -2661,19 +2797,24 @@ var leaf;
     var Normal3DTask = /** @class */ (function (_super) {
         __extends(Normal3DTask, _super);
         function Normal3DTask() {
-            var _this = _super.call(this) || this;
-            _this.positionData = [];
-            _this.indexs = [];
+            var _this_1 = _super.call(this) || this;
+            _this_1.model = [];
+            _this_1.position = [];
+            _this_1.normal = [];
+            _this_1.color = [];
+            _this_1.indexs = [];
+            _this_1.counts = [];
+            _this_1.index = 0;
             //初始化作色器、program
-            _this.initProgram();
+            _this_1.initProgram();
             //初始化作色器固定变量 和 获取作色器中得变量
-            _this.initAttriLocation();
-            return _this;
+            _this_1.initAttriLocation();
+            return _this_1;
         }
         Normal3DTask.prototype.initProgram = function () {
             var gl = leaf.GLCore.gl;
-            var vertexSource = "\n        attribute vec3 a_Position;\n        uniform mat4 u_model;\n        uniform mat4 u_project;\n        void main() {\n          gl_Position = u_project * u_model * vec4(a_Position, 1.0);\n        }\n      ";
-            var fragmentSource = "\n        precision mediump float;\n        void main() {\n          gl_FragColor = vec4(0.0,1.0,0.0,1.0); //\u7EAF\u7EFF\u8272\n       }\n      ";
+            var vertexSource = "\n        attribute vec4 a_position;\n        attribute vec4 a_normal;\n        attribute vec4 a_color;\n        uniform mat4 u_project;\n        uniform mat4 u_model;\n        uniform vec3 u_lightColor;\n        uniform vec3 u_lightDirection;\n        varying vec4 v_color;\n        void main() {\n          gl_Position = u_project * u_model * a_position;\n          vec3 normal = normalize(vec3(a_normal));\n          float nDotL = max(dot(u_lightDirection, normal), 0.0);\n          vec3 diffuse = u_lightColor * vec3(a_color) * nDotL;\n          v_color = vec4(diffuse, a_color.a);\n        }\n      ";
+            var fragmentSource = "\n        precision mediump float;\n        varying vec4 v_color;\n        void main() {\n          gl_FragColor = vec4(1.0,1.0,1.0,1.0);\n       }\n      ";
             var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
             var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
             this.program = this.createWebGLProgram(vertexShader, fragmentShader);
@@ -2684,17 +2825,74 @@ var leaf;
             this.buffer = gl.createBuffer();
             this.indexBuffer = gl.createBuffer();
             gl.useProgram(program);
-            this.a_Position = gl.getAttribLocation(program, "a_Position");
-            gl.enableVertexAttribArray(this.a_Position);
-            gl.vertexAttribPointer(this.a_Position, 2, gl.FLOAT, false, leaf.$size * 6, 0);
+            var projectionMatrix = new ecs.Matrix4();
+            //projectionMatrix.orthographicCamera(0, leaf.getStageWidth(), 0, leaf.getStageHeight(), 0, -1000);
+            projectionMatrix.orthographicCamera(0, leaf.getStageWidth(), 0, leaf.getStageHeight(), 0, 1000);
+            this.u_project = gl.getUniformLocation(program, "u_project");
+            gl.uniformMatrix4fv(this.u_project, false, new Float32Array(projectionMatrix.elements));
+            this.u_model = gl.getUniformLocation(program, "u_model");
+            this.a_position = gl.getAttribLocation(program, "a_position");
+            this.a_color = gl.getAttribLocation(program, "a_color");
+            this.a_normal = gl.getAttribLocation(program, "a_normal");
         };
-        Normal3DTask.prototype.addTask = function (positions, indexs) {
-            var index = this.positionData.length;
-            var positionData = this.positionData;
-            // positionData[index + 0] = x 
+        Normal3DTask.prototype.addTask = function (matrix, positions, normals, colors, indexs) {
+            this.model.push(matrix.elements.concat());
+            this.position.push(positions);
+            this.normal.push(normals);
+            this.color.push(colors);
+            this.indexs.push(indexs);
+            this.counts.push(indexs.length);
+            // this.indexs.push([this.index, this.index + 1, this.index + 2]);
+            // this.counts.push(positions.length / 3);
+            // this.index += positions.length / 3;
         };
         Normal3DTask.prototype.render = function () {
+            var _this = this;
+            var gl = leaf.GLCore.gl;
+            gl.useProgram(_this.program);
+            //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
+            //开始渲染任务
+            for (var i = 0, len = this.position.length; i < len; i++) {
+                //切换混合模式
+                // BlendModeFunc.changeBlendMode(this.blendMode[i]);
+                //分配 buffer 内容
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.position[i]), gl.STATIC_DRAW);
+                gl.vertexAttribPointer(_this.a_position, 3, gl.FLOAT, false, leaf.$size * 3, 0);
+                gl.enableVertexAttribArray(this.a_position);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.normal[i]), gl.STATIC_DRAW);
+                gl.vertexAttribPointer(_this.a_normal, 3, gl.FLOAT, false, leaf.$size * 3, 0);
+                gl.enableVertexAttribArray(this.a_normal);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.color[i]), gl.STATIC_DRAW);
+                gl.vertexAttribPointer(_this.a_color, 3, gl.FLOAT, false, leaf.$size * 3, 0);
+                gl.enableVertexAttribArray(this.a_color);
+                gl.uniformMatrix4fv(this.u_model, false, new Float32Array(this.model[i]));
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indexs[i]), gl.STATIC_DRAW);
+                //真正的绘制，之前测试 drawElements 并不比 drawArrays 快，其实也很正常，因为二维里面顶点数据共用并不多，
+                //一个矩形也就对角线的两个顶点各被共用两次(两个三角形共用)，远小于 3D 里面的立方体一个顶点被 6 个三角形共用。
+                gl.drawElements(gl.TRIANGLES, this.counts[i], gl.UNSIGNED_SHORT, 0); //利用drawElements画三角形
+                leaf.runInfo.drawCount += _this.position[i].length;
+                leaf.runInfo.drawCall++;
+            }
+            this.model.length = 0;
+            this.position.length = 0;
+            this.normal.length = 0;
+            this.color.length = 0;
+            this.indexs.length = 0;
+            this.index = 0;
+            this.counts.length = 0;
         };
+        Object.defineProperty(Normal3DTask, "shader", {
+            get: function () {
+                if (!this._shader) {
+                    this._shader = new Normal3DTask();
+                }
+                return this._shader;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return Normal3DTask;
     }(leaf.Shader));
     leaf.Normal3DTask = Normal3DTask;
@@ -2781,9 +2979,11 @@ var leaf;
             this.a_Position = gl.getAttribLocation(program, "a_Position");
             gl.enableVertexAttribArray(this.a_Position);
             gl.vertexAttribPointer(this.a_Position, 2, gl.FLOAT, false, leaf.$size * 6, 0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
             this.a_TexCoord = gl.getAttribLocation(program, "a_TexCoord");
             gl.enableVertexAttribArray(this.a_TexCoord);
             gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 2);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
             this.a_Alpha = gl.getAttribLocation(program, "a_Alpha");
             gl.enableVertexAttribArray(this.a_Alpha);
             gl.vertexAttribPointer(this.a_Alpha, 1, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 4);
@@ -3833,8 +4033,8 @@ var leaf;
             var e = new leaf.TouchEvent();
             e.touchId = touchId;
             var m = leaf.world.root.transform.reverse;
-            e.stageX = m.a * touchX + m.c * touchY + m.tx;
-            e.stageY = m.b * touchX + m.d * touchY + m.ty;
+            // e.stageX = m.a * touchX + m.c * touchY + m.tx;
+            // e.stageY = m.b * touchX + m.d * touchY + m.ty;
             e.target = target;
             this.dispatchTouchEvent(e, target, touchX, touchY, "start");
         };
@@ -3845,8 +4045,8 @@ var leaf;
             var e = new leaf.TouchEvent();
             e.touchId = touchId;
             var m = leaf.world.root.transform.reverse;
-            e.stageX = m.a * touchX + m.c * touchY + m.tx;
-            e.stageY = m.b * touchX + m.d * touchY + m.ty;
+            // e.stageX = m.a * touchX + m.c * touchY + m.tx;
+            // e.stageY = m.b * touchX + m.d * touchY + m.ty;
             e.target = target;
             this.dispatchTouchEvent(e, target, touchX, touchY, "move");
         };
@@ -3857,8 +4057,8 @@ var leaf;
             var e = new leaf.TouchEvent();
             e.touchId = touchId;
             var m = leaf.world.root.transform.reverse;
-            e.stageX = m.a * touchX + m.c * touchY + m.tx;
-            e.stageY = m.b * touchX + m.d * touchY + m.ty;
+            // e.stageX = m.a * touchX + m.c * touchY + m.tx;
+            // e.stageY = m.b * touchX + m.d * touchY + m.ty;
             e.target = target;
             this.dispatchTouchEvent(e, target, touchX, touchY, "end");
         };
@@ -3872,8 +4072,8 @@ var leaf;
             var startIndex = -1;
             for (var i = list.length - 1, x = 0, y = 0; i >= 0; i--) {
                 var m = list[i].transform.reverse;
-                x = m.a * (touchX + m.tx) + m.c * touchY;
-                y = m.b * touchX + m.d * (touchY + m.ty);
+                // x = m.a * (touchX + m.tx) + m.c * touchY;
+                // y = m.b * touchX + m.d * (touchY + m.ty);
                 touchX = x;
                 touchY = y;
                 locals.push([x, y]);
@@ -3902,8 +4102,8 @@ var leaf;
         };
         TouchManager.findTarget = function (touchX, touchY, checkEntity) {
             var m = checkEntity.transform.reverse;
-            var x = m.a * (touchX + m.tx) + m.c * touchY;
-            var y = m.b * touchX + m.d * (touchY + m.ty);
+            var x; // = m.a * (touchX + m.tx) + m.c * touchY;
+            var y; // = m.b * touchX + m.d * (touchY + m.ty);
             var t = checkEntity.getComponent(leaf.TouchComponent);
             if (!t || t.touchChildrenEnabled) {
                 for (var i = checkEntity.children.length - 1; i >= 0; i--) {

@@ -218,7 +218,6 @@ declare namespace ecs {
         ty: number;
         _storeList: any[];
         id: number;
-        constructor();
         identity(): this;
         setTo(a: any, b: any, c: any, d: any, tx: any, ty: any): this;
         translate(x: any, y: any): this;
@@ -240,6 +239,74 @@ declare namespace ecs {
          * @returns {Matrix}
          */
         static create(): any;
+    }
+}
+declare namespace ecs {
+    class Matrix4 {
+        id: number;
+        elements: number[];
+        identity(): this;
+        set(src: Matrix4): this;
+        orthographicCamera(left: number, right: number, top: number, bottom: number, near: number, far: number): void;
+        perspectiveCamera(fovy: number, aspect: number, near: number, far: number): this;
+        /**
+         * 透视投影
+         * @param left
+         * @param right
+         * @param bottom
+         * @param top
+         * @param near
+         * @param far
+         * @returns
+         */
+        setFrustum(left: any, right: any, bottom: any, top: any, near: any, far: any): this;
+        scale(x: any, y: any, z: any): this;
+        translate(x: any, y: any, z: any): this;
+        rotate(angle: any, x: any, y: any, z: any): this;
+        lookAt(eyeX: any, eyeY: any, eyeZ: any, centerX: any, centerY: any, centerZ: any, upX: any, upY: any, upZ: any): this;
+        setLookAt(eyeX: any, eyeY: any, eyeZ: any, centerX: any, centerY: any, centerZ: any, upX: any, upY: any, upZ: any): this;
+        setScale(x: any, y: any, z: any): this;
+        setRotate(angle: any, x: any, y: any, z: any): this;
+        setTranslate(x: any, y: any, z: any): this;
+        /**
+         *
+         * @param other
+         * @returns
+         */
+        concat(other: any): this;
+        multiplyVector3(pos: any): Vector3;
+        multiplyVector4(pos: any): Vector4;
+        /**
+         * 转置
+         * @returns
+         */
+        transpose(): this;
+        /**
+         * 求 other 的逆矩阵并写入本矩阵
+         * @param other
+         * @returns
+         */
+        setInverseOf(other: any): this;
+        /**
+         * 求逆矩阵并写入ßß
+         * @returns
+         */
+        invert(): this;
+        /**
+         *
+         * ultiply the perspective projection matrix from the right.
+         * @param left
+         * @param right
+         * @param bottom
+         * @param top
+         * @param near
+         * @param far
+         * @returns
+         */
+        frustum(left: any, right: any, bottom: any, top: any, near: any, far: any): this;
+        perspective(fovy: any, aspect: any, near: any, far: any): this;
+        dropShadow(plane: any, light: any): this;
+        dropShadowDirectionally(normX: any, normY: any, normZ: any, planeX: any, planeY: any, planeZ: any, lightX: any, lightY: any, lightZ: any): this;
     }
 }
 declare namespace ecs {
@@ -369,16 +436,21 @@ declare namespace ecs {
         readonly entity: Entity;
         x: number;
         y: number;
+        z: number;
         anchorOffsetX: number;
         anchorOffsetY: number;
+        anchorOffsetZ: number;
         scaleX: number;
         scaleY: number;
-        angle: number;
+        scaleZ: number;
+        angleX: number;
+        angleY: number;
+        angleZ: number;
         alpha: number;
         readonly parent: Transform;
-        readonly local: Matrix;
-        readonly reverse: Matrix;
-        readonly worldMatrix: Matrix;
+        readonly local: Matrix4;
+        readonly reverse: Matrix4;
+        readonly worldMatrix: Matrix4;
         readonly worldAlpha: number;
         reset(): void;
     }
@@ -401,6 +473,17 @@ declare namespace ecs {
          * 从启动开始的帧数
          */
         frame: number;
+    }
+}
+declare namespace ecs {
+    class Vector3 {
+        elements: number[];
+        normalize(): this;
+    }
+}
+declare namespace ecs {
+    class Vector4 {
+        elements: number[];
     }
 }
 declare namespace ecs {

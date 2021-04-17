@@ -14,7 +14,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -1720,6 +1720,564 @@ var ecs;
 })(ecs || (ecs = {}));
 var ecs;
 (function (ecs) {
+    var Matrix4 = /** @class */ (function () {
+        function Matrix4() {
+            this.elements = [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ];
+        }
+        Matrix4.prototype.identity = function () {
+            var e = this.elements;
+            e[0] = 1;
+            e[4] = 0;
+            e[8] = 0;
+            e[12] = 0;
+            e[1] = 0;
+            e[5] = 1;
+            e[9] = 0;
+            e[13] = 0;
+            e[2] = 0;
+            e[6] = 0;
+            e[10] = 1;
+            e[14] = 0;
+            e[3] = 0;
+            e[7] = 0;
+            e[11] = 0;
+            e[15] = 1;
+            return this;
+        };
+        Matrix4.prototype.set = function (src) {
+            var i, s, d;
+            s = src.elements;
+            d = this.elements;
+            if (s === d) {
+                return;
+            }
+            for (i = 0; i < 16; ++i) {
+                d[i] = s[i];
+            }
+            return this;
+        };
+        Matrix4.prototype.orthographicCamera = function (left, right, top, bottom, near, far) {
+            this.elements[0] = 2 / (right - left);
+            this.elements[5] = -2 / (bottom - top);
+            this.elements[10] = -2 / (far - near);
+            this.elements[12] = -(right + left) / (right - left);
+            this.elements[13] = (top + bottom) / (bottom - top);
+            this.elements[14] = -(far + near) / (far - near);
+        };
+        Matrix4.prototype.perspectiveCamera = function (fovy, aspect, near, far) {
+            var e, rd, s, ct;
+            if (near === far || aspect === 0) {
+                throw 'null frustum';
+            }
+            if (near <= 0) {
+                throw 'near <= 0';
+            }
+            if (far <= 0) {
+                throw 'far <= 0';
+            }
+            fovy = Math.PI * fovy / 180 / 2;
+            s = Math.sin(fovy);
+            if (s === 0) {
+                throw 'null frustum';
+            }
+            rd = 1 / (far - near);
+            ct = Math.cos(fovy) / s;
+            e = this.elements;
+            e[0] = ct / aspect;
+            e[1] = 0;
+            e[2] = 0;
+            e[3] = 0;
+            e[4] = 0;
+            e[5] = ct;
+            e[6] = 0;
+            e[7] = 0;
+            e[8] = 0;
+            e[9] = 0;
+            e[10] = -(far + near) * rd;
+            e[11] = -1;
+            e[12] = 0;
+            e[13] = 0;
+            e[14] = -2 * near * far * rd;
+            e[15] = 0;
+            return this;
+        };
+        /**
+         * 透视投影
+         * @param left
+         * @param right
+         * @param bottom
+         * @param top
+         * @param near
+         * @param far
+         * @returns
+         */
+        Matrix4.prototype.setFrustum = function (left, right, bottom, top, near, far) {
+            var e, rw, rh, rd;
+            if (left === right || top === bottom || near === far) {
+                throw 'null frustum';
+            }
+            if (near <= 0) {
+                throw 'near <= 0';
+            }
+            if (far <= 0) {
+                throw 'far <= 0';
+            }
+            rw = 1 / (right - left);
+            rh = 1 / (top - bottom);
+            rd = 1 / (far - near);
+            e = this.elements;
+            e[0] = 2 * near * rw;
+            e[1] = 0;
+            e[2] = 0;
+            e[3] = 0;
+            e[4] = 0;
+            e[5] = 2 * near * rh;
+            e[6] = 0;
+            e[7] = 0;
+            e[8] = (right + left) * rw;
+            e[9] = (top + bottom) * rh;
+            e[10] = -(far + near) * rd;
+            e[11] = -1;
+            e[12] = 0;
+            e[13] = 0;
+            e[14] = -2 * near * far * rd;
+            e[15] = 0;
+            return this;
+        };
+        Matrix4.prototype.scale = function (x, y, z) {
+            var e = this.elements;
+            e[0] *= x;
+            e[4] *= y;
+            e[8] *= z;
+            e[1] *= x;
+            e[5] *= y;
+            e[9] *= z;
+            e[2] *= x;
+            e[6] *= y;
+            e[10] *= z;
+            e[3] *= x;
+            e[7] *= y;
+            e[11] *= z;
+            return this;
+        };
+        Matrix4.prototype.translate = function (x, y, z) {
+            var e = this.elements;
+            e[12] += e[0] * x + e[4] * y + e[8] * z;
+            e[13] += e[1] * x + e[5] * y + e[9] * z;
+            e[14] += e[2] * x + e[6] * y + e[10] * z;
+            e[15] += e[3] * x + e[7] * y + e[11] * z;
+            return this;
+        };
+        Matrix4.prototype.rotate = function (angle, x, y, z) {
+            return this.concat(new Matrix4().setRotate(angle, x, y, z));
+        };
+        Matrix4.prototype.lookAt = function (eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ) {
+            return this.concat(new Matrix4().setLookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ));
+        };
+        Matrix4.prototype.setLookAt = function (eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ) {
+            var e, fx, fy, fz, rlf, sx, sy, sz, rls, ux, uy, uz;
+            fx = centerX - eyeX;
+            fy = centerY - eyeY;
+            fz = centerZ - eyeZ;
+            // Normalize f.
+            rlf = 1 / Math.sqrt(fx * fx + fy * fy + fz * fz);
+            fx *= rlf;
+            fy *= rlf;
+            fz *= rlf;
+            // Calculate cross product of f and up.
+            sx = fy * upZ - fz * upY;
+            sy = fz * upX - fx * upZ;
+            sz = fx * upY - fy * upX;
+            // Normalize s.
+            rls = 1 / Math.sqrt(sx * sx + sy * sy + sz * sz);
+            sx *= rls;
+            sy *= rls;
+            sz *= rls;
+            // Calculate cross product of s and f.
+            ux = sy * fz - sz * fy;
+            uy = sz * fx - sx * fz;
+            uz = sx * fy - sy * fx;
+            // Set to this.
+            e = this.elements;
+            e[0] = sx;
+            e[1] = ux;
+            e[2] = -fx;
+            e[3] = 0;
+            e[4] = sy;
+            e[5] = uy;
+            e[6] = -fy;
+            e[7] = 0;
+            e[8] = sz;
+            e[9] = uz;
+            e[10] = -fz;
+            e[11] = 0;
+            e[12] = 0;
+            e[13] = 0;
+            e[14] = 0;
+            e[15] = 1;
+            // Translate.
+            return this.translate(-eyeX, -eyeY, -eyeZ);
+        };
+        Matrix4.prototype.setScale = function (x, y, z) {
+            var e = this.elements;
+            e[0] = x;
+            e[4] = 0;
+            e[8] = 0;
+            e[12] = 0;
+            e[1] = 0;
+            e[5] = y;
+            e[9] = 0;
+            e[13] = 0;
+            e[2] = 0;
+            e[6] = 0;
+            e[10] = z;
+            e[14] = 0;
+            e[3] = 0;
+            e[7] = 0;
+            e[11] = 0;
+            e[15] = 1;
+            return this;
+        };
+        Matrix4.prototype.setRotate = function (angle, x, y, z) {
+            var e, s, c, len, rlen, nc, xy, yz, zx, xs, ys, zs;
+            angle = Math.PI * angle / 180;
+            e = this.elements;
+            s = Math.sin(angle);
+            c = Math.cos(angle);
+            if (0 !== x && 0 === y && 0 === z) {
+                // Rotation around X axis
+                if (x < 0) {
+                    s = -s;
+                }
+                e[0] = 1;
+                e[4] = 0;
+                e[8] = 0;
+                e[12] = 0;
+                e[1] = 0;
+                e[5] = c;
+                e[9] = -s;
+                e[13] = 0;
+                e[2] = 0;
+                e[6] = s;
+                e[10] = c;
+                e[14] = 0;
+                e[3] = 0;
+                e[7] = 0;
+                e[11] = 0;
+                e[15] = 1;
+            }
+            else if (0 === x && 0 !== y && 0 === z) {
+                // Rotation around Y axis
+                if (y < 0) {
+                    s = -s;
+                }
+                e[0] = c;
+                e[4] = 0;
+                e[8] = s;
+                e[12] = 0;
+                e[1] = 0;
+                e[5] = 1;
+                e[9] = 0;
+                e[13] = 0;
+                e[2] = -s;
+                e[6] = 0;
+                e[10] = c;
+                e[14] = 0;
+                e[3] = 0;
+                e[7] = 0;
+                e[11] = 0;
+                e[15] = 1;
+            }
+            else if (0 === x && 0 === y && 0 !== z) {
+                // Rotation around Z axis
+                if (z < 0) {
+                    s = -s;
+                }
+                e[0] = c;
+                e[4] = -s;
+                e[8] = 0;
+                e[12] = 0;
+                e[1] = s;
+                e[5] = c;
+                e[9] = 0;
+                e[13] = 0;
+                e[2] = 0;
+                e[6] = 0;
+                e[10] = 1;
+                e[14] = 0;
+                e[3] = 0;
+                e[7] = 0;
+                e[11] = 0;
+                e[15] = 1;
+            }
+            else {
+                // Rotation around another axis
+                len = Math.sqrt(x * x + y * y + z * z);
+                if (len !== 1) {
+                    rlen = 1 / len;
+                    x *= rlen;
+                    y *= rlen;
+                    z *= rlen;
+                }
+                nc = 1 - c;
+                xy = x * y;
+                yz = y * z;
+                zx = z * x;
+                xs = x * s;
+                ys = y * s;
+                zs = z * s;
+                e[0] = x * x * nc + c;
+                e[1] = xy * nc + zs;
+                e[2] = zx * nc - ys;
+                e[3] = 0;
+                e[4] = xy * nc - zs;
+                e[5] = y * y * nc + c;
+                e[6] = yz * nc + xs;
+                e[7] = 0;
+                e[8] = zx * nc + ys;
+                e[9] = yz * nc - xs;
+                e[10] = z * z * nc + c;
+                e[11] = 0;
+                e[12] = 0;
+                e[13] = 0;
+                e[14] = 0;
+                e[15] = 1;
+            }
+            return this;
+        };
+        Matrix4.prototype.setTranslate = function (x, y, z) {
+            var e = this.elements;
+            e[0] = 1;
+            e[4] = 0;
+            e[8] = 0;
+            e[12] = x;
+            e[1] = 0;
+            e[5] = 1;
+            e[9] = 0;
+            e[13] = y;
+            e[2] = 0;
+            e[6] = 0;
+            e[10] = 1;
+            e[14] = z;
+            e[3] = 0;
+            e[7] = 0;
+            e[11] = 0;
+            e[15] = 1;
+            return this;
+        };
+        /**
+         *
+         * @param other
+         * @returns
+         */
+        // concatTo(other) {
+        //   var i, e, a, b, ai0, ai1, ai2, ai3;
+        //   // Calculate e = a * b
+        //   e = other.elements;
+        //   a = other.elements;
+        //   b = this.elements;
+        //   // If e equals b, copy b to temporary matrix.
+        //   if (e === b) {
+        //     b = [];
+        //     for (i = 0; i < 16; ++i) {
+        //       b[i] = e[i];
+        //     }
+        //   }
+        //   for (i = 0; i < 4; i++) {
+        //     ai0 = a[i]; ai1 = a[i + 4]; ai2 = a[i + 8]; ai3 = a[i + 12];
+        //     e[i] = ai0 * b[0] + ai1 * b[1] + ai2 * b[2] + ai3 * b[3];
+        //     e[i + 4] = ai0 * b[4] + ai1 * b[5] + ai2 * b[6] + ai3 * b[7];
+        //     e[i + 8] = ai0 * b[8] + ai1 * b[9] + ai2 * b[10] + ai3 * b[11];
+        //     e[i + 12] = ai0 * b[12] + ai1 * b[13] + ai2 * b[14] + ai3 * b[15];
+        //   }
+        //   // return other;
+        // }
+        Matrix4.prototype.concat = function (other) {
+            var i, e, a, b, ai0, ai1, ai2, ai3;
+            // Calculate e = a * b
+            e = this.elements;
+            a = this.elements;
+            b = other.elements;
+            // If e equals b, copy b to temporary matrix.
+            if (e === b) {
+                b = [];
+                for (i = 0; i < 16; ++i) {
+                    b[i] = e[i];
+                }
+            }
+            for (i = 0; i < 4; i++) {
+                ai0 = a[i];
+                ai1 = a[i + 4];
+                ai2 = a[i + 8];
+                ai3 = a[i + 12];
+                e[i] = ai0 * b[0] + ai1 * b[1] + ai2 * b[2] + ai3 * b[3];
+                e[i + 4] = ai0 * b[4] + ai1 * b[5] + ai2 * b[6] + ai3 * b[7];
+                e[i + 8] = ai0 * b[8] + ai1 * b[9] + ai2 * b[10] + ai3 * b[11];
+                e[i + 12] = ai0 * b[12] + ai1 * b[13] + ai2 * b[14] + ai3 * b[15];
+            }
+            return this;
+        };
+        Matrix4.prototype.multiplyVector3 = function (pos) {
+            var e = this.elements;
+            var p = pos.elements;
+            var v = new ecs.Vector3();
+            var result = v.elements;
+            result[0] = p[0] * e[0] + p[1] * e[4] + p[2] * e[8] + e[11];
+            result[1] = p[0] * e[1] + p[1] * e[5] + p[2] * e[9] + e[12];
+            result[2] = p[0] * e[2] + p[1] * e[6] + p[2] * e[10] + e[13];
+            return v;
+        };
+        Matrix4.prototype.multiplyVector4 = function (pos) {
+            var e = this.elements;
+            var p = pos.elements;
+            var v = new ecs.Vector4();
+            var result = v.elements;
+            result[0] = p[0] * e[0] + p[1] * e[4] + p[2] * e[8] + p[3] * e[12];
+            result[1] = p[0] * e[1] + p[1] * e[5] + p[2] * e[9] + p[3] * e[13];
+            result[2] = p[0] * e[2] + p[1] * e[6] + p[2] * e[10] + p[3] * e[14];
+            result[3] = p[0] * e[3] + p[1] * e[7] + p[2] * e[11] + p[3] * e[15];
+            return v;
+        };
+        /**
+         * 转置
+         * @returns
+         */
+        Matrix4.prototype.transpose = function () {
+            var e, t;
+            e = this.elements;
+            t = e[1];
+            e[1] = e[4];
+            e[4] = t;
+            t = e[2];
+            e[2] = e[8];
+            e[8] = t;
+            t = e[3];
+            e[3] = e[12];
+            e[12] = t;
+            t = e[6];
+            e[6] = e[9];
+            e[9] = t;
+            t = e[7];
+            e[7] = e[13];
+            e[13] = t;
+            t = e[11];
+            e[11] = e[14];
+            e[14] = t;
+            return this;
+        };
+        /**
+         * 求 other 的逆矩阵并写入本矩阵
+         * @param other
+         * @returns
+         */
+        Matrix4.prototype.setInverseOf = function (other) {
+            var i, s, d, inv, det;
+            s = other.elements;
+            d = this.elements;
+            inv = [];
+            inv[0] = s[5] * s[10] * s[15] - s[5] * s[11] * s[14] - s[9] * s[6] * s[15]
+                + s[9] * s[7] * s[14] + s[13] * s[6] * s[11] - s[13] * s[7] * s[10];
+            inv[4] = -s[4] * s[10] * s[15] + s[4] * s[11] * s[14] + s[8] * s[6] * s[15]
+                - s[8] * s[7] * s[14] - s[12] * s[6] * s[11] + s[12] * s[7] * s[10];
+            inv[8] = s[4] * s[9] * s[15] - s[4] * s[11] * s[13] - s[8] * s[5] * s[15]
+                + s[8] * s[7] * s[13] + s[12] * s[5] * s[11] - s[12] * s[7] * s[9];
+            inv[12] = -s[4] * s[9] * s[14] + s[4] * s[10] * s[13] + s[8] * s[5] * s[14]
+                - s[8] * s[6] * s[13] - s[12] * s[5] * s[10] + s[12] * s[6] * s[9];
+            inv[1] = -s[1] * s[10] * s[15] + s[1] * s[11] * s[14] + s[9] * s[2] * s[15]
+                - s[9] * s[3] * s[14] - s[13] * s[2] * s[11] + s[13] * s[3] * s[10];
+            inv[5] = s[0] * s[10] * s[15] - s[0] * s[11] * s[14] - s[8] * s[2] * s[15]
+                + s[8] * s[3] * s[14] + s[12] * s[2] * s[11] - s[12] * s[3] * s[10];
+            inv[9] = -s[0] * s[9] * s[15] + s[0] * s[11] * s[13] + s[8] * s[1] * s[15]
+                - s[8] * s[3] * s[13] - s[12] * s[1] * s[11] + s[12] * s[3] * s[9];
+            inv[13] = s[0] * s[9] * s[14] - s[0] * s[10] * s[13] - s[8] * s[1] * s[14]
+                + s[8] * s[2] * s[13] + s[12] * s[1] * s[10] - s[12] * s[2] * s[9];
+            inv[2] = s[1] * s[6] * s[15] - s[1] * s[7] * s[14] - s[5] * s[2] * s[15]
+                + s[5] * s[3] * s[14] + s[13] * s[2] * s[7] - s[13] * s[3] * s[6];
+            inv[6] = -s[0] * s[6] * s[15] + s[0] * s[7] * s[14] + s[4] * s[2] * s[15]
+                - s[4] * s[3] * s[14] - s[12] * s[2] * s[7] + s[12] * s[3] * s[6];
+            inv[10] = s[0] * s[5] * s[15] - s[0] * s[7] * s[13] - s[4] * s[1] * s[15]
+                + s[4] * s[3] * s[13] + s[12] * s[1] * s[7] - s[12] * s[3] * s[5];
+            inv[14] = -s[0] * s[5] * s[14] + s[0] * s[6] * s[13] + s[4] * s[1] * s[14]
+                - s[4] * s[2] * s[13] - s[12] * s[1] * s[6] + s[12] * s[2] * s[5];
+            inv[3] = -s[1] * s[6] * s[11] + s[1] * s[7] * s[10] + s[5] * s[2] * s[11]
+                - s[5] * s[3] * s[10] - s[9] * s[2] * s[7] + s[9] * s[3] * s[6];
+            inv[7] = s[0] * s[6] * s[11] - s[0] * s[7] * s[10] - s[4] * s[2] * s[11]
+                + s[4] * s[3] * s[10] + s[8] * s[2] * s[7] - s[8] * s[3] * s[6];
+            inv[11] = -s[0] * s[5] * s[11] + s[0] * s[7] * s[9] + s[4] * s[1] * s[11]
+                - s[4] * s[3] * s[9] - s[8] * s[1] * s[7] + s[8] * s[3] * s[5];
+            inv[15] = s[0] * s[5] * s[10] - s[0] * s[6] * s[9] - s[4] * s[1] * s[10]
+                + s[4] * s[2] * s[9] + s[8] * s[1] * s[6] - s[8] * s[2] * s[5];
+            det = s[0] * inv[0] + s[1] * inv[4] + s[2] * inv[8] + s[3] * inv[12];
+            if (det === 0) {
+                return this;
+            }
+            det = 1 / det;
+            for (i = 0; i < 16; i++) {
+                d[i] = inv[i] * det;
+            }
+            return this;
+        };
+        /**
+         * 求逆矩阵并写入ßß
+         * @returns
+         */
+        Matrix4.prototype.invert = function () {
+            return this.setInverseOf(this);
+        };
+        /**
+         *
+         * ultiply the perspective projection matrix from the right.
+         * @param left
+         * @param right
+         * @param bottom
+         * @param top
+         * @param near
+         * @param far
+         * @returns
+         */
+        Matrix4.prototype.frustum = function (left, right, bottom, top, near, far) {
+            return this.concat(new Matrix4().setFrustum(left, right, bottom, top, near, far));
+        };
+        Matrix4.prototype.perspective = function (fovy, aspect, near, far) {
+            return this.concat(new Matrix4().perspectiveCamera(fovy, aspect, near, far));
+        };
+        Matrix4.prototype.dropShadow = function (plane, light) {
+            var mat = new Matrix4();
+            var e = mat.elements;
+            var dot = plane[0] * light[0] + plane[1] * light[1] + plane[2] * light[2] + plane[3] * light[3];
+            e[0] = dot - light[0] * plane[0];
+            e[1] = -light[1] * plane[0];
+            e[2] = -light[2] * plane[0];
+            e[3] = -light[3] * plane[0];
+            e[4] = -light[0] * plane[1];
+            e[5] = dot - light[1] * plane[1];
+            e[6] = -light[2] * plane[1];
+            e[7] = -light[3] * plane[1];
+            e[8] = -light[0] * plane[2];
+            e[9] = -light[1] * plane[2];
+            e[10] = dot - light[2] * plane[2];
+            e[11] = -light[3] * plane[2];
+            e[12] = -light[0] * plane[3];
+            e[13] = -light[1] * plane[3];
+            e[14] = -light[2] * plane[3];
+            e[15] = dot - light[3] * plane[3];
+            return this.concat(mat);
+        };
+        Matrix4.prototype.dropShadowDirectionally = function (normX, normY, normZ, planeX, planeY, planeZ, lightX, lightY, lightZ) {
+            var a = planeX * normX + planeY * normY + planeZ * normZ;
+            return this.dropShadow([normX, normY, normZ, -a], [lightX, lightY, lightZ, 0]);
+        };
+        return Matrix4;
+    }());
+    ecs.Matrix4 = Matrix4;
+})(ecs || (ecs = {}));
+var ecs;
+(function (ecs) {
     ecs.$componentRecyclePool = null;
     function setComponentRecyclePool(pool) {
         ecs.$componentRecyclePool = pool;
@@ -2044,11 +2602,19 @@ var ecs;
             /**
              * @internal
              */
+            this._z = 0;
+            /**
+             * @internal
+             */
             this._anchorOffsetX = 0;
             /**
              * @internal
              */
             this._anchorOffsetY = 0;
+            /**
+             * @internal
+             */
+            this._anchorOffsetZ = 0;
             /**
              * @internal
              */
@@ -2060,7 +2626,19 @@ var ecs;
             /**
              * @internal
              */
-            this._angle = 0;
+            this._scaleZ = 1;
+            /**
+             * @internal
+             */
+            this._angleZ = 0;
+            /**
+             * @internal
+             */
+            this._angleX = 0;
+            /**
+             * @internal
+             */
+            this._angleY = 0;
             /**
              * @internal
              */
@@ -2076,12 +2654,12 @@ var ecs;
             /**
              * @internal
              */
-            this._local = new ecs.Matrix();
-            this._reverse = new ecs.Matrix();
+            this._local = new ecs.Matrix4();
+            this._reverse = new ecs.Matrix4();
             /**
              * @internal
              */
-            this._worldMatrix = new ecs.Matrix();
+            this._worldMatrix = new ecs.Matrix4();
             this._entity = entity;
         }
         Object.defineProperty(Transform.prototype, "entity", {
@@ -2113,6 +2691,17 @@ var ecs;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Transform.prototype, "z", {
+            get: function () { return this._z; },
+            set: function (val) {
+                if (this._z === val)
+                    return;
+                this.dirty = this.reverseDirty = true;
+                this._z = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(Transform.prototype, "anchorOffsetX", {
             get: function () { return this._anchorOffsetX; },
             set: function (val) {
@@ -2131,6 +2720,17 @@ var ecs;
                     return;
                 this.dirty = this.reverseDirty = true;
                 this._anchorOffsetY = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Transform.prototype, "anchorOffsetZ", {
+            get: function () { return this._anchorOffsetZ; },
+            set: function (val) {
+                if (this._anchorOffsetZ === val)
+                    return;
+                this.dirty = this.reverseDirty = true;
+                this._anchorOffsetZ = val;
             },
             enumerable: true,
             configurable: true
@@ -2157,13 +2757,46 @@ var ecs;
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(Transform.prototype, "angle", {
-            get: function () { return this._angle; },
+        Object.defineProperty(Transform.prototype, "scaleZ", {
+            get: function () { return this._scaleZ; },
             set: function (val) {
-                if (this._angle === val)
+                if (this._scaleZ === val)
                     return;
                 this.dirty = this.reverseDirty = true;
-                this._angle = val;
+                this._scaleZ = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Transform.prototype, "angleX", {
+            get: function () { return this._angleX; },
+            set: function (val) {
+                if (this._angleX === val)
+                    return;
+                this.dirty = this.reverseDirty = true;
+                this._angleX = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Transform.prototype, "angleY", {
+            get: function () { return this._angleY; },
+            set: function (val) {
+                if (this._angleY === val)
+                    return;
+                this.dirty = this.reverseDirty = true;
+                this._angleY = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Transform.prototype, "angleZ", {
+            get: function () { return this._angleZ; },
+            set: function (val) {
+                if (this._angleZ === val)
+                    return;
+                this.dirty = this.reverseDirty = true;
+                this._angleZ = val;
             },
             enumerable: true,
             configurable: true
@@ -2188,27 +2821,18 @@ var ecs;
                 if (this.dirty) {
                     this.dirty = false;
                     var local = this._local;
-                    this._local.identity();
-                    var sx = this._scaleX;
-                    var sy = this._scaleY;
-                    if (sx != 1 || sy != 1) {
-                        local.a *= sx;
-                        local.d *= sy;
-                    }
-                    if (this._angle) {
-                        var sin = Math.sin(this._angle);
-                        var cos = Math.cos(this._angle);
-                        local.a = cos * sx;
-                        local.b = sin * sx;
-                        local.c = -sin * sy;
-                        local.d = cos * sy;
-                    }
-                    var tx = -this._anchorOffsetX * local.a + this._x;
-                    var ty = -this._anchorOffsetY * local.d + this._y;
-                    tx += -this._anchorOffsetY * local.c;
-                    ty += -this._anchorOffsetX * local.b;
-                    local.tx = tx;
-                    local.ty = ty;
+                    local.identity();
+                    local.translate(-this._anchorOffsetX, -this._anchorOffsetY, 0);
+                    if (this._x || this._y || this._z)
+                        local.translate(this._x, this._y, this._z);
+                    if (this._angleX)
+                        local.rotate(this._angleX, 1, 0, 0);
+                    if (this._angleY)
+                        local.rotate(this._angleY, 0, 1, 0);
+                    if (this._angleZ)
+                        local.rotate(this._angleZ, 0, 0, 1);
+                    if (this._scaleX != 1 || this._scaleY != 1 || this._scaleZ != 1)
+                        local.scale(this._scaleX, this._scaleY, this._scaleZ);
                 }
                 this._local.id = this.entity.id;
                 return this._local;
@@ -2220,28 +2844,7 @@ var ecs;
             get: function () {
                 if (this.reverseDirty) {
                     this.reverseDirty = false;
-                    var local = this._reverse;
-                    local.identity();
-                    var sx = 1 / this._scaleX;
-                    var sy = 1 / this._scaleY;
-                    if (sx != 1 || sy != 1) {
-                        local.a *= sx;
-                        local.d *= sy;
-                    }
-                    if (this._angle) {
-                        var sin = Math.sin(-this._angle);
-                        var cos = Math.cos(-this._angle);
-                        local.a = cos * sx;
-                        local.b = sin * sx;
-                        local.c = -sin * sy;
-                        local.d = cos * sy;
-                    }
-                    var tx = -this._anchorOffsetX * local.a - this._x;
-                    var ty = -this._anchorOffsetY * local.d - this._y;
-                    tx += -this._anchorOffsetY * local.c;
-                    ty += -this._anchorOffsetX * local.b;
-                    local.tx = tx;
-                    local.ty = ty;
+                    this._reverse.setInverseOf(this.local);
                 }
                 return this._reverse;
             },
@@ -2252,7 +2855,7 @@ var ecs;
             get: function () {
                 var dis = this.$parent;
                 var local = this.local;
-                this._worldMatrix.setTo(local.a, local.b, local.c, local.d, local.tx, local.ty);
+                this._worldMatrix.set(local);
                 while (dis) {
                     this._worldMatrix.concat(dis.local);
                     dis = dis.$parent;
@@ -2279,8 +2882,9 @@ var ecs;
             this._local.identity();
             this._reverse.identity();
             this.dirty = false;
-            this._anchorOffsetX = this._anchorOffsetY = this._x = this._y = this._angle = 0;
-            this._scaleX = this._scaleY = this._alpha = 1;
+            this._anchorOffsetX = this._anchorOffsetY = this._anchorOffsetZ;
+            this._x = this._y = this._z = this._angleX = this._angleY = this._angleZ = 0;
+            this._scaleX = this._scaleY = this._scaleZ = this._alpha = 1;
         };
         return Transform;
     }());
@@ -2294,6 +2898,45 @@ var ecs;
         return UpdateInfo;
     }());
     ecs.UpdateInfo = UpdateInfo;
+})(ecs || (ecs = {}));
+var ecs;
+(function (ecs) {
+    var Vector3 = /** @class */ (function () {
+        function Vector3() {
+            this.elements = [0, 0, 0];
+        }
+        Vector3.prototype.normalize = function () {
+            var v = this.elements;
+            var c = v[0], d = v[1], e = v[2], g = Math.sqrt(c * c + d * d + e * e);
+            if (g) {
+                if (g == 1)
+                    return this;
+            }
+            else {
+                v[0] = 0;
+                v[1] = 0;
+                v[2] = 0;
+                return this;
+            }
+            g = 1 / g;
+            v[0] = c * g;
+            v[1] = d * g;
+            v[2] = e * g;
+            return this;
+        };
+        return Vector3;
+    }());
+    ecs.Vector3 = Vector3;
+})(ecs || (ecs = {}));
+var ecs;
+(function (ecs) {
+    var Vector4 = /** @class */ (function () {
+        function Vector4() {
+            this.elements = [0, 0, 0, 1];
+        }
+        return Vector4;
+    }());
+    ecs.Vector4 = Vector4;
 })(ecs || (ecs = {}));
 var ecs;
 (function (ecs) {

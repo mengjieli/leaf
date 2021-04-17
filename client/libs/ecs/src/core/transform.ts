@@ -19,12 +19,22 @@ namespace ecs {
         /**
          * @internal
          */
+        private _z: number = 0;
+
+        /**
+         * @internal
+         */
         private _anchorOffsetX: number = 0;
 
         /**
          * @internal
          */
         private _anchorOffsetY: number = 0;
+
+        /**
+         * @internal
+         */
+        private _anchorOffsetZ: number = 0;
 
         /**
          * @internal
@@ -39,7 +49,22 @@ namespace ecs {
         /**
          * @internal
          */
-        private _angle: number = 0;
+        private _scaleZ: number = 1;
+
+        /**
+         * @internal
+         */
+        private _angleZ: number = 0;
+
+        /**
+         * @internal
+         */
+        private _angleX: number = 0;
+
+        /**
+         * @internal
+         */
+        private _angleY: number = 0;
 
         /**
          * @internal
@@ -59,9 +84,9 @@ namespace ecs {
         /**
          * @internal
          */
-        private _local: Matrix = new Matrix();
+        private _local: Matrix4 = new Matrix4();
 
-        private _reverse: Matrix = new Matrix();
+        private _reverse: Matrix4 = new Matrix4();
 
         /**
          * @internal
@@ -86,6 +111,13 @@ namespace ecs {
             this._y = val;
         }
 
+        get z() { return this._z; }
+        set z(val: number) {
+            if (this._z === val) return;
+            this.dirty = this.reverseDirty = true;
+            this._z = val;
+        }
+
         get anchorOffsetX() { return this._anchorOffsetX; }
         set anchorOffsetX(val: number) {
             if (this._anchorOffsetX === val) return;
@@ -100,6 +132,13 @@ namespace ecs {
             this._anchorOffsetY = val;
         }
 
+        get anchorOffsetZ() { return this._anchorOffsetZ; }
+        set anchorOffsetZ(val: number) {
+            if (this._anchorOffsetZ === val) return;
+            this.dirty = this.reverseDirty = true;
+            this._anchorOffsetZ = val;
+        }
+
         get scaleX() { return this._scaleX; }
         set scaleX(val: number) {
             if (this._scaleX === val) return;
@@ -107,18 +146,39 @@ namespace ecs {
             this._scaleX = val;
         }
 
-    get scaleY() { return this._scaleY; }
+        get scaleY() { return this._scaleY; }
         set scaleY(val: number) {
             if (this._scaleY === val) return;
             this.dirty = this.reverseDirty = true;
             this._scaleY = val;
         }
 
-        get angle() { return this._angle; }
-        set angle(val: number) {
-            if (this._angle === val) return;
+        get scaleZ() { return this._scaleZ; }
+        set scaleZ(val: number) {
+            if (this._scaleZ === val) return;
             this.dirty = this.reverseDirty = true;
-            this._angle = val;
+            this._scaleZ = val;
+        }
+
+        get angleX() { return this._angleX; }
+        set angleX(val: number) {
+            if (this._angleX === val) return;
+            this.dirty = this.reverseDirty = true;
+            this._angleX = val;
+        }
+
+        get angleY() { return this._angleY; }
+        set angleY(val: number) {
+            if (this._angleY === val) return;
+            this.dirty = this.reverseDirty = true;
+            this._angleY = val;
+        }
+
+        get angleZ() { return this._angleZ; }
+        set angleZ(val: number) {
+            if (this._angleZ === val) return;
+            this.dirty = this.reverseDirty = true;
+            this._angleZ = val;
         }
 
         get alpha() { return this._alpha; }
@@ -129,7 +189,7 @@ namespace ecs {
         /**
          * @internal
          */
-        private _worldMatrix: Matrix = new Matrix();
+        private _worldMatrix: Matrix4 = new Matrix4();
 
         /**
          * @internal
@@ -140,61 +200,26 @@ namespace ecs {
             return this.$parent;
         }
 
-        get local(): Matrix {
+        get local(): Matrix4 {
             if (this.dirty) {
                 this.dirty = false;
-                let local = this._local
-                this._local.identity();
-                let sx = this._scaleX;
-                let sy = this._scaleY;
-                if (sx != 1 || sy != 1) {
-                    local.a *= sx;
-                    local.d *= sy;
-                }
-                if (this._angle) {
-                    var sin = Math.sin(this._angle);
-                    var cos = Math.cos(this._angle);
-                    local.a = cos * sx;
-                    local.b = sin * sx;
-                    local.c = -sin * sy;
-                    local.d = cos * sy;
-                }
-                let tx = -this._anchorOffsetX * local.a + this._x;
-                let ty = -this._anchorOffsetY * local.d + this._y;
-                tx += -this._anchorOffsetY * local.c;
-                ty += -this._anchorOffsetX * local.b;
-                local.tx = tx;
-                local.ty = ty;
+                let local = this._local;
+                local.identity();
+                local.translate(-this._anchorOffsetX, -this._anchorOffsetY, 0);
+                if (this._x || this._y || this._z) local.translate(this._x, this._y, this._z);
+                if (this._angleX) local.rotate(this._angleX, 1, 0, 0);
+                if (this._angleY) local.rotate(this._angleY, 0, 1, 0);
+                if (this._angleZ) local.rotate(this._angleZ, 0, 0, 1);
+                if (this._scaleX != 1 || this._scaleY != 1 || this._scaleZ != 1) local.scale(this._scaleX, this._scaleY, this._scaleZ);
             }
             this._local.id = this.entity.id;
             return this._local;
         }
 
-        get reverse(): Matrix {
+        get reverse(): Matrix4 {
             if (this.reverseDirty) {
                 this.reverseDirty = false;
-                let local = this._reverse
-                local.identity();
-                let sx = 1 / this._scaleX;
-                let sy = 1 / this._scaleY;
-                if (sx != 1 || sy != 1) {
-                    local.a *= sx;
-                    local.d *= sy;
-                }
-                if (this._angle) {
-                    var sin = Math.sin(-this._angle);
-                    var cos = Math.cos(-this._angle);
-                    local.a = cos * sx;
-                    local.b = sin * sx;
-                    local.c = -sin * sy;
-                    local.d = cos * sy;
-                }
-                let tx = -this._anchorOffsetX * local.a - this._x;
-                let ty = -this._anchorOffsetY * local.d - this._y;
-                tx += -this._anchorOffsetY * local.c;
-                ty += -this._anchorOffsetX * local.b;
-                local.tx = tx;
-                local.ty = ty;
+                this._reverse.setInverseOf(this.local);
             }
             return this._reverse;
         }
@@ -202,7 +227,7 @@ namespace ecs {
         get worldMatrix() {
             let dis = this.$parent;
             let local = this.local;
-            this._worldMatrix.setTo(local.a, local.b, local.c, local.d, local.tx, local.ty);
+            this._worldMatrix.set(local);
             while (dis) {
                 this._worldMatrix.concat(dis.local);
                 dis = dis.$parent;
@@ -224,8 +249,9 @@ namespace ecs {
             this._local.identity();
             this._reverse.identity();
             this.dirty = false;
-            this._anchorOffsetX = this._anchorOffsetY = this._x = this._y = this._angle = 0;
-            this._scaleX = this._scaleY = this._alpha = 1;
+            this._anchorOffsetX = this._anchorOffsetY = this._anchorOffsetZ
+            this._x = this._y = this._z = this._angleX = this._angleY = this._angleZ = 0;
+            this._scaleX = this._scaleY = this._scaleZ = this._alpha = 1;
         }
 
     }
