@@ -132,6 +132,10 @@ declare namespace leaf {
         size: number;
         color: number;
         preRender(): void;
+        static vertices: number[];
+        static colors: number[];
+        static normals: number[];
+        static indices: number[];
         preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader): void;
         onDestroy(): void;
     }
@@ -482,7 +486,8 @@ declare namespace leaf {
         private a_position;
         private a_color;
         private a_normal;
-        private u_mvp;
+        private u_projection;
+        private u_mvc;
         private u_model;
         private u_normalMatrix;
         private u_lightColor;
@@ -490,18 +495,23 @@ declare namespace leaf {
         private u_ambientLight;
         private u_pointLightColor;
         private u_pointLightPosition;
+        private colorBuffer;
+        private normalBuffer;
         constructor();
         initProgram(): void;
         static camera: ecs.Matrix4;
+        projectionMatrix: ecs.Matrix4;
         initAttriLocation(): void;
-        mvp: number[][];
+        mvc: number[][];
         model: number[][];
         normalMatrix: number[][];
         position: number[][];
+        normal: number[][];
+        color: number[][];
         indexs: number[][];
         counts: number[];
         index: number;
-        addTask(matrix: ecs.Matrix4, positions: number[], indexs: number[]): void;
+        addTask(matrix: ecs.Matrix4, positions: number[], normals: number[], colors: number[], indexs: number[]): void;
         static diffuseColor: number[];
         static diffuseDirection: number[];
         static ambientColor: number[];

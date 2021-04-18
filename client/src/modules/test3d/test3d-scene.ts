@@ -43,21 +43,12 @@ export class Test3dScene extends ModuleScene {
     leaf.Normal3DTask.ambientColor = [0.2, 0.2, 0.2];
     leaf.Normal3DTask.pointColor = [1.0, 1.0, 1.0];
     leaf.Normal3DTask.pointPosition = [2.3, 4.0, 3.5];
+
+    leaf.Normal3DTask.camera.identity();
+    // leaf.Normal3DTask.camera.translate(0, 0, -20);
+    leaf.Normal3DTask.camera.lookAt(6, 6, 14, 0, 0, 0, 0, 1, 0);
     // leaf.Normal3DTask.pointPosition = [0,0,0];
 
-    window["ca"] = (a: number[], b: number[]) => {
-      if (a.length != b.length) {
-        console.error("length not equals !")
-        return false;
-      }
-      for (let i = 0; i < a.length; i++) {
-        if (~~(a[i] * 1000) != ~~(b[i] * 1000) ) {
-          console.error(i,a[i],b[i])
-          return false;
-        }
-      }
-      return true;
-    }
 
     // // Set the light color (white)
     // gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
@@ -109,4 +100,18 @@ class Rotate extends ecs.Component {
     this.transform.angleZ += 0.1;
   }
 
+}
+
+window["ca"] = (a: number[], b: number[]) => {
+  if (a.length != b.length) {
+    console.error("length not equals !")
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (~~(a[i] * 1000) != ~~(b[i] * 1000)) {
+      console.error(i, a[i], b[i])
+      return false;
+    }
+  }
+  return true;
 }
