@@ -248,12 +248,26 @@ var Test3dScene = /** @class */ (function (_super) {
         // cb.transform.angleX = 45;
         // cb.transform.angleY = 45;
         // cb.transform.angleZ = 55;
-        cb.color = 0xffffff;
+        cb.color = 0xff0000;
         leaf.Normal3DTask.diffuseColor = [0.0, 0.0, 0.0];
-        leaf.Normal3DTask.diffuseDirection = [0, 0, -1];
+        leaf.Normal3DTask.diffuseDirection = [1, 1, -1];
         leaf.Normal3DTask.ambientColor = [0.2, 0.2, 0.2];
         leaf.Normal3DTask.pointColor = [1.0, 1.0, 1.0];
         leaf.Normal3DTask.pointPosition = [2.3, 4.0, 3.5];
+        // leaf.Normal3DTask.pointPosition = [0,0,0];
+        window["ca"] = function (a, b) {
+            if (a.length != b.length) {
+                console.error("length not equals !");
+                return false;
+            }
+            for (var i = 0; i < a.length; i++) {
+                if (~~(a[i] * 1000) != ~~(b[i] * 1000)) {
+                    console.error(i, a[i], b[i]);
+                    return false;
+                }
+            }
+            return true;
+        };
         // // Set the light color (white)
         // gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
         // // Set the light direction (in the world coordinate)
