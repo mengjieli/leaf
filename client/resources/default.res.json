@@ -4529,8 +4529,28 @@
       "type": 1
     },
     {
+      "name": "test-bg_png",
+      "path": "assets/test-bg.png",
+      "type": 1
+    },
+    {
       "name": "top_info_bg_png",
       "path": "assets/textures/top_info_bg.png",
+      "type": 1
+    },
+    {
+      "name": "CITY_MEGA_png",
+      "path": "assets/可爱横版整套城市/CITY_MEGA.png",
+      "type": 1
+    },
+    {
+      "name": "SHIPPING_DOCKS_AREA_png",
+      "path": "assets/可爱横版整套城市/SHIPPING_DOCKS_AREA.png",
+      "type": 1
+    },
+    {
+      "name": "house_png",
+      "path": "assets/可爱横版整套城市/house.png",
       "type": 1
     }
   ]

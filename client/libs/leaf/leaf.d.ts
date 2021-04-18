@@ -113,12 +113,12 @@ declare namespace leaf {
 declare namespace leaf {
     class Bitmap extends Render {
         shader: NormalShaderTask;
+        private _tint;
+        tint: number;
         private _resource;
         private _res;
         texture: Texture;
         resource: string;
-        private _tint;
-        tint: number;
         readonly width: number;
         readonly height: number;
         preRender(): void;
@@ -133,9 +133,14 @@ declare namespace leaf {
         color: number;
         preRender(): void;
         static vertices: number[];
+        static texCoords: number[];
         static colors: number[];
         static normals: number[];
         static indices: number[];
+        private _resource;
+        private _res;
+        texture: Texture;
+        resource: string;
         preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader): void;
         onDestroy(): void;
     }
@@ -168,6 +173,29 @@ declare namespace leaf {
         readonly textHeight: number;
         onDestroy(): void;
         static useScaleFont: boolean;
+    }
+}
+declare namespace leaf {
+    class Platform extends Render {
+        shader: Normal3DTask;
+        size: number;
+        color: number;
+        preRender(): void;
+        static vertices: number[];
+        static texCoords: number[];
+        static colors: number[];
+        static normals: number[];
+        static indices: number[];
+        private _resource;
+        private _res;
+        texture: Texture;
+        resource: string;
+        private _width;
+        private _height;
+        width: number;
+        height: number;
+        preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader): void;
+        onDestroy(): void;
     }
 }
 declare namespace leaf {
@@ -486,6 +514,8 @@ declare namespace leaf {
         private a_position;
         private a_color;
         private a_normal;
+        private a_TexCoord;
+        private u_Sampler;
         private u_projection;
         private u_mvc;
         private u_model;
@@ -495,8 +525,11 @@ declare namespace leaf {
         private u_ambientLight;
         private u_pointLightColor;
         private u_pointLightPosition;
+        private u_SpotDirection;
+        private u_SpotRot;
         private colorBuffer;
         private normalBuffer;
+        private texCoordBuffer;
         constructor();
         initProgram(): void;
         static camera: ecs.Matrix4;
@@ -508,15 +541,19 @@ declare namespace leaf {
         position: number[][];
         normal: number[][];
         color: number[][];
+        texCoord: number[][];
+        texture: WebGLTexture[];
         indexs: number[][];
         counts: number[];
         index: number;
-        addTask(matrix: ecs.Matrix4, positions: number[], normals: number[], colors: number[], indexs: number[]): void;
+        addTask(matrix: ecs.Matrix4, positions: number[], normals: number[], colors: number[], texCoords: number[], texture: WebGLTexture, indexs: number[]): void;
         static diffuseColor: number[];
         static diffuseDirection: number[];
         static ambientColor: number[];
         static pointColor: number[];
         static pointPosition: number[];
+        static spotDirection: number[];
+        static spotRot: number;
         render(): void;
         private static _shader;
         static readonly shader: Normal3DTask;
@@ -912,6 +949,19 @@ declare namespace leaf {
             x: number;
             y: number;
         };
+    }
+}
+declare namespace leaf {
+    class KeyBoard extends ecs.Component {
+        onPressUp: ecs.Broadcast<{}>;
+        onPressDown: ecs.Broadcast<{}>;
+        onPressLeft: ecs.Broadcast<{}>;
+        onPressRight: ecs.Broadcast<{}>;
+        onPressZ: ecs.Broadcast<{}>;
+        onPressX: ecs.Broadcast<{}>;
+        awake(): void;
+        onKeyDown: (e: any) => void;
+        onDestroy(): void;
     }
 }
 declare namespace leaf {

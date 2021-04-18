@@ -81,9 +81,9 @@
         window["IS_WEB"] = true;
 
         var canvas = document.getElementById('leaf');
-        // canvas.width = window.innerWidth;
-        // canvas.height = window.innerHeight;
-        canvas.width = canvas.height = 400;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        // canvas.width = canvas.height = 400;
 
         loadScript(list, function () {
             new Main();

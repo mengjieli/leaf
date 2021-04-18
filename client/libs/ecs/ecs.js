@@ -1767,10 +1767,10 @@ var ecs;
         };
         Matrix4.prototype.orthographicCamera = function (left, right, top, bottom, near, far) {
             this.elements[0] = 2 / (right - left);
-            this.elements[5] = -2 / (bottom - top);
+            this.elements[5] = 2 / (bottom - top);
             this.elements[10] = -2 / (far - near);
             this.elements[12] = -(right + left) / (right - left);
-            this.elements[13] = (top + bottom) / (bottom - top);
+            this.elements[13] = -(top + bottom) / (bottom - top);
             this.elements[14] = -(far + near) / (far - near);
         };
         Matrix4.prototype.perspectiveCamera = function (fovy, aspect, near, far) {

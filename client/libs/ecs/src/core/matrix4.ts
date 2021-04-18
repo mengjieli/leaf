@@ -45,10 +45,10 @@ namespace ecs {
 
     orthographicCamera(left: number, right: number, top: number, bottom: number, near: number, far: number) {
       this.elements[0] = 2 / (right - left);
-      this.elements[5] = -2 / (bottom - top);
+      this.elements[5] = 2 / (bottom - top);
       this.elements[10] = -2 / (far - near);
       this.elements[12] = - (right + left) / (right - left);
-      this.elements[13] = (top + bottom) / (bottom - top);
+      this.elements[13] = -(top + bottom) / (bottom - top);
       this.elements[14] = - (far + near) / (far - near);
     }
 

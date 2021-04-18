@@ -4,6 +4,17 @@ namespace leaf {
 
         shader = NormalShaderTask.shader;
 
+
+        private _tint: number = 0xffffff;
+
+        get tint(): number {
+            return this._tint;
+        }
+
+        set tint(val: number) {
+            this._tint = val;
+        }
+        
         /**
          * @internal
          */
@@ -22,16 +33,6 @@ namespace leaf {
 
         get resource(): string {
             return this._resource;
-        }
-
-        private _tint: number = 0xffffff;
-
-        get tint(): number {
-            return this._tint;
-        }
-
-        set tint(val: number) {
-            this._tint = val;
         }
 
         set resource(val: string) {

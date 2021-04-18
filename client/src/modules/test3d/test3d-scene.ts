@@ -18,35 +18,63 @@ export class Test3dScene extends ModuleScene {
     // t1.transform.x = 0;
     // t1.transform.y = 0;
 
-    let cb = ecs.Entity.create().addComponent(leaf.Cube);
-    // cb.transform.x = 1;
-    // cb.transform.x = 0;
-    cb.size = 4;
-    // cb.transform.x = 320;
-    // cb.transform.y = 500;
-    // cb.transform.z = -500;
-    cb.entity.parent = this.scene;
-    cb.transform.setRotate(90, 0, 1, 0);
-    // cb.transform.translate(0.1, 0, 0);
-    // cb.transform.rotate(-10, 0, 1, 0);
-    // cb.transform.rotate(-10, 1, 0, 0);
-    // cb.transform.rotate(45, 0, 0, 1);
-    // cb.transform.scale(1.1, 1, 1);
-    // cb.addComponent(Rotate);
-    // cb.transform.angleX = 45;
-    // cb.transform.angleY = 45;
-    // cb.transform.angleZ = 55;
-    cb.color = 0xff0000;
+    // let cb = ecs.Entity.create().addComponent(leaf.Cube);
+    // cb.size = 4;
+    // cb.entity.parent = this.scene;
+    // cb.transform.setRotate(90, 0, 1, 0);
+    // cb.color = 0xffffff;
+    // cb.resource = "house_png";
+
+    let platform = ecs.Entity.create().addComponent(leaf.Platform);
+    platform.width = 1.5;
+    platform.height = 1.5 *1052 / 678;
+    platform.entity.parent = this.scene;
+    platform.resource = "house_png";
+    // platform.texture=  leaf.PointTexture.getTexture(0xffffff);//
+
+    let kb = platform.addComponent(leaf.KeyBoard);
+    kb.onPressRight.on(() => {
+      leaf.Normal3DTask.pointPosition[0] += 0.1;
+      console.error(leaf.Normal3DTask.pointPosition);
+    });
+    kb.onPressLeft.on(() => {
+      leaf.Normal3DTask.pointPosition[0] -= 0.1;
+      console.error(leaf.Normal3DTask.pointPosition);
+    });
+    kb.onPressUp.on(() => {
+      leaf.Normal3DTask.pointPosition[1] += 0.1;
+      console.error(leaf.Normal3DTask.pointPosition);
+    });
+    kb.onPressDown.on(() => {
+      leaf.Normal3DTask.pointPosition[1] -= 0.1;
+      console.error(leaf.Normal3DTask.pointPosition);
+    });
+    kb.onPressZ.on(() => {
+      leaf.Normal3DTask.pointPosition[2] += 0.1;
+      console.error(leaf.Normal3DTask.pointPosition);
+    });
+    kb.onPressX.on(() => {
+      leaf.Normal3DTask.pointPosition[2] -= 0.1;
+      console.error(leaf.Normal3DTask.pointPosition);
+    });
+    // platform.color = 0xffffff;
 
     leaf.Normal3DTask.diffuseColor = [0.0, 0.0, 0.0];
     leaf.Normal3DTask.diffuseDirection = [1, 1, -1];
-    leaf.Normal3DTask.ambientColor = [0.2, 0.2, 0.2];
-    leaf.Normal3DTask.pointColor = [1.0, 1.0, 1.0];
-    leaf.Normal3DTask.pointPosition = [2.3, 4.0, 3.5];
+    leaf.Normal3DTask.ambientColor = [0.1, 0.1, 0.1];
+    leaf.Normal3DTask.pointColor = [1.5, 1.5, 0.5];
+    leaf.Normal3DTask.pointPosition = [0, 0, 0.5];
+    leaf.Normal3DTask.spotDirection = [0, -1, -1];
+    leaf.Normal3DTask.spotRot = 10 * Math.PI / 180;
 
     leaf.Normal3DTask.camera.identity();
-    // leaf.Normal3DTask.camera.translate(0, 0, -20);
-    leaf.Normal3DTask.camera.lookAt(6, 6, 14, 0, 0, 0, 0, 1, 0);
+    leaf.Normal3DTask.camera.translate(0, 0, -4);
+
+    platform.addComponent(SpotRotate);
+
+
+
+    // leaf.Normal3DTask.camera.lookAt(6, 6, 14, 0, 0, 0, 0, 1, 0);
     // leaf.Normal3DTask.pointPosition = [0,0,0];
 
 
@@ -68,6 +96,8 @@ export class Test3dScene extends ModuleScene {
 
     // console.error(t1.entity.id)
     // console.error("scene 3d");
+
+    // leaf.StateWin.show();
   }
 
   addTriangle(pos: number[]) {
@@ -88,6 +118,18 @@ export class Test3dScene extends ModuleScene {
     t.parent = this.scene;
 
     return t;
+  }
+
+}
+
+class SpotRotate extends ecs.Component {
+
+  add = 0.001;
+
+  update() {
+    leaf.Normal3DTask.spotDirection[0] += this.add;
+    if (leaf.Normal3DTask.spotDirection[0] > 0.1) this.add = -this.add;
+    if (leaf.Normal3DTask.spotDirection[0] < -0.1) this.add = -this.add;
   }
 
 }
