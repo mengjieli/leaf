@@ -2593,78 +2593,81 @@ var ecs;
 })(ecs || (ecs = {}));
 var ecs;
 (function (ecs) {
-    var Transform = /** @class */ (function () {
+    var Transform = /** @class */ (function (_super) {
+        __extends(Transform, _super);
         function Transform(entity) {
+            var _this = _super.call(this) || this;
             /**
              * @internal
              */
-            this._x = 0;
+            _this._x = 0;
             /**
              * @internal
              */
-            this._y = 0;
+            _this._y = 0;
             /**
              * @internal
              */
-            this._z = 0;
+            _this._z = 0;
             /**
              * @internal
              */
-            this._anchorOffsetX = 0;
+            _this._anchorOffsetX = 0;
             /**
              * @internal
              */
-            this._anchorOffsetY = 0;
+            _this._anchorOffsetY = 0;
             /**
              * @internal
              */
-            this._anchorOffsetZ = 0;
+            _this._anchorOffsetZ = 0;
             /**
              * @internal
              */
-            this._scaleX = 1;
+            _this._scaleX = 1;
             /**
              * @internal
              */
-            this._scaleY = 1;
+            _this._scaleY = 1;
             /**
              * @internal
              */
-            this._scaleZ = 1;
+            _this._scaleZ = 1;
             /**
              * @internal
              */
-            this._angleZ = 0;
+            _this._angleZ = 0;
             /**
              * @internal
              */
-            this._angleX = 0;
+            _this._angleX = 0;
             /**
              * @internal
              */
-            this._angleY = 0;
+            _this._angleY = 0;
             /**
              * @internal
              */
-            this._alpha = 1;
+            _this._alpha = 1;
             /**
              * @internal
              */
-            this.dirty = false;
+            _this.dirty = false;
             /**
              * @internal
              */
-            this.reverseDirty = false;
+            _this.reverseDirty = false;
             /**
              * @internal
              */
-            this._local = new ecs.Matrix4();
-            this._reverse = new ecs.Matrix4();
+            _this._local = new ecs.Matrix4();
+            _this._reverse = new ecs.Matrix4();
             /**
              * @internal
              */
-            this._worldMatrix = new ecs.Matrix4();
-            this._entity = entity;
+            _this._worldMatrix = new ecs.Matrix4();
+            _this._entity = entity;
+            return _this;
         }
         Object.defineProperty(Transform.prototype, "entity", {
             get: function () {
@@ -2822,24 +2825,20 @@ var ecs;
         });
         Object.defineProperty(Transform.prototype, "local", {
             get: function () {
-                if (this.dirty) {
-                    this.dirty = false;
-                    var local = this._local;
-                    local.identity();
-                    local.translate(-this._anchorOffsetX, -this._anchorOffsetY, 0);
-                    if (this._x || this._y || this._z)
-                        local.translate(this._x, this._y, this._z);
-                    if (this._angleX)
-                        local.rotate(this._angleX, 1, 0, 0);
-                    if (this._angleY)
-                        local.rotate(this._angleY, 0, 1, 0);
-                    if (this._angleZ)
-                        local.rotate(this._angleZ, 0, 0, 1);
-                    if (this._scaleX != 1 || this._scaleY != 1 || this._scaleZ != 1)
-                        local.scale(this._scaleX, this._scaleY, this._scaleZ);
-                }
-                this._local.id = this.entity.id;
-                return this._local;
+                // if (this.dirty) {
+                //     this.dirty = false;
+                //     let local = this._local;
+                //     local.identity();
+                //     local.translate(-this._anchorOffsetX, -this._anchorOffsetY, 0);
+                //     if (this._x || this._y || this._z) local.translate(this._x, this._y, this._z);
+                //     if (this._angleX) local.rotate(this._angleX, 1, 0, 0);
+                //     if (this._angleY) local.rotate(this._angleY, 0, 1, 0);
+                //     if (this._angleZ) local.rotate(this._angleZ, 0, 0, 1);
+                //     if (this._scaleX != 1 || this._scaleY != 1 || this._scaleZ != 1) local.scale(this._scaleX, this._scaleY, this._scaleZ);
+                // }
+                // this._local.id = this.entity.id;
+                // return this._local;
+                return this;
             },
             enumerable: true,
             configurable: true
@@ -2891,7 +2890,7 @@ var ecs;
             this._scaleX = this._scaleY = this._scaleZ = this._alpha = 1;
         };
         return Transform;
-    }());
+    }(ecs.Matrix4));
     ecs.Transform = Transform;
 })(ecs || (ecs = {}));
 var ecs;

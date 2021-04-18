@@ -431,7 +431,7 @@ declare namespace ecs {
     function syncSystem(mode?: EMSyncSystemMode): <T extends new () => System<any>>(c: T) => T;
 }
 declare namespace ecs {
-    class Transform {
+    class Transform extends Matrix4 {
         constructor(entity: Entity);
         private _reverse;
         readonly entity: Entity;

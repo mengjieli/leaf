@@ -231,16 +231,35 @@ var Test3dScene = /** @class */ (function (_super) {
         // t1.transform.x = 0;
         // t1.transform.y = 0;
         var cb = ecs.Entity.create().addComponent(leaf.Cube);
-        cb.size = 300;
-        cb.transform.x = 320;
-        cb.transform.y = 500;
-        cb.transform.z = -500;
+        // cb.transform.x = 1;
+        // cb.transform.x = 0;
+        cb.size = 4;
+        // cb.transform.x = 320;
+        // cb.transform.y = 500;
+        // cb.transform.z = -500;
         cb.entity.parent = _this.scene;
-        cb.addComponent(Rotate);
-        // cb.transform.angleX = 15;
-        // cb.transform.angleY = 15;
-        // cb.transform.angleZ = 45;
-        cb.color = 0xff0000;
+        cb.transform.setRotate(90, 0, 1, 0);
+        // cb.transform.translate(0.1, 0, 0);
+        // cb.transform.rotate(-10, 0, 1, 0);
+        // cb.transform.rotate(-10, 1, 0, 0);
+        // cb.transform.rotate(45, 0, 0, 1);
+        // cb.transform.scale(1.1, 1, 1);
+        // cb.addComponent(Rotate);
+        // cb.transform.angleX = 45;
+        // cb.transform.angleY = 45;
+        // cb.transform.angleZ = 55;
+        cb.color = 0xffffff;
+        leaf.Normal3DTask.diffuseColor = [0.0, 0.0, 0.0];
+        leaf.Normal3DTask.diffuseDirection = [0, 0, -1];
+        leaf.Normal3DTask.ambientColor = [0.2, 0.2, 0.2];
+        leaf.Normal3DTask.pointColor = [1.0, 1.0, 1.0];
+        leaf.Normal3DTask.pointPosition = [2.3, 4.0, 3.5];
+        // // Set the light color (white)
+        // gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
+        // // Set the light direction (in the world coordinate)
+        // gl.uniform3f(u_LightPosition, 2.3, 4.0, 3.5);
+        // // Set the ambient light
+        // gl.uniform3f(u_AmbientLight, 0.2, 0.2, 0.2);
         x = 0;
         y = 0;
         return _this;

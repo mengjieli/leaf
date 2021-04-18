@@ -2821,6 +2821,7 @@ var leaf;
         __extends(Normal3DTask, _super);
         function Normal3DTask() {
             var _this_1 = _super.call(this) || this;
+            _this_1.mvp = [];
             _this_1.model = [];
             _this_1.normalMatrix = [];
             _this_1.position = [];
@@ -2848,27 +2849,26 @@ var leaf;
             var vertexSource = 'attribute vec4 a_position;\n' +
                 'attribute vec4 a_color;\n' +
                 'attribute vec4 a_normal;\n' + // Normal
-                'uniform mat4 u_project;\n' +
+                'uniform mat4 u_mvp;\n' +
                 'uniform mat4 u_model;\n' +
                 'uniform mat4 u_normalMatrix;\n' +
                 'uniform vec3 u_lightColor;\n' + // Diffuse light color
                 'uniform vec3 u_lightDirection;\n' + // Diffuse light direction (in the world coordinate, normalized)
-                // 'uniform vec3 u_ambientLight;\n' +   // Color of an ambient light
+                'uniform vec3 u_ambientLight;\n' + // Color of an ambient light
+                'uniform vec3 u_pointLightColor;\n' +
+                'uniform vec3 u_pointLightPosition;\n' +
                 'varying vec4 v_Color;\n' +
                 'void main() {\n' +
-                // '  gl_Position = u_project * u_model * a_position;\n' +
-                // '  vec4 normal =  u_project * u_model * a_normal;\n' +
-                // '  float nDotL = max(dot(u_lightDirection, normalize(normal.xyz)), 0.0);\n' +
-                // '  vec3 diffuse = u_lightColor * a_color.rgb * nDotL;\n' +
-                // '  v_Color = vec4(diffuse , a_color.a);\n' +
-                '  gl_Position =  u_project * u_model * a_position;\n' +
-                '  vec4 normal = u_normalMatrix * a_normal;\n' +
-                // '  vec4 normal = vec4(a_normal.xyz,1.0);\n' +
-                '  float nDotL = max(dot(u_lightDirection, normalize(normal.xyz)), 0.0);\n' +
-                // '  nDotL = 0.5;\n' +  
-                '  v_Color = vec4(a_color.xyz * nDotL, 1.0);\n' +
-                // '  v_Color = vec4(1.0, 1.0, 1.0, 1.0);\n' +
-                // '  v_Color = u_model * a_color;\n' +
+                '  gl_Position =  u_mvp * a_position;\n' +
+                '  vec3 normal = normalize(vec3(u_normalMatrix * a_normal));\n' +
+                '  float nDotL = max(dot(u_lightDirection, normal), 0.0);\n' +
+                '  vec3 diffuse = u_lightColor * a_color.xyz * nDotL;\n' +
+                '  vec3 ambient = u_ambientLight * a_color.rgb;\n' +
+                '  vec4 vertexPosition = u_model * a_position;\n' +
+                '  vec3 pointDirection = normalize(u_pointLightPosition - vec3(vertexPosition));\n' +
+                '  float pDotL = max(dot(pointDirection, normal), 0.0);\n' +
+                '  vec3 pointColor = u_pointLightColor * a_color.xyz * pDotL;\n' +
+                '  v_Color = vec4(pointColor + diffuse + ambient, 1.0);\n' +
                 '}\n';
             // Fragment shader program
             var fragmentSource = '#ifdef GL_ES\n' +
@@ -2891,12 +2891,14 @@ var leaf;
             gl.useProgram(program);
             var projectionMatrix = new ecs.Matrix4();
             //projectionMatrix.orthographicCamera(0, leaf.getStageWidth(), 0, leaf.getStageHeight(), 0, -1000);
-            projectionMatrix.orthographicCamera(0, leaf.getStageWidth(), 0, leaf.getStageHeight(), 0, 1000);
+            // projectionMatrix.orthographicCamera(0, leaf.getStageWidth(), 0, leaf.getStageHeight(), 0, 1000);
+            // projectionMatrix.orthographicCamera(-1, 1, -leaf.getStageHeight()/leaf.getStageWidth(), leaf.getStageHeight()/leaf.getStageWidth(), -1000, 1000);
             // projectionMatrix.perspectiveCamera(30, leaf.getStageWidth() / leaf.getStageHeight(), 1, 1000);
             // projectionMatrix.perspectiveCamera(30, leaf.getStageWidth() / leaf.getStageHeight(), 1, 1000);
             // projectionMatrix.lookAt(3, 3, 7, 0, 0, 0, 0, 1, 0);
-            this.u_project = gl.getUniformLocation(program, "u_project");
-            gl.uniformMatrix4fv(this.u_project, false, new Float32Array(projectionMatrix.elements));
+            Normal3DTask.camera.perspectiveCamera(30, leaf.getStageWidth() / leaf.getStageHeight(), 1, 100);
+            Normal3DTask.camera.lookAt(6, 6, 14, 0, 0, 0, 0, 1, 0);
+            this.u_mvp = gl.getUniformLocation(program, "u_mvp");
             this.u_model = gl.getUniformLocation(program, "u_model");
             this.u_normalMatrix = gl.getUniformLocation(program, "u_normalMatrix");
             this.a_position = gl.getAttribLocation(program, "a_position");
@@ -2905,8 +2907,15 @@ var leaf;
             this.u_lightColor = gl.getUniformLocation(program, "u_lightColor");
             this.u_lightDirection = gl.getUniformLocation(program, "u_lightDirection");
             this.u_ambientLight = gl.getUniformLocation(program, "u_ambientLight");
+            this.u_pointLightColor = gl.getUniformLocation(program, "u_pointLightColor");
+            this.u_pointLightPosition = gl.getUniformLocation(program, "u_pointLightPosition");
         };
         Normal3DTask.prototype.addTask = function (matrix, positions, indexs) {
+            var camera = Normal3DTask.camera;
+            var copy = camera.elements.concat();
+            camera.concat(matrix);
+            this.mvp.push(camera.elements);
+            camera.elements = copy;
             this.model.push(matrix.elements.concat());
             this.normalMatrix.push((new ecs.Matrix4()).setInverseOf(matrix).transpose().elements);
             this.position.push(positions);
@@ -2927,9 +2936,11 @@ var leaf;
             gl.enableVertexAttribArray(this.a_position);
             gl.enableVertexAttribArray(this.a_normal);
             gl.enableVertexAttribArray(this.a_color);
-            gl.uniform3f(this.u_lightColor, 1.0, 1.0, 1.0);
-            gl.uniform3f(this.u_lightDirection, 0, 0, -1);
-            // gl.uniform3f(this.u_ambientLight, 0.5, 0.5, 0.5);
+            gl.uniform3fv(this.u_lightColor, Normal3DTask.diffuseColor);
+            gl.uniform3fv(this.u_lightDirection, Normal3DTask.diffuseDirection);
+            gl.uniform3fv(this.u_ambientLight, Normal3DTask.ambientColor);
+            gl.uniform3fv(this.u_pointLightColor, Normal3DTask.pointColor);
+            gl.uniform3fv(this.u_pointLightPosition, Normal3DTask.pointPosition);
             for (var i = 0, len = this.position.length; i < len; i++) {
                 //切换混合模式
                 // BlendModeFunc.changeBlendMode(this.blendMode[i]);
@@ -2939,6 +2950,7 @@ var leaf;
                 gl.vertexAttribPointer(_this.a_normal, 3, gl.FLOAT, false, leaf.$size * 9, leaf.$size * 3);
                 gl.vertexAttribPointer(_this.a_color, 3, gl.FLOAT, false, leaf.$size * 9, leaf.$size * 6);
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.position[i]), gl.STATIC_DRAW);
+                gl.uniformMatrix4fv(this.u_mvp, false, new Float32Array(this.mvp[i]));
                 gl.uniformMatrix4fv(this.u_model, false, new Float32Array(this.model[i]));
                 gl.uniformMatrix4fv(this.u_normalMatrix, false, new Float32Array(this.normalMatrix[i]));
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
@@ -2949,6 +2961,7 @@ var leaf;
                 leaf.runInfo.drawCount += _this.position[i].length;
                 leaf.runInfo.drawCall++;
             }
+            this.mvp.length = 0;
             this.model.length = 0;
             this.normalMatrix.length = 0;
             this.position.length = 0;
@@ -2968,6 +2981,12 @@ var leaf;
             enumerable: true,
             configurable: true
         });
+        Normal3DTask.camera = new ecs.Matrix4();
+        Normal3DTask.diffuseColor = [0.0, 0.0, 0.0];
+        Normal3DTask.diffuseDirection = [0, 0, -1];
+        Normal3DTask.ambientColor = [0.2, 0.2, 0.2];
+        Normal3DTask.pointColor = [0.5, 0.5, 0.5];
+        Normal3DTask.pointPosition = [0, 0, 0];
         return Normal3DTask;
     }(leaf.Shader));
     leaf.Normal3DTask = Normal3DTask;
