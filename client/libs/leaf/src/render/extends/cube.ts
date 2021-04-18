@@ -14,57 +14,57 @@ namespace leaf {
     preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader) {
       let hs = this.size / 2;
       let m = matrix.concat(this.entity.transform.local);
-      let r = this.color >> 16;
-      let g = (this.color >> 8) & 0xFF;
-      let b = this.color & 0xFF;
+      let r = (this.color >> 16) / 255.0;
+      let g = ((this.color >> 8) & 0xFF) / 255.0;
+      let b = (this.color & 0xFF) / 255.0;
       this.shader.addTask(m, [
-        // -hs, -hs, hs, 0, 0, -1, r, g, b,
-        // hs, -hs, hs, 0, 0, -1, r, g, b,
-        // hs, hs, hs, 0, 0, -1, r, g, b,
-        // -hs, hs, hs, 0, 0, -1, r, g, b,
-
-        // hs, -hs, -hs, 0, 0, 1, r, g, b,
-        // -hs, -hs, -hs, 0, 0, 1, r, g, b,
-        // -hs, hs, -hs, 0, 0, 1, r, g, b,
-        // hs, hs, -hs, 0, 0, 1, r, g, b,
-
-        // -hs, hs, hs, 0, 0, -1, r, g, b,
-        // hs, hs, hs, 0, 0, -1, r, g, b,
-        // -hs, hs, -hs, 0, 0, 1, r, g, b,
-        // hs, hs, -hs, 0, 0, 1, r, g, b,
-
-        // hs, -hs, hs, 0, 0, -1, r, g, b,
-        // -hs, -hs, hs, 0, 0, -1, r, g, b,
-        // hs, -hs, -hs, 0, 0, 1, r, g, b,
-        // -hs, -hs, -hs, 0, 0, 1, r, g, b,
-
-        // hs, -hs, -hs, 0, 0, 1, r, g, b,
-        // -hs, -hs, hs, 0, 0, -1, r, g, b,
-        // -hs, hs, hs, 0, 0, -1, r, g, b,
-        // hs, hs, -hs, 0, 0, 1, r, g, b,
-
+        -hs, -hs, hs, 0, 0, -1, r, g, b,
         hs, -hs, hs, 0, 0, -1, r, g, b,
+        hs, hs, hs, 0, 0, -1, r, g, b,
+        -hs, hs, hs, 0, 0, -1, r, g, b,
+
+        hs, -hs, -hs, 0, 0, 1,r, g, b,
         -hs, -hs, -hs, 0, 0, 1, r, g, b,
         -hs, hs, -hs, 0, 0, 1, r, g, b,
-        hs, hs, hs, 0, 0, -1, r, g, b
+        hs, hs, -hs, 0, 0, 1, r, g, b,
+
+        -hs, -hs, hs, 0, 1, 0, r, g, b,
+        hs, -hs, hs, 0, 1, 0, r, g, b,
+        hs, -hs, -hs, 0, 1, 0, r, g, b,
+        -hs, -hs, -hs, 0, 1, 0, r, g, b,
+
+        -hs, hs, hs, 0, -1, 0, r, g, b,
+        hs, hs, hs, 0, -1, 0, r, g, b,
+        hs,hs, -hs, 0, -1, 0, r, g, b,
+        -hs, hs, -hs, 0, -1, 0, r, g, b,
+
+        -hs, -hs, hs, 1, 0, 0, r, g, b,
+        -hs, hs, hs, 1, 0, 0, r, g, b,
+        -hs, hs, -hs, 1, 0, 0, r, g, b,
+        -hs, -hs, -hs, 1, 0, 0, r, g, b,
+
+        hs, -hs, hs, -1, 0, 0, r, g, b,
+        hs, hs, hs, -1, 0, 0, r, g, b,
+        hs, hs, -hs, -1, 0, 0, r, g, b,
+        hs, -hs, -hs, -1, 0, 0, r, g, b
       ], [
         0, 1, 3,//后
         1, 2, 3,
 
-        // 4, 5, 7, //前
-        // 5, 6, 7,
+        4, 5, 7, //前
+        5, 6, 7,
 
-        // 8, 9, 11, //上
-        // 9, 10, 11,
+        8, 9, 11, //上
+        9, 10, 11,
 
-        // 12, 13, 15,//下
-        // 13, 14, 15,
+        12, 13, 15,//下
+        13, 14, 15,
 
-        // 16, 17, 19, //左
-        // 17, 18, 19,
+        16, 17, 19, //左
+        17, 18, 19,
 
-        // 20, 21, 23, //右
-        // 21, 22, 23
+        20, 21, 23, //右
+        21, 22, 23
       ]);
       // (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
     }

@@ -865,37 +865,47 @@ var leaf;
         Cube.prototype.preRender2 = function (matrix, alpha, shader) {
             var hs = this.size / 2;
             var m = matrix.concat(this.entity.transform.local);
-            var r = this.color >> 16;
-            var g = (this.color >> 8) & 0xFF;
-            var b = this.color & 0xFF;
+            var r = (this.color >> 16) / 255.0;
+            var g = ((this.color >> 8) & 0xFF) / 255.0;
+            var b = (this.color & 0xFF) / 255.0;
             this.shader.addTask(m, [
-                // -hs, -hs, hs, 0, 0, -1, r, g, b,
-                // hs, -hs, hs, 0, 0, -1, r, g, b,
-                // hs, hs, hs, 0, 0, -1, r, g, b,
-                // -hs, hs, hs, 0, 0, -1, r, g, b,
-                // hs, -hs, -hs, 0, 0, 1, r, g, b,
-                // -hs, -hs, -hs, 0, 0, 1, r, g, b,
-                // -hs, hs, -hs, 0, 0, 1, r, g, b,
-                // hs, hs, -hs, 0, 0, 1, r, g, b,
-                // -hs, hs, hs, 0, 0, -1, r, g, b,
-                // hs, hs, hs, 0, 0, -1, r, g, b,
-                // -hs, hs, -hs, 0, 0, 1, r, g, b,
-                // hs, hs, -hs, 0, 0, 1, r, g, b,
-                // hs, -hs, hs, 0, 0, -1, r, g, b,
-                // -hs, -hs, hs, 0, 0, -1, r, g, b,
-                // hs, -hs, -hs, 0, 0, 1, r, g, b,
-                // -hs, -hs, -hs, 0, 0, 1, r, g, b,
-                // hs, -hs, -hs, 0, 0, 1, r, g, b,
-                // -hs, -hs, hs, 0, 0, -1, r, g, b,
-                // -hs, hs, hs, 0, 0, -1, r, g, b,
-                // hs, hs, -hs, 0, 0, 1, r, g, b,
+                -hs, -hs, hs, 0, 0, -1, r, g, b,
                 hs, -hs, hs, 0, 0, -1, r, g, b,
+                hs, hs, hs, 0, 0, -1, r, g, b,
+                -hs, hs, hs, 0, 0, -1, r, g, b,
+                hs, -hs, -hs, 0, 0, 1, r, g, b,
                 -hs, -hs, -hs, 0, 0, 1, r, g, b,
                 -hs, hs, -hs, 0, 0, 1, r, g, b,
-                hs, hs, hs, 0, 0, -1, r, g, b
+                hs, hs, -hs, 0, 0, 1, r, g, b,
+                -hs, -hs, hs, 0, 1, 0, r, g, b,
+                hs, -hs, hs, 0, 1, 0, r, g, b,
+                hs, -hs, -hs, 0, 1, 0, r, g, b,
+                -hs, -hs, -hs, 0, 1, 0, r, g, b,
+                -hs, hs, hs, 0, -1, 0, r, g, b,
+                hs, hs, hs, 0, -1, 0, r, g, b,
+                hs, hs, -hs, 0, -1, 0, r, g, b,
+                -hs, hs, -hs, 0, -1, 0, r, g, b,
+                -hs, -hs, hs, 1, 0, 0, r, g, b,
+                -hs, hs, hs, 1, 0, 0, r, g, b,
+                -hs, hs, -hs, 1, 0, 0, r, g, b,
+                -hs, -hs, -hs, 1, 0, 0, r, g, b,
+                hs, -hs, hs, -1, 0, 0, r, g, b,
+                hs, hs, hs, -1, 0, 0, r, g, b,
+                hs, hs, -hs, -1, 0, 0, r, g, b,
+                hs, -hs, -hs, -1, 0, 0, r, g, b
             ], [
                 0, 1, 3,
                 1, 2, 3,
+                4, 5, 7,
+                5, 6, 7,
+                8, 9, 11,
+                9, 10, 11,
+                12, 13, 15,
+                13, 14, 15,
+                16, 17, 19,
+                17, 18, 19,
+                20, 21, 23,
+                21, 22, 23
             ]);
             // (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
         };
@@ -1316,7 +1326,7 @@ var leaf;
                 this.point1.x, this.point1.y, this.point1.z,
                 this.point2.x, this.point2.y, this.point2.z,
                 this.point3.x, this.point3.y, this.point3.z,
-            ], [0, 1, 2], this.color);
+            ], [0, 1, 2]);
             // (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
         };
         Triangle.prototype.onDestroy = function () {
@@ -2812,6 +2822,7 @@ var leaf;
         function Normal3DTask() {
             var _this_1 = _super.call(this) || this;
             _this_1.model = [];
+            _this_1.normalMatrix = [];
             _this_1.position = [];
             // normal: number[][] = [];
             // color: number[][] = [];
@@ -2839,24 +2850,25 @@ var leaf;
                 'attribute vec4 a_normal;\n' + // Normal
                 'uniform mat4 u_project;\n' +
                 'uniform mat4 u_model;\n' +
+                'uniform mat4 u_normalMatrix;\n' +
                 'uniform vec3 u_lightColor;\n' + // Diffuse light color
                 'uniform vec3 u_lightDirection;\n' + // Diffuse light direction (in the world coordinate, normalized)
                 // 'uniform vec3 u_ambientLight;\n' +   // Color of an ambient light
                 'varying vec4 v_Color;\n' +
                 'void main() {\n' +
-                '  gl_Position = u_project * u_model * a_position;\n' +
-                // Make the length of the normal 1.0
-                '  vec4 normal =  u_project * u_model * a_normal;\n' +
-                // '  vec3 normal = normalize(a_normal.xyz);\n' +
-                // The dot product of the light direction and the normal (the orientation of a surface)
+                // '  gl_Position = u_project * u_model * a_position;\n' +
+                // '  vec4 normal =  u_project * u_model * a_normal;\n' +
+                // '  float nDotL = max(dot(u_lightDirection, normalize(normal.xyz)), 0.0);\n' +
+                // '  vec3 diffuse = u_lightColor * a_color.rgb * nDotL;\n' +
+                // '  v_Color = vec4(diffuse , a_color.a);\n' +
+                '  gl_Position =  u_project * u_model * a_position;\n' +
+                '  vec4 normal = u_normalMatrix * a_normal;\n' +
+                // '  vec4 normal = vec4(a_normal.xyz,1.0);\n' +
                 '  float nDotL = max(dot(u_lightDirection, normalize(normal.xyz)), 0.0);\n' +
-                // Calculate the color due to diffuse reflection
-                '  vec3 diffuse = u_lightColor * a_color.rgb * nDotL;\n' +
-                // Calculate the color due to ambient reflection
-                // '  vec3 ambient = u_ambientLight * a_color.rgb;\n' +
-                // Add the surface colors due to diffuse reflection and ambient reflection
-                // '  v_Color = vec4(diffuse + ambient, a_color.a);\n' +
-                '  v_Color = vec4(diffuse , a_color.a);\n' +
+                // '  nDotL = 0.5;\n' +  
+                '  v_Color = vec4(a_color.xyz * nDotL, 1.0);\n' +
+                // '  v_Color = vec4(1.0, 1.0, 1.0, 1.0);\n' +
+                // '  v_Color = u_model * a_color;\n' +
                 '}\n';
             // Fragment shader program
             var fragmentSource = '#ifdef GL_ES\n' +
@@ -2865,6 +2877,7 @@ var leaf;
                 'varying vec4 v_Color;\n' +
                 'void main() {\n' +
                 '  gl_FragColor = v_Color;\n' +
+                // '  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n' +
                 '}\n';
             var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
             var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
@@ -2879,9 +2892,13 @@ var leaf;
             var projectionMatrix = new ecs.Matrix4();
             //projectionMatrix.orthographicCamera(0, leaf.getStageWidth(), 0, leaf.getStageHeight(), 0, -1000);
             projectionMatrix.orthographicCamera(0, leaf.getStageWidth(), 0, leaf.getStageHeight(), 0, 1000);
+            // projectionMatrix.perspectiveCamera(30, leaf.getStageWidth() / leaf.getStageHeight(), 1, 1000);
+            // projectionMatrix.perspectiveCamera(30, leaf.getStageWidth() / leaf.getStageHeight(), 1, 1000);
+            // projectionMatrix.lookAt(3, 3, 7, 0, 0, 0, 0, 1, 0);
             this.u_project = gl.getUniformLocation(program, "u_project");
             gl.uniformMatrix4fv(this.u_project, false, new Float32Array(projectionMatrix.elements));
             this.u_model = gl.getUniformLocation(program, "u_model");
+            this.u_normalMatrix = gl.getUniformLocation(program, "u_normalMatrix");
             this.a_position = gl.getAttribLocation(program, "a_position");
             this.a_color = gl.getAttribLocation(program, "a_color");
             this.a_normal = gl.getAttribLocation(program, "a_normal");
@@ -2891,6 +2908,7 @@ var leaf;
         };
         Normal3DTask.prototype.addTask = function (matrix, positions, indexs) {
             this.model.push(matrix.elements.concat());
+            this.normalMatrix.push((new ecs.Matrix4()).setInverseOf(matrix).transpose().elements);
             this.position.push(positions);
             // this.normal.push(normals);
             // this.color.push(colors);
@@ -2910,7 +2928,7 @@ var leaf;
             gl.enableVertexAttribArray(this.a_normal);
             gl.enableVertexAttribArray(this.a_color);
             gl.uniform3f(this.u_lightColor, 1.0, 1.0, 1.0);
-            gl.uniform3f(this.u_lightDirection, 0.5, 3.0, 4.0);
+            gl.uniform3f(this.u_lightDirection, 0, 0, -1);
             // gl.uniform3f(this.u_ambientLight, 0.5, 0.5, 0.5);
             for (var i = 0, len = this.position.length; i < len; i++) {
                 //切换混合模式
@@ -2922,6 +2940,7 @@ var leaf;
                 gl.vertexAttribPointer(_this.a_color, 3, gl.FLOAT, false, leaf.$size * 9, leaf.$size * 6);
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.position[i]), gl.STATIC_DRAW);
                 gl.uniformMatrix4fv(this.u_model, false, new Float32Array(this.model[i]));
+                gl.uniformMatrix4fv(this.u_normalMatrix, false, new Float32Array(this.normalMatrix[i]));
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
                 gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indexs[i]), gl.STATIC_DRAW);
                 //真正的绘制，之前测试 drawElements 并不比 drawArrays 快，其实也很正常，因为二维里面顶点数据共用并不多，
@@ -2931,6 +2950,7 @@ var leaf;
                 leaf.runInfo.drawCall++;
             }
             this.model.length = 0;
+            this.normalMatrix.length = 0;
             this.position.length = 0;
             // this.normal.length = 0;
             // this.color.length = 0;

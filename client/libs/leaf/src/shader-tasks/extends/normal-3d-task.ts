@@ -7,6 +7,7 @@ namespace leaf {
     private a_normal: any;
     private u_project: any;
     private u_model: any;
+    private u_normalMatrix: any;
     private u_lightColor: any;
     private u_lightDirection: any;
     private u_ambientLight: any;
@@ -35,26 +36,27 @@ namespace leaf {
         'attribute vec4 a_normal;\n' +       // Normal
         'uniform mat4 u_project;\n' +
         'uniform mat4 u_model;\n' +
+        'uniform mat4 u_normalMatrix;\n' +
         'uniform vec3 u_lightColor;\n' +   // Diffuse light color
         'uniform vec3 u_lightDirection;\n' + // Diffuse light direction (in the world coordinate, normalized)
         // 'uniform vec3 u_ambientLight;\n' +   // Color of an ambient light
         'varying vec4 v_Color;\n' +
         'void main() {\n' +
-        '  gl_Position = u_project * u_model * a_position;\n' +
-
-        // Make the length of the normal 1.0
-        '  vec4 normal =  u_project * u_model * a_normal;\n' +
-        // '  vec3 normal = normalize(a_normal.xyz);\n' +
-        // The dot product of the light direction and the normal (the orientation of a surface)
+        // '  gl_Position = u_project * u_model * a_position;\n' +
+        // '  vec4 normal =  u_project * u_model * a_normal;\n' +
+        // '  float nDotL = max(dot(u_lightDirection, normalize(normal.xyz)), 0.0);\n' +
+        // '  vec3 diffuse = u_lightColor * a_color.rgb * nDotL;\n' +
+        // '  v_Color = vec4(diffuse , a_color.a);\n' +
+        '  gl_Position =  u_project * u_model * a_position;\n' +
+        '  vec4 normal = u_normalMatrix * a_normal;\n' +
+        // '  vec4 normal = vec4(a_normal.xyz,1.0);\n' +
         '  float nDotL = max(dot(u_lightDirection, normalize(normal.xyz)), 0.0);\n' +
-        // Calculate the color due to diffuse reflection
-        '  vec3 diffuse = u_lightColor * a_color.rgb * nDotL;\n' +
-        // Calculate the color due to ambient reflection
-        // '  vec3 ambient = u_ambientLight * a_color.rgb;\n' +
-        // Add the surface colors due to diffuse reflection and ambient reflection
-        // '  v_Color = vec4(diffuse + ambient, a_color.a);\n' +
-        '  v_Color = vec4(diffuse , a_color.a);\n' +
+        // '  nDotL = 0.5;\n' +  
+        '  v_Color = vec4(a_color.xyz * nDotL, 1.0);\n' +
+        // '  v_Color = vec4(1.0, 1.0, 1.0, 1.0);\n' +
+        // '  v_Color = u_model * a_color;\n' +
         '}\n';
+
 
       // Fragment shader program
       var fragmentSource =
@@ -64,6 +66,7 @@ namespace leaf {
         'varying vec4 v_Color;\n' +
         'void main() {\n' +
         '  gl_FragColor = v_Color;\n' +
+        // '  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n' +
         '}\n';
       var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
       var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
@@ -81,10 +84,14 @@ namespace leaf {
       let projectionMatrix = new ecs.Matrix4();
       //projectionMatrix.orthographicCamera(0, leaf.getStageWidth(), 0, leaf.getStageHeight(), 0, -1000);
       projectionMatrix.orthographicCamera(0, leaf.getStageWidth(), 0, leaf.getStageHeight(), 0, 1000);
+      // projectionMatrix.perspectiveCamera(30, leaf.getStageWidth() / leaf.getStageHeight(), 1, 1000);
+      // projectionMatrix.perspectiveCamera(30, leaf.getStageWidth() / leaf.getStageHeight(), 1, 1000);
+      // projectionMatrix.lookAt(3, 3, 7, 0, 0, 0, 0, 1, 0);
       this.u_project = gl.getUniformLocation(program, "u_project");
       gl.uniformMatrix4fv(this.u_project, false, new Float32Array(projectionMatrix.elements));
 
       this.u_model = gl.getUniformLocation(program, "u_model");
+      this.u_normalMatrix = gl.getUniformLocation(program, "u_normalMatrix");
       this.a_position = gl.getAttribLocation(program, "a_position");
       this.a_color = gl.getAttribLocation(program, "a_color");
       this.a_normal = gl.getAttribLocation(program, "a_normal");
@@ -94,6 +101,7 @@ namespace leaf {
     }
 
     model: number[][] = [];
+    normalMatrix: number[][] = [];
     position: number[][] = [];
     // normal: number[][] = [];
     // color: number[][] = [];
@@ -103,6 +111,7 @@ namespace leaf {
 
     addTask(matrix: ecs.Matrix4, positions: number[], indexs: number[]) {
       this.model.push(matrix.elements.concat());
+      this.normalMatrix.push((new ecs.Matrix4()).setInverseOf(matrix).transpose().elements);
       this.position.push(positions);
       // this.normal.push(normals);
       // this.color.push(colors);
@@ -124,7 +133,7 @@ namespace leaf {
       gl.enableVertexAttribArray(this.a_color);
 
       gl.uniform3f(this.u_lightColor, 1.0, 1.0, 1.0);
-      gl.uniform3f(this.u_lightDirection, 0.5, 3.0, 4.0);
+      gl.uniform3f(this.u_lightDirection, 0, 0, -1);
       // gl.uniform3f(this.u_ambientLight, 0.5, 0.5, 0.5);
 
       for (var i = 0, len = this.position.length; i < len; i++) {
@@ -138,6 +147,7 @@ namespace leaf {
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.position[i]), gl.STATIC_DRAW);
 
         gl.uniformMatrix4fv(this.u_model, false, new Float32Array(this.model[i]));
+        gl.uniformMatrix4fv(this.u_normalMatrix, false, new Float32Array(this.normalMatrix[i]));
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indexs[i]), gl.STATIC_DRAW);
@@ -151,6 +161,7 @@ namespace leaf {
       }
 
       this.model.length = 0;
+      this.normalMatrix.length = 0;
       this.position.length = 0;
       // this.normal.length = 0;
       // this.color.length = 0;

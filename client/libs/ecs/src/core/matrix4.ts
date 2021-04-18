@@ -11,6 +11,12 @@ namespace ecs {
       0, 0, 0, 1
     ];
 
+    constructor(src?: number[]) {
+      if (src) {
+        for (let i = 0; i < src.length && i < this.elements.length; i++) this.elements[i] = src[i];
+      }
+    }
+
     identity() {
       var e = this.elements;
       e[0] = 1; e[4] = 0; e[8] = 0; e[12] = 0;

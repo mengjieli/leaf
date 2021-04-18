@@ -1721,13 +1721,17 @@ var ecs;
 var ecs;
 (function (ecs) {
     var Matrix4 = /** @class */ (function () {
-        function Matrix4() {
+        function Matrix4(src) {
             this.elements = [
                 1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
                 0, 0, 0, 1
             ];
+            if (src) {
+                for (var i = 0; i < src.length && i < this.elements.length; i++)
+                    this.elements[i] = src[i];
+            }
         }
         Matrix4.prototype.identity = function () {
             var e = this.elements;

@@ -484,6 +484,7 @@ declare namespace leaf {
         private a_normal;
         private u_project;
         private u_model;
+        private u_normalMatrix;
         private u_lightColor;
         private u_lightDirection;
         private u_ambientLight;
@@ -491,6 +492,7 @@ declare namespace leaf {
         initProgram(): void;
         initAttriLocation(): void;
         model: number[][];
+        normalMatrix: number[][];
         position: number[][];
         indexs: number[][];
         counts: number[];

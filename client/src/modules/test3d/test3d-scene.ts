@@ -19,14 +19,14 @@ export class Test3dScene extends ModuleScene {
     // t1.transform.y = 0;
 
     let cb = ecs.Entity.create().addComponent(leaf.Cube);
-    cb.size = 100;
+    cb.size = 300;
     cb.transform.x = 320;
     cb.transform.y = 500;
     cb.transform.z = -500;
     cb.entity.parent = this.scene;
     cb.addComponent(Rotate);
-    // cb.transform.angleX = 45;
-    // cb.transform.angleY = 45;
+    // cb.transform.angleX = 15;
+    // cb.transform.angleY = 15;
     // cb.transform.angleZ = 45;
     cb.color = 0xff0000;
 

@@ -18,7 +18,7 @@ namespace leaf {
         this.point1.x, this.point1.y, this.point1.z,
         this.point2.x, this.point2.y, this.point2.z,
         this.point3.x, this.point3.y, this.point3.z,
-      ], [0, 1, 2], this.color);
+      ], [0, 1, 2]);
       // (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
     }
 

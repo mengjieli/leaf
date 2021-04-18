@@ -245,6 +245,7 @@ declare namespace ecs {
     class Matrix4 {
         id: number;
         elements: number[];
+        constructor(src?: number[]);
         identity(): this;
         set(src: Matrix4): this;
         orthographicCamera(left: number, right: number, top: number, bottom: number, near: number, far: number): void;

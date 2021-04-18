@@ -231,14 +231,14 @@ var Test3dScene = /** @class */ (function (_super) {
         // t1.transform.x = 0;
         // t1.transform.y = 0;
         var cb = ecs.Entity.create().addComponent(leaf.Cube);
-        cb.size = 100;
+        cb.size = 300;
         cb.transform.x = 320;
         cb.transform.y = 500;
         cb.transform.z = -500;
         cb.entity.parent = _this.scene;
         cb.addComponent(Rotate);
-        // cb.transform.angleX = 45;
-        // cb.transform.angleY = 45;
+        // cb.transform.angleX = 15;
+        // cb.transform.angleY = 15;
         // cb.transform.angleZ = 45;
         cb.color = 0xff0000;
         x = 0;
