@@ -22,8 +22,9 @@ namespace leaf {
             //绑定舞台的渲染纹理。
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             //清除舞台，这句如果和 3d 合并之后应该去掉
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            // gl.clear(gl.STENCIL_BUFFER_BIT);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.clear(gl.DEPTH_BUFFER_BIT);
+            gl.clear(gl.STENCIL_BUFFER_BIT);
             let tasks: Shader[] = [];
             this.matrix.identity();
             this.cc = 0;

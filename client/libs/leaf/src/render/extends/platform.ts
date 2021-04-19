@@ -137,7 +137,7 @@ namespace leaf {
       if (!this.texture) return;
       matrix.scale(this._width, this._height, 0);
       let m = matrix.concat(this.entity.transform.local);
-      this.shader.addTask(m, Platform.vertices, Platform.normals, this.colors, this.texCoords, this.texture.texture, Platform.indices);
+      this.shader.addTask(m, Platform.vertices, Platform.normals, this.colors, this.texCoords, this.texture, Platform.indices);
     }
 
     onDestroy() {

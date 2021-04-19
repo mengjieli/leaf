@@ -200,6 +200,21 @@ declare namespace leaf {
     }
 }
 declare namespace leaf {
+    class Polygon extends Render {
+        shader: Polygon3DTask;
+        private _vertices;
+        readonly vertices: number[];
+        private _colors;
+        readonly colors: number[];
+        private _indices;
+        readonly indices: number[];
+        private _alphas;
+        readonly alphas: number[];
+        preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader): void;
+        onDestroy(): void;
+    }
+}
+declare namespace leaf {
     class ScrollBitmap extends Render {
         shader: ScrollerShaderTask;
         private _resource;
@@ -547,7 +562,7 @@ declare namespace leaf {
         indexs: number[][];
         counts: number[];
         index: number;
-        addTask(matrix: ecs.Matrix4, positions: number[], normals: number[], colors: number[], texCoords: number[], texture: WebGLTexture, indexs: number[]): void;
+        addTask(matrix: ecs.Matrix4, positions: number[], normals: number[], colors: number[], texCoords: number[], texture: Texture, indexs: number[]): void;
         static diffuseColor: number[];
         static diffuseDirection: number[];
         static ambientColor: number[];
@@ -608,6 +623,32 @@ declare namespace leaf {
         reset(): void;
         private static _shader;
         static readonly shader: NormalShaderTask;
+    }
+}
+declare namespace leaf {
+    class Polygon3DTask extends Shader {
+        private a_position;
+        private a_color;
+        private a_alpha;
+        private u_projection;
+        private u_mvc;
+        private colorBuffer;
+        private alphaBuffer;
+        constructor();
+        initProgram(): void;
+        projectionMatrix: ecs.Matrix4;
+        initAttriLocation(): void;
+        mvcs: number[];
+        positions: number[];
+        colors: number[];
+        alphas: number[];
+        indexs: number[];
+        count: number;
+        index: number;
+        addTask(matrix: ecs.Matrix4, positions: number[], colors: number[], indexs: number[], alphas: number[]): void;
+        render(): void;
+        private static _shader;
+        static readonly shader: Polygon3DTask;
     }
 }
 declare namespace leaf {

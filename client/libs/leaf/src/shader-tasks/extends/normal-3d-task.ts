@@ -82,8 +82,7 @@ namespace leaf {
         '  spotDotL = max((spotDotL - u_SpotRot),0.0)/(1.0 - u_SpotRot);\n' +
         '  vec3 diffuse = u_LightColor * v_Color.rgb * nDotL * spotDotL;\n' +
         '  vec3 ambient = u_AmbientLight * v_Color.rgb;\n' +
-        // '  gl_FragColor = texture2D(u_Sampler,v_TexCoord) * vec4(diffuse + ambient, v_Color.a);\n' +
-        '  gl_FragColor = texture2D(u_Sampler,v_TexCoord) ;\n' +
+        '  gl_FragColor = texture2D(u_Sampler,v_TexCoord) * vec4(diffuse + ambient, v_Color.a);\n' +
         '}\n';
       var vertexShader = this.createShader(gl.VERTEX_SHADER, VSHADER_SOURCE);
       var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, FSHADER_SOURCE);
@@ -151,7 +150,10 @@ namespace leaf {
     index = 0;
 
     addTask(matrix: ecs.Matrix4, positions: number[], normals: number[],
-      colors: number[], texCoords: number[], texture: WebGLTexture, indexs: number[]) {
+      colors: number[], texCoords: number[], texture: Texture, indexs: number[]) {
+      if (texture.dirty) {
+        texture.update();
+      }
       // let camera = this.projectionMatrix;
       let camera = Normal3DTask.camera;
       let copy = camera.elements.concat();
@@ -165,7 +167,7 @@ namespace leaf {
       this.normal.push(normals);
       this.color.push(colors);
       this.texCoord.push(texCoords);
-      this.texture.push(texture);
+      this.texture.push(texture.texture);
       this.indexs.push(indexs);
       this.counts.push(indexs.length);
     }

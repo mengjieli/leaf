@@ -112,7 +112,7 @@ namespace leaf {
         colors[i * 3 + 1] = g;
         colors[i * 3 + 2] = b;
       }
-      this.shader.addTask(m, Cube.vertices, Cube.normals, Cube.colors, Cube.texCoords, this.texture.texture, Cube.indices);
+      this.shader.addTask(m, Cube.vertices, Cube.normals, Cube.colors, Cube.texCoords, this.texture, Cube.indices);
       // let hs = this.size / 2;
       // this.shader.addTask(m, 
       // //   [

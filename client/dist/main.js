@@ -236,13 +236,42 @@ var Test3dScene = /** @class */ (function (_super) {
         // cb.transform.setRotate(90, 0, 1, 0);
         // cb.color = 0xffffff;
         // cb.resource = "house_png";
-        var platform = ecs.Entity.create().addComponent(leaf.Platform);
-        platform.width = 1.5;
-        platform.height = 1.5 * 1052 / 678;
-        platform.entity.parent = _this.scene;
+        // let platform = ecs.Entity.create().addComponent(leaf.Platform);
+        // platform.width = 1.5;
+        // platform.height = 1.5 * 1052 / 678;
+        // platform.entity.parent = this.scene;
         // platform.resource = "house_png";
-        platform.texture = leaf.PointTexture.getTexture(0xff0000); //
-        var kb = platform.addComponent(leaf.KeyBoard);
+        // platform.texture = leaf.PointTexture.getTexture(0xff0000);//
+        var polygon = ecs.Entity.create().addComponent(leaf.Polygon);
+        polygon.entity.parent = _this.scene;
+        polygon.transform.translate(0, -1, 0);
+        var vertices = polygon.vertices;
+        var colors = polygon.colors;
+        var indices = polygon.indices;
+        var alphas = polygon.alphas;
+        // 0.5, 0.5, 0,
+        //   -0.5, 0.5, 0,
+        //   -0.5, -0.5, 0,
+        vertices[0] = 0.5;
+        vertices[1] = 0.5;
+        vertices[2] = 0;
+        vertices[3] = -0.5;
+        vertices[4] = 0.5;
+        vertices[5] = 0;
+        vertices[6] = -0.5;
+        vertices[7] = -0.5;
+        vertices[8] = 0;
+        alphas[0] = 0;
+        alphas[1] = 1;
+        alphas[2] = 1;
+        for (var i = 0; i < vertices.length; i++) {
+            colors[i] = 1;
+        }
+        indices[0] = 0;
+        indices[1] = 1;
+        indices[2] = 2;
+        _this.scene.addComponent(SpotRotate);
+        var kb = _this.scene.addComponent(leaf.KeyBoard);
         kb.onPressRight.on(function () {
             leaf.Normal3DTask.pointPosition[0] += 0.1;
             console.error(leaf.Normal3DTask.pointPosition);
@@ -277,7 +306,6 @@ var Test3dScene = /** @class */ (function (_super) {
         leaf.Normal3DTask.spotRot = 30 * Math.PI / 180;
         leaf.Normal3DTask.camera.identity();
         leaf.Normal3DTask.camera.translate(0, 0, -4);
-        platform.addComponent(SpotRotate);
         x = 0;
         y = 0;
         return _this;

@@ -25,14 +25,49 @@ export class Test3dScene extends ModuleScene {
     // cb.color = 0xffffff;
     // cb.resource = "house_png";
 
-    let platform = ecs.Entity.create().addComponent(leaf.Platform);
-    platform.width = 1.5;
-    platform.height = 1.5 * 1052 / 678;
-    platform.entity.parent = this.scene;
+    // let platform = ecs.Entity.create().addComponent(leaf.Platform);
+    // platform.width = 1.5;
+    // platform.height = 1.5 * 1052 / 678;
+    // platform.entity.parent = this.scene;
     // platform.resource = "house_png";
-    platform.texture = leaf.PointTexture.getTexture(0xff0000);//
+    // platform.texture = leaf.PointTexture.getTexture(0xff0000);//
 
-    let kb = platform.addComponent(leaf.KeyBoard);
+    let polygon = ecs.Entity.create().addComponent(leaf.Polygon);
+    polygon.entity.parent = this.scene;
+    polygon.transform.translate(0,-1,0);
+    let vertices = polygon.vertices;
+    let colors = polygon.colors;
+    let indices = polygon.indices;
+    let alphas = polygon.alphas;
+
+    // 0.5, 0.5, 0,
+    //   -0.5, 0.5, 0,
+    //   -0.5, -0.5, 0,
+    vertices[0] = 0.5;
+    vertices[1] = 0.5;
+    vertices[2] = 0;
+
+    vertices[3] = -0.5;
+    vertices[4] = 0.5;
+    vertices[5] = 0;
+
+    vertices[6] = -0.5;
+    vertices[7] = -0.5;
+    vertices[8] = 0;
+
+    alphas[0] = 0;
+    alphas[1] = 1;
+    alphas[2] = 1;
+
+    for (let i = 0; i < vertices.length; i++) {
+      colors[i] = 1;
+    }
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+
+    this.scene.addComponent(SpotRotate);
+    let kb = this.scene.addComponent(leaf.KeyBoard);
     kb.onPressRight.on(() => {
       leaf.Normal3DTask.pointPosition[0] += 0.1;
       console.error(leaf.Normal3DTask.pointPosition);
@@ -69,8 +104,6 @@ export class Test3dScene extends ModuleScene {
 
     leaf.Normal3DTask.camera.identity();
     leaf.Normal3DTask.camera.translate(0, 0, -4);
-
-    platform.addComponent(SpotRotate);
 
     x = 0;
     y = 0;

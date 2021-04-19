@@ -324,7 +324,6 @@ var leaf;
                     // gl.enable(gl.CULL_FACE);
                     // gl.enable(gl.BLEND);
                     gl.enable(gl.DEPTH_TEST);
-                    gl.clear(gl.STENCIL_BUFFER_BIT);
                     gl.enable(gl.STENCIL_TEST);
                     gl.blendColor(1.0, 1.0, 1.0, 1.0);
                     // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
@@ -424,8 +423,9 @@ var leaf;
             //绑定舞台的渲染纹理。
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             //清除舞台，这句如果和 3d 合并之后应该去掉
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            // gl.clear(gl.STENCIL_BUFFER_BIT);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.clear(gl.DEPTH_BUFFER_BIT);
+            gl.clear(gl.STENCIL_BUFFER_BIT);
             var tasks = [];
             this.matrix.identity();
             this.cc = 0;
@@ -917,7 +917,7 @@ var leaf;
                 colors[i * 3 + 1] = g;
                 colors[i * 3 + 2] = b;
             }
-            this.shader.addTask(m, Cube.vertices, Cube.normals, Cube.colors, Cube.texCoords, this.texture.texture, Cube.indices);
+            this.shader.addTask(m, Cube.vertices, Cube.normals, Cube.colors, Cube.texCoords, this.texture, Cube.indices);
             // let hs = this.size / 2;
             // this.shader.addTask(m, 
             // //   [
@@ -1487,7 +1487,7 @@ var leaf;
                 return;
             matrix.scale(this._width, this._height, 0);
             var m = matrix.concat(this.entity.transform.local);
-            this.shader.addTask(m, Platform.vertices, Platform.normals, this.colors, this.texCoords, this.texture.texture, Platform.indices);
+            this.shader.addTask(m, Platform.vertices, Platform.normals, this.colors, this.texCoords, this.texture, Platform.indices);
         };
         Platform.prototype.onDestroy = function () {
             this._color = 0xffffff;
@@ -1518,6 +1518,64 @@ var leaf;
         return Platform;
     }(leaf.Render));
     leaf.Platform = Platform;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var Polygon = /** @class */ (function (_super) {
+        __extends(Polygon, _super);
+        function Polygon() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.shader = leaf.Polygon3DTask.shader;
+            _this._vertices = [];
+            _this._colors = [];
+            _this._indices = [];
+            _this._alphas = [];
+            return _this;
+        }
+        Object.defineProperty(Polygon.prototype, "vertices", {
+            get: function () {
+                return this._vertices;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Polygon.prototype, "colors", {
+            get: function () {
+                return this._colors;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Polygon.prototype, "indices", {
+            get: function () {
+                return this._indices;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Polygon.prototype, "alphas", {
+            get: function () {
+                return this._alphas;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Polygon.prototype.preRender2 = function (matrix, alpha, shader) {
+            var m = matrix.concat(this.entity.transform.local);
+            var alphas = this._alphas.concat();
+            for (var i = 0; i < alphas.length; i++) {
+                alphas[i] *= alpha;
+            }
+            this.shader.addTask(m, this.vertices, this.colors, this.indices, alphas);
+        };
+        Polygon.prototype.onDestroy = function () {
+            this._vertices.length = 0;
+            this.colors.length = 0;
+            this.indices.length = 0;
+        };
+        return Polygon;
+    }(leaf.Render));
+    leaf.Polygon = Polygon;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {
@@ -3422,8 +3480,7 @@ var leaf;
                 '  spotDotL = max((spotDotL - u_SpotRot),0.0)/(1.0 - u_SpotRot);\n' +
                 '  vec3 diffuse = u_LightColor * v_Color.rgb * nDotL * spotDotL;\n' +
                 '  vec3 ambient = u_AmbientLight * v_Color.rgb;\n' +
-                // '  gl_FragColor = texture2D(u_Sampler,v_TexCoord) * vec4(diffuse + ambient, v_Color.a);\n' +
-                '  gl_FragColor = texture2D(u_Sampler,v_TexCoord) ;\n' +
+                '  gl_FragColor = texture2D(u_Sampler,v_TexCoord) * vec4(diffuse + ambient, v_Color.a);\n' +
                 '}\n';
             var vertexShader = this.createShader(gl.VERTEX_SHADER, VSHADER_SOURCE);
             var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, FSHADER_SOURCE);
@@ -3466,6 +3523,9 @@ var leaf;
             gl.uniformMatrix4fv(this.u_projection, false, new Float32Array(this.projectionMatrix.elements));
         };
         Normal3DTask.prototype.addTask = function (matrix, positions, normals, colors, texCoords, texture, indexs) {
+            if (texture.dirty) {
+                texture.update();
+            }
             // let camera = this.projectionMatrix;
             var camera = Normal3DTask.camera;
             var copy = camera.elements.concat();
@@ -3478,7 +3538,7 @@ var leaf;
             this.normal.push(normals);
             this.color.push(colors);
             this.texCoord.push(texCoords);
-            this.texture.push(texture);
+            this.texture.push(texture.texture);
             this.indexs.push(indexs);
             this.counts.push(indexs.length);
         };
@@ -3607,7 +3667,7 @@ var leaf;
         NormalShaderTask.prototype.initProgram = function () {
             var gl = leaf.GLCore.gl;
             var vertexSource = "\n             attribute vec2 a_TexCoord;\n             attribute vec4 a_Position;\n             attribute float a_Alpha;\n             attribute float a_Sampler;\n             uniform mat4 u_PMatrix;\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n             varying float v_Sampler;\n             void main(void)\n             {\n                gl_Position = u_PMatrix*a_Position;\n                v_TexCoord = a_TexCoord;\n                v_Alpha = a_Alpha;\n                v_Sampler = a_Sampler;\n             }\n             ";
-            var fragmentSource = "\n             precision mediump float;\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n             varying float v_Sampler;\n             uniform vec4 u_Color;\n             uniform sampler2D u_Sampler0;\n             uniform sampler2D u_Sampler1;\n             uniform sampler2D u_Sampler2;\n             uniform sampler2D u_Sampler3;\n             uniform sampler2D u_Sampler4;\n             uniform sampler2D u_Sampler5;\n             uniform sampler2D u_Sampler6;\n             uniform sampler2D u_Sampler7;\n             vec4 getTextureColor(vec2 coord);\n             void main(void)\n             {\n                gl_FragColor = getTextureColor(v_TexCoord)*u_Color*v_Alpha;\n             }\n             vec4 getTextureColor(vec2 coord) {\n                if(v_Sampler == 0.0) {\n                    return texture2D(u_Sampler0,v_TexCoord);\n                } else if(v_Sampler == 1.0) {\n                    return texture2D(u_Sampler1,v_TexCoord);\n                } else if(v_Sampler == 2.0) {\n                    return texture2D(u_Sampler2,v_TexCoord);\n                } else if(v_Sampler == 3.0) {\n                    return texture2D(u_Sampler3,v_TexCoord);\n                } else if(v_Sampler == 4.0) {\n                    return texture2D(u_Sampler4,v_TexCoord);\n                } else if(v_Sampler == 5.0) {\n                    return texture2D(u_Sampler5,v_TexCoord);\n                } else if(v_Sampler == 6.0) {\n                    return texture2D(u_Sampler6,v_TexCoord);\n                } else if(v_Sampler == 7.0) {\n                    return texture2D(u_Sampler7,v_TexCoord);\n                }\n             }\n             ";
+            var fragmentSource = "\n             #ifdef GL_ES\n             precision mediump float;\n             #endif\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n             varying float v_Sampler;\n             uniform vec4 u_Color;\n             uniform sampler2D u_Sampler0;\n             uniform sampler2D u_Sampler1;\n             uniform sampler2D u_Sampler2;\n             uniform sampler2D u_Sampler3;\n             uniform sampler2D u_Sampler4;\n             uniform sampler2D u_Sampler5;\n             uniform sampler2D u_Sampler6;\n             uniform sampler2D u_Sampler7;\n             vec4 getTextureColor(vec2 coord);\n             void main(void)\n             {\n                gl_FragColor = getTextureColor(v_TexCoord)*u_Color*v_Alpha;\n             }\n             vec4 getTextureColor(vec2 coord) {\n                if(v_Sampler == 0.0) {\n                    return texture2D(u_Sampler0,v_TexCoord);\n                } else if(v_Sampler == 1.0) {\n                    return texture2D(u_Sampler1,v_TexCoord);\n                } else if(v_Sampler == 2.0) {\n                    return texture2D(u_Sampler2,v_TexCoord);\n                } else if(v_Sampler == 3.0) {\n                    return texture2D(u_Sampler3,v_TexCoord);\n                } else if(v_Sampler == 4.0) {\n                    return texture2D(u_Sampler4,v_TexCoord);\n                } else if(v_Sampler == 5.0) {\n                    return texture2D(u_Sampler5,v_TexCoord);\n                } else if(v_Sampler == 6.0) {\n                    return texture2D(u_Sampler6,v_TexCoord);\n                } else if(v_Sampler == 7.0) {\n                    return texture2D(u_Sampler7,v_TexCoord);\n                }\n             }\n             ";
             var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
             var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
             this.program = this.createWebGLProgram(vertexShader, fragmentShader);
@@ -3796,6 +3856,147 @@ var leaf;
         return NormalShaderTask;
     }(leaf.Shader));
     leaf.NormalShaderTask = NormalShaderTask;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
+    var Polygon3DTask = /** @class */ (function (_super) {
+        __extends(Polygon3DTask, _super);
+        function Polygon3DTask() {
+            var _this_1 = _super.call(this) || this;
+            _this_1.mvcs = [];
+            _this_1.positions = [];
+            _this_1.colors = [];
+            _this_1.alphas = [];
+            _this_1.indexs = [];
+            _this_1.count = 0;
+            _this_1.index = 0;
+            //初始化作色器、program
+            _this_1.initProgram();
+            //初始化作色器固定变量 和 获取作色器中得变量
+            _this_1.initAttriLocation();
+            return _this_1;
+        }
+        Polygon3DTask.prototype.initProgram = function () {
+            var gl = leaf.GLCore.gl;
+            //'uniform mat4 u_Projection;\n' +
+            // 'uniform mat4 u_MvcMatrix;\n' +
+            // '  gl_Position =  u_Projection * u_MvcMatrix * a_Position;\n' +
+            //提高灯光效果 浮尘，噪声图
+            var VSHADER_SOURCE = 'attribute vec4 a_Position;\n' +
+                'attribute vec3 a_Color;\n' + // Defined constant in main()
+                'attribute float a_Alpha;\n' +
+                'uniform mat4 u_Projection;\n' +
+                'uniform mat4 u_MvcMatrix;\n' +
+                'varying vec3 v_Color;\n' +
+                'varying float v_Alpha;\n' +
+                'void main() {\n' +
+                '  gl_Position = u_Projection * u_MvcMatrix * a_Position;\n' +
+                '  v_Color = a_Color;\n' +
+                '  v_Alpha = a_Alpha;\n' +
+                '}\n';
+            // Fragment shader program
+            var FSHADER_SOURCE = '#ifdef GL_ES\n' +
+                'precision mediump float;\n' +
+                '#endif\n' +
+                'varying vec3 v_Color;\n' +
+                'varying float v_Alpha;\n' +
+                'void main() {\n' +
+                '  gl_FragColor = vec4(v_Color.xyz,1.0) * v_Alpha;\n' +
+                '}\n';
+            var vertexShader = this.createShader(gl.VERTEX_SHADER, VSHADER_SOURCE);
+            var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, FSHADER_SOURCE);
+            this.program = this.createWebGLProgram(vertexShader, fragmentShader);
+        };
+        Polygon3DTask.prototype.initAttriLocation = function () {
+            var gl = leaf.GLCore.gl;
+            var program = this.program;
+            this.buffer = gl.createBuffer();
+            this.colorBuffer = gl.createBuffer();
+            this.alphaBuffer = gl.createBuffer();
+            this.indexBuffer = gl.createBuffer();
+            gl.useProgram(program);
+            this.u_mvc = gl.getUniformLocation(program, "u_MvcMatrix");
+            this.u_projection = gl.getUniformLocation(program, "u_Projection");
+            this.a_position = gl.getAttribLocation(program, "a_Position");
+            this.a_color = gl.getAttribLocation(program, "a_Color");
+            this.a_alpha = gl.getAttribLocation(program, "a_Alpha");
+            this.projectionMatrix = new ecs.Matrix4();
+            this.projectionMatrix.orthographicCamera(-1, 1, -leaf.getStageHeight() / leaf.getStageWidth(), leaf.getStageHeight() / leaf.getStageWidth(), -1000, 1000);
+            gl.uniformMatrix4fv(this.u_projection, false, new Float32Array(this.projectionMatrix.elements));
+        };
+        Polygon3DTask.prototype.addTask = function (matrix, positions, colors, indexs, alphas) {
+            // let camera = this.projectionMatrix;
+            var camera = leaf.Normal3DTask.camera;
+            var copy = camera.elements.concat();
+            camera.concat(matrix);
+            for (var i = 0, len = this.mvcs.length; i < camera.elements.length; i++) {
+                this.mvcs[len + i] = camera.elements[i];
+            }
+            camera.elements = copy;
+            for (var i = 0, len = this.positions.length; i < positions.length; i++) {
+                this.positions[len + i] = positions[i];
+            }
+            for (var i = 0, len = this.colors.length; i < colors.length; i++) {
+                this.colors[len + i] = colors[i];
+            }
+            for (var i = 0, len = this.indexs.length; i < indexs.length; i++) {
+                this.indexs[len + i] = indexs[i];
+            }
+            for (var i = 0, len = this.alphas.length; i < alphas.length; i++) {
+                this.alphas[len + i] = alphas[i];
+            }
+            this.count += indexs.length;
+        };
+        Polygon3DTask.prototype.render = function () {
+            var _this = this;
+            var gl = leaf.GLCore.gl;
+            gl.useProgram(_this.program);
+            //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
+            //开始渲染任务
+            gl.enableVertexAttribArray(this.a_position);
+            gl.enableVertexAttribArray(this.a_color);
+            gl.enableVertexAttribArray(this.a_alpha);
+            //切换混合模式
+            // BlendModeFunc.changeBlendMode(this.blendMode[i]);
+            //分配 buffer 内容
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+            gl.vertexAttribPointer(_this.a_position, 3, gl.FLOAT, false, leaf.$size * 3, 0);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.positions), gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+            gl.vertexAttribPointer(_this.a_color, 3, gl.FLOAT, false, leaf.$size * 3, 0);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.colors), gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.alphaBuffer);
+            gl.vertexAttribPointer(_this.a_alpha, 1, gl.FLOAT, false, leaf.$size * 1, 0);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.alphas), gl.STATIC_DRAW);
+            gl.uniformMatrix4fv(this.u_mvc, false, new Float32Array(this.mvcs));
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indexs), gl.STATIC_DRAW);
+            //真正的绘制，之前测试 drawElements 并不比 drawArrays 快，其实也很正常，因为二维里面顶点数据共用并不多，
+            //一个矩形也就对角线的两个顶点各被共用两次(两个三角形共用)，远小于 3D 里面的立方体一个顶点被 6 个三角形共用。
+            gl.drawElements(gl.TRIANGLES, this.count, gl.UNSIGNED_SHORT, 0); //利用drawElements画三角形
+            leaf.runInfo.drawCount += _this.indexs.length;
+            leaf.runInfo.drawCall++;
+            this.mvcs.length = 0;
+            this.positions.length = 0;
+            this.colors.length = 0;
+            this.alphas.length = 0;
+            this.indexs.length = 0;
+            this.index = 0;
+            this.count = 0;
+        };
+        Object.defineProperty(Polygon3DTask, "shader", {
+            get: function () {
+                if (!this._shader) {
+                    this._shader = new Polygon3DTask();
+                }
+                return this._shader;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return Polygon3DTask;
+    }(leaf.Shader));
+    leaf.Polygon3DTask = Polygon3DTask;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {

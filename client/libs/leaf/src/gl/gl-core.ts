@@ -86,7 +86,6 @@ namespace leaf {
                     // gl.enable(gl.CULL_FACE);
                     // gl.enable(gl.BLEND);
                     gl.enable(gl.DEPTH_TEST);
-                    gl.clear(gl.STENCIL_BUFFER_BIT);
                     gl.enable(gl.STENCIL_TEST);
                     gl.blendColor(1.0, 1.0, 1.0, 1.0);
                     // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);

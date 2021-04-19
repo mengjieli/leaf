@@ -48,7 +48,9 @@ namespace leaf {
              `;
 
             var fragmentSource = `
+             #ifdef GL_ES
              precision mediump float;
+             #endif
              varying vec2 v_TexCoord;
              varying float v_Alpha;
              varying float v_Sampler;
