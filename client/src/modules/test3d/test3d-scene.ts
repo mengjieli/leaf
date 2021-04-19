@@ -56,8 +56,8 @@ export class Test3dScene extends ModuleScene {
     vertices[8] = 0;
 
     alphas[0] = 0;
-    alphas[1] = 1;
-    alphas[2] = 1;
+    alphas[1] = 0;
+    alphas[2] = 0.5;
 
     for (let i = 0; i < vertices.length; i++) {
       colors[i] = 1;

@@ -262,8 +262,8 @@ var Test3dScene = /** @class */ (function (_super) {
         vertices[7] = -0.5;
         vertices[8] = 0;
         alphas[0] = 0;
-        alphas[1] = 1;
-        alphas[2] = 1;
+        alphas[1] = 0;
+        alphas[2] = 0.5;
         for (var i = 0; i < vertices.length; i++) {
             colors[i] = 1;
         }
