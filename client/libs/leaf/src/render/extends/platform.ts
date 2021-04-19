@@ -6,7 +6,25 @@ namespace leaf {
 
     size: number = 1;
 
-    color: number = 0xffffff;
+    private _color: number = 0xffffff;
+
+    set color(val: number) {
+      if (this._color === val) return;
+      this._color = val;
+      let colors = this.colors;
+      let r = (this.color >> 16) / 255.0;
+      let g = ((this.color >> 8) & 0xFF) / 255.0;
+      let b = (this.color & 0xFF) / 255.0;
+      for (let i = 0; i < colors.length / 3; i++) {
+        colors[i * 3 + 0] = r;
+        colors[i * 3 + 1] = g;
+        colors[i * 3 + 2] = b;
+      }
+    }
+
+    get color(): number {
+      return this._color;
+    }
 
     preRender() {
     }
@@ -18,7 +36,7 @@ namespace leaf {
       0.5, -0.5, 0,  // v0-v1-v2-v3 front
     ];
 
-    static texCoords = [
+    texCoords = [
       1, 1,
       0, 1,
       0, 0,
@@ -26,7 +44,7 @@ namespace leaf {
     ]
 
     // Colors
-    static colors = [
+    colors = [
       1, 1, 1,
       1, 1, 1,
       1, 1, 1,
@@ -59,7 +77,16 @@ namespace leaf {
     }
 
     set texture(val: Texture) {
+      if (this._texture === val) return;
       this._texture = val;
+      if (val) {
+        this.texCoords = [
+          val.endX, val.endY,
+          val.startX, val.endY,
+          val.startX, val.startY,
+          val.endX, val.startY
+        ];
+      }
     }
 
     get resource(): string {
@@ -108,22 +135,13 @@ namespace leaf {
 
     preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader) {
       if (!this.texture) return;
-      matrix.scale(this._width, this._height, 1);
+      matrix.scale(this._width, this._height, 0);
       let m = matrix.concat(this.entity.transform.local);
-      let r = (this.color >> 16) / 255.0;
-      let g = ((this.color >> 8) & 0xFF) / 255.0;
-      let b = (this.color & 0xFF) / 255.0;
-      let colors = Platform.colors;
-      for (let i = 0; i < colors.length / 3; i++) {
-        colors[i * 3 + 0] = r;
-        colors[i * 3 + 1] = g;
-        colors[i * 3 + 2] = b;
-      }
-      this.shader.addTask(m, Platform.vertices, Platform.normals, colors, Platform.texCoords, this.texture.texture, Platform.indices);
+      this.shader.addTask(m, Platform.vertices, Platform.normals, this.colors, this.texCoords, this.texture.texture, Platform.indices);
     }
 
     onDestroy() {
-      this.color = 0xffffff;
+      this._color = 0xffffff;
       this._width = this._height = 1;
       this.size = 1;
       this.texture = null;

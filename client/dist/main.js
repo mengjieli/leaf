@@ -240,8 +240,8 @@ var Test3dScene = /** @class */ (function (_super) {
         platform.width = 1.5;
         platform.height = 1.5 * 1052 / 678;
         platform.entity.parent = _this.scene;
-        platform.resource = "house_png";
-        // platform.texture=  leaf.PointTexture.getTexture(0xffffff);//
+        // platform.resource = "house_png";
+        platform.texture = leaf.PointTexture.getTexture(0xff0000); //
         var kb = platform.addComponent(leaf.KeyBoard);
         kb.onPressRight.on(function () {
             leaf.Normal3DTask.pointPosition[0] += 0.1;
@@ -274,30 +274,13 @@ var Test3dScene = /** @class */ (function (_super) {
         leaf.Normal3DTask.pointColor = [1.5, 1.5, 0.5];
         leaf.Normal3DTask.pointPosition = [0, 0, 0.5];
         leaf.Normal3DTask.spotDirection = [0, -1, -1];
-        leaf.Normal3DTask.spotRot = 10 * Math.PI / 180;
+        leaf.Normal3DTask.spotRot = 30 * Math.PI / 180;
         leaf.Normal3DTask.camera.identity();
         leaf.Normal3DTask.camera.translate(0, 0, -4);
         platform.addComponent(SpotRotate);
-        // leaf.Normal3DTask.camera.lookAt(6, 6, 14, 0, 0, 0, 0, 1, 0);
-        // leaf.Normal3DTask.pointPosition = [0,0,0];
-        // // Set the light color (white)
-        // gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
-        // // Set the light direction (in the world coordinate)
-        // gl.uniform3f(u_LightPosition, 2.3, 4.0, 3.5);
-        // // Set the ambient light
-        // gl.uniform3f(u_AmbientLight, 0.2, 0.2, 0.2);
         x = 0;
         y = 0;
         return _this;
-        // let t2 = this.addTriangle([
-        //   x, y, -0.9,
-        //   x + 200, y, -1.1,
-        //   x, y + 200, -1
-        // ]);
-        // t2.color = 0x5555ff;
-        // console.error(t1.entity.id)
-        // console.error("scene 3d");
-        // leaf.StateWin.show();
     }
     Test3dScene.prototype.addTriangle = function (pos) {
         var t = ecs.Entity.create().addComponent(leaf.Triangle);

@@ -79,10 +79,11 @@ namespace leaf {
         '  vec3 lightDirection = normalize(u_LightPosition - v_Position);\n' +
         '  float nDotL = max(dot(lightDirection, normal), 0.0);\n' +
         '  float spotDotL = max(dot(-lightDirection, normalize(u_SpotDirection)), 0.0);\n' +
-        '  spotDotL = max((spotDotL - 1.0 + u_SpotRot),0.0)/u_SpotRot;\n' +
+        '  spotDotL = max((spotDotL - u_SpotRot),0.0)/(1.0 - u_SpotRot);\n' +
         '  vec3 diffuse = u_LightColor * v_Color.rgb * nDotL * spotDotL;\n' +
         '  vec3 ambient = u_AmbientLight * v_Color.rgb;\n' +
-        '  gl_FragColor = texture2D(u_Sampler,v_TexCoord) * vec4(diffuse + ambient, v_Color.a);\n' +
+        // '  gl_FragColor = texture2D(u_Sampler,v_TexCoord) * vec4(diffuse + ambient, v_Color.a);\n' +
+        '  gl_FragColor = texture2D(u_Sampler,v_TexCoord) ;\n' +
         '}\n';
       var vertexShader = this.createShader(gl.VERTEX_SHADER, VSHADER_SOURCE);
       var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, FSHADER_SOURCE);
@@ -124,7 +125,7 @@ namespace leaf {
       this.projectionMatrix = new ecs.Matrix4();
       //projectionMatrix.orthographicCamera(0, leaf.getStageWidth(), 0, leaf.getStageHeight(), 0, -100);
       // this.projectionMatrix.orthographicCamera(0, leaf.getStageWidth(), 0, leaf.getStageHeight(), -1000, 1000);
-      this.projectionMatrix.orthographicCamera(-1, 1, -leaf.getStageHeight()/leaf.getStageWidth(), leaf.getStageHeight()/leaf.getStageWidth(), -1000, 1000);
+      this.projectionMatrix.orthographicCamera(-1, 1, -leaf.getStageHeight() / leaf.getStageWidth(), leaf.getStageHeight() / leaf.getStageWidth(), -1000, 1000);
       // this.projectionMatrix.perspectiveCamera(30, leaf.getStageWidth() / leaf.getStageHeight(), 1, 100);
       // this.projectionMatrix.perspectiveCamera(30, leaf.getStageWidth() / leaf.getStageHeight(), 1, 100);
       // this.projectionMatrix.lookAt(6, 6, 14, 0, 0, 0, 0, 1, 0);
@@ -167,9 +168,6 @@ namespace leaf {
       this.texture.push(texture);
       this.indexs.push(indexs);
       this.counts.push(indexs.length);
-      // this.indexs.push([this.index, this.index + 1, this.index + 2]);
-      // this.counts.push(positions.length / 3);
-      // this.index += positions.length / 3;
     }
 
     static diffuseColor = [0.0, 0.0, 0.0];
@@ -200,7 +198,7 @@ namespace leaf {
       gl.uniform3fv(this.u_pointLightColor, Normal3DTask.pointColor);
       gl.uniform3fv(this.u_pointLightPosition, Normal3DTask.pointPosition);
       gl.uniform3fv(this.u_SpotDirection, Normal3DTask.spotDirection);
-      gl.uniform1f(this.u_SpotRot, Normal3DTask.spotRot);
+      gl.uniform1f(this.u_SpotRot, Math.cos(Normal3DTask.spotRot));
 
       gl.activeTexture(gl[`TEXTURE0`]);
 

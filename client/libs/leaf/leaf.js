@@ -1369,11 +1369,45 @@ var leaf;
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.shader = leaf.Normal3DTask.shader;
             _this.size = 1;
-            _this.color = 0xffffff;
+            _this._color = 0xffffff;
+            _this.texCoords = [
+                1, 1,
+                0, 1,
+                0, 0,
+                1, 0
+            ];
+            // Colors
+            _this.colors = [
+                1, 1, 1,
+                1, 1, 1,
+                1, 1, 1,
+                1, 1, 1 // v0-v1-v2-v3 front
+            ];
             _this._width = 1;
             _this._height = 1;
             return _this;
         }
+        Object.defineProperty(Platform.prototype, "color", {
+            get: function () {
+                return this._color;
+            },
+            set: function (val) {
+                if (this._color === val)
+                    return;
+                this._color = val;
+                var colors = this.colors;
+                var r = (this.color >> 16) / 255.0;
+                var g = ((this.color >> 8) & 0xFF) / 255.0;
+                var b = (this.color & 0xFF) / 255.0;
+                for (var i = 0; i < colors.length / 3; i++) {
+                    colors[i * 3 + 0] = r;
+                    colors[i * 3 + 1] = g;
+                    colors[i * 3 + 2] = b;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
         Platform.prototype.preRender = function () {
         };
         Object.defineProperty(Platform.prototype, "texture", {
@@ -1381,7 +1415,17 @@ var leaf;
                 return this._texture;
             },
             set: function (val) {
+                if (this._texture === val)
+                    return;
                 this._texture = val;
+                if (val) {
+                    this.texCoords = [
+                        val.endX, val.endY,
+                        val.startX, val.endY,
+                        val.startX, val.startY,
+                        val.endX, val.startY
+                    ];
+                }
             },
             enumerable: true,
             configurable: true
@@ -1441,21 +1485,12 @@ var leaf;
         Platform.prototype.preRender2 = function (matrix, alpha, shader) {
             if (!this.texture)
                 return;
-            matrix.scale(this._width, this._height, 1);
+            matrix.scale(this._width, this._height, 0);
             var m = matrix.concat(this.entity.transform.local);
-            var r = (this.color >> 16) / 255.0;
-            var g = ((this.color >> 8) & 0xFF) / 255.0;
-            var b = (this.color & 0xFF) / 255.0;
-            var colors = Platform.colors;
-            for (var i = 0; i < colors.length / 3; i++) {
-                colors[i * 3 + 0] = r;
-                colors[i * 3 + 1] = g;
-                colors[i * 3 + 2] = b;
-            }
-            this.shader.addTask(m, Platform.vertices, Platform.normals, colors, Platform.texCoords, this.texture.texture, Platform.indices);
+            this.shader.addTask(m, Platform.vertices, Platform.normals, this.colors, this.texCoords, this.texture.texture, Platform.indices);
         };
         Platform.prototype.onDestroy = function () {
-            this.color = 0xffffff;
+            this._color = 0xffffff;
             this._width = this._height = 1;
             this.size = 1;
             this.texture = null;
@@ -1468,19 +1503,6 @@ var leaf;
             -0.5, 0.5, 0,
             -0.5, -0.5, 0,
             0.5, -0.5, 0,
-        ];
-        Platform.texCoords = [
-            1, 1,
-            0, 1,
-            0, 0,
-            1, 0
-        ];
-        // Colors
-        Platform.colors = [
-            1, 1, 1,
-            1, 1, 1,
-            1, 1, 1,
-            1, 1, 1 // v0-v1-v2-v3 front
         ];
         // Normal
         Platform.normals = [
@@ -3397,10 +3419,11 @@ var leaf;
                 '  vec3 lightDirection = normalize(u_LightPosition - v_Position);\n' +
                 '  float nDotL = max(dot(lightDirection, normal), 0.0);\n' +
                 '  float spotDotL = max(dot(-lightDirection, normalize(u_SpotDirection)), 0.0);\n' +
-                '  spotDotL = max((spotDotL - 1.0 + u_SpotRot),0.0)/u_SpotRot;\n' +
+                '  spotDotL = max((spotDotL - u_SpotRot),0.0)/(1.0 - u_SpotRot);\n' +
                 '  vec3 diffuse = u_LightColor * v_Color.rgb * nDotL * spotDotL;\n' +
                 '  vec3 ambient = u_AmbientLight * v_Color.rgb;\n' +
-                '  gl_FragColor = texture2D(u_Sampler,v_TexCoord) * vec4(diffuse + ambient, v_Color.a);\n' +
+                // '  gl_FragColor = texture2D(u_Sampler,v_TexCoord) * vec4(diffuse + ambient, v_Color.a);\n' +
+                '  gl_FragColor = texture2D(u_Sampler,v_TexCoord) ;\n' +
                 '}\n';
             var vertexShader = this.createShader(gl.VERTEX_SHADER, VSHADER_SOURCE);
             var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, FSHADER_SOURCE);
@@ -3458,9 +3481,6 @@ var leaf;
             this.texture.push(texture);
             this.indexs.push(indexs);
             this.counts.push(indexs.length);
-            // this.indexs.push([this.index, this.index + 1, this.index + 2]);
-            // this.counts.push(positions.length / 3);
-            // this.index += positions.length / 3;
         };
         Normal3DTask.prototype.render = function () {
             var _this = this;
@@ -3481,7 +3501,7 @@ var leaf;
             gl.uniform3fv(this.u_pointLightColor, Normal3DTask.pointColor);
             gl.uniform3fv(this.u_pointLightPosition, Normal3DTask.pointPosition);
             gl.uniform3fv(this.u_SpotDirection, Normal3DTask.spotDirection);
-            gl.uniform1f(this.u_SpotRot, Normal3DTask.spotRot);
+            gl.uniform1f(this.u_SpotRot, Math.cos(Normal3DTask.spotRot));
             gl.activeTexture(gl["TEXTURE0"]);
             for (var i = 0, len = this.position.length; i < len; i++) {
                 //切换混合模式

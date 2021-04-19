@@ -179,11 +179,12 @@ declare namespace leaf {
     class Platform extends Render {
         shader: Normal3DTask;
         size: number;
+        private _color;
         color: number;
         preRender(): void;
         static vertices: number[];
-        static texCoords: number[];
-        static colors: number[];
+        texCoords: number[];
+        colors: number[];
         static normals: number[];
         static indices: number[];
         private _resource;
