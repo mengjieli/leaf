@@ -250,15 +250,23 @@ var Test3dScene = /** @class */ (function (_super) {
         // platform.resource = "house_png";
         // platform.texture = leaf.PointTexture.getTexture(0xff0000);//
         var tail = ecs.Entity.create().addComponent(Tail, _this.scene);
-        // tail.addComponent(CircleMove2D, 1, 0.001);
         tail.parent = _this.scene;
         tail.normal = ecs.Vector3.create(0, 0, 1);
         tail.width = 0.01;
-        tail.addComponent(tween.Tween, tail.transform, 1000, { x: 0.8 }).onComplete = function () {
-            tail.addComponent(tween.Tween, tail.transform, 1000, { x: 0, y: 0.8 }).onComplete = function () {
-                tail.addComponent(tween.Tween, tail.transform, 1000, { x: -0.8, y: 0 });
+        tail.lifeTime = 1000;
+        var time = 300;
+        var call = function () {
+            tail.addComponent(tween.Tween, tail.transform, time, { x: 0.8 }).onComplete = function () {
+                // time = Math.max(time - 100, 300);
+                tail.addComponent(tween.Tween, tail.transform, time, { x: 0, y: 0.8 }).onComplete = function () {
+                    // time = Math.max(time - 100, 300);
+                    // tail.addComponent(tween.Tween, tail.transform, time, { x: -0.8, y: 0 }).onComplete = call;
+                    // time = Math.max(time - 100, 300);
+                };
             };
         };
+        call();
+        // tail.addComponent(CircleMove2D, 1, 0.003);
         _this.scene.addComponent(SpotRotate);
         var kb = _this.scene.addComponent(leaf.KeyBoard);
         kb.onPressRight.on(function () {
@@ -331,15 +339,17 @@ var Tail = /** @class */ (function (_super) {
         _this.points = [];
         return _this;
     }
-    Tail.prototype.init = function (p) {
+    Tail.prototype.init = function () {
         this.points.length = 0;
         this.lifeTime = 1000;
         this.width = 0.1;
         this.color = 0xffffff;
         this.tail = ecs.Entity.create().addComponent(leaf.Triangles);
-        this.tail.parent = p;
     };
     Tail.prototype.update = function (dt) {
+        if (this.tail.parent != this.entity.parent) {
+            this.tail.parent = this.entity.parent;
+        }
         for (var i = 0; i < this.points.length; i++) {
             var p = this.points[i];
             p.alpha = Math.max(p.alpha - dt / this.lifeTime, 0);

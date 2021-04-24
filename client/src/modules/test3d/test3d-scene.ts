@@ -33,22 +33,23 @@ export class Test3dScene extends ModuleScene {
     // platform.texture = leaf.PointTexture.getTexture(0xff0000);//
 
     let tail = ecs.Entity.create().addComponent(Tail, this.scene);
-    // tail.addComponent(CircleMove2D, 1, 0.001);
     tail.parent = this.scene;
     tail.normal = ecs.Vector3.create(0, 0, 1);
     tail.width = 0.01;
-    let time = 1000;
+    tail.lifeTime = 1000;
+    let time = 300;
     let call = () => {
       tail.addComponent(tween.Tween, tail.transform, time, { x: 0.8 }).onComplete = () => {
-        time = Math.max(time - 100, 300);
+        // time = Math.max(time - 100, 300);
         tail.addComponent(tween.Tween, tail.transform, time, { x: 0, y: 0.8 }).onComplete = () => {
-          time = Math.max(time - 100, 300);
-          tail.addComponent(tween.Tween, tail.transform, time, { x: -0.8, y: 0 }).onComplete = call;
-          time = Math.max(time - 100, 300);
+          // time = Math.max(time - 100, 300);
+          // tail.addComponent(tween.Tween, tail.transform, time, { x: -0.8, y: 0 }).onComplete = call;
+          // time = Math.max(time - 100, 300);
         }
       };
     }
     call();
+    // tail.addComponent(CircleMove2D, 1, 0.003);
 
     this.scene.addComponent(SpotRotate);
     let kb = this.scene.addComponent(leaf.KeyBoard);
