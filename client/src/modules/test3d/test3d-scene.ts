@@ -37,11 +37,18 @@ export class Test3dScene extends ModuleScene {
     tail.parent = this.scene;
     tail.normal = ecs.Vector3.create(0, 0, 1);
     tail.width = 0.01;
-    tail.addComponent(tween.Tween, tail.transform, 1000, { x: 0.8 }).onComplete = () => {
-      tail.addComponent(tween.Tween, tail.transform, 1000, { x: 0, y: 0.8 }).onComplete = () => {
-        tail.addComponent(tween.Tween, tail.transform, 1000, { x: -0.8, y: 0 })
-      }
-    };
+    let time = 1000;
+    let call = () => {
+      tail.addComponent(tween.Tween, tail.transform, time, { x: 0.8 }).onComplete = () => {
+        time = Math.max(time - 100, 300);
+        tail.addComponent(tween.Tween, tail.transform, time, { x: 0, y: 0.8 }).onComplete = () => {
+          time = Math.max(time - 100, 300);
+          tail.addComponent(tween.Tween, tail.transform, time, { x: -0.8, y: 0 }).onComplete = call;
+          time = Math.max(time - 100, 300);
+        }
+      };
+    }
+    call();
 
     this.scene.addComponent(SpotRotate);
     let kb = this.scene.addComponent(leaf.KeyBoard);
@@ -117,17 +124,18 @@ class Tail extends ecs.Component {
   width: number;
   color: number;
 
-  init(p: ecs.Entity) {
+  init() {
     this.points.length = 0;
     this.lifeTime = 1000;
     this.width = 0.1;
     this.color = 0xffffff;
     this.tail = ecs.Entity.create().addComponent(leaf.Triangles);
-    this.tail.parent = p;
-
   }
 
   update(dt: number) {
+    if (this.tail.parent != this.entity.parent) {
+      this.tail.parent = this.entity.parent;
+    }
     for (let i = 0; i < this.points.length; i++) {
       let p = this.points[i];
       p.alpha = Math.max(p.alpha - dt / this.lifeTime, 0);
