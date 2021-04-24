@@ -4,44 +4,28 @@ namespace leaf {
 
     shader = Polygon3DTask.shader;
 
+    readonly vertices: number[] = [];
 
-    private _vertices: number[] = [];
+    readonly colors: number[] = [];
 
-    get vertices(): number[] {
-      return this._vertices;
-    }
+    readonly indices: number[] = [];
 
-    private _colors: number[] = [];
-
-    get colors(): number[] {
-      return this._colors;
-    }
-
-    private _indices: number[] = [];
-
-    get indices(): number[] {
-      return this._indices;
-    }
-
-    private _alphas: number[] = [];
-
-    get alphas():number[] {
-      return this._alphas;
-    }
+    readonly alphas: number[] = [];
 
     preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader) {
       let m = matrix.concat(this.entity.transform.local);
-      let alphas =  this._alphas.concat();
-      for(let i = 0; i < alphas.length; i++) {
+      let alphas = this.alphas.concat();
+      for (let i = 0; i < alphas.length; i++) {
         alphas[i] *= alpha;
       }
       this.shader.addTask(m, this.vertices, this.colors, this.indices, alphas);
     }
 
     onDestroy() {
-      this._vertices.length = 0;
+      this.vertices.length = 0;
       this.colors.length = 0;
       this.indices.length = 0;
+      this.alphas.length = 0;
     }
 
   }

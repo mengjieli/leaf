@@ -42,6 +42,14 @@ export class Main {
                     // new PuzzleScene();
                 }
             )
+        });
+
+        (new orange.native.File("libs/")).watch((url, content) => {
+            if (url.split(".").length === 2 && url.split(".")[1] === "js") {
+                eval(content);
+                leaf.init();
+                orange.autoloadLink("Test3dScene")
+            }
         })
     }
 }

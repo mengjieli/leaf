@@ -32,39 +32,16 @@ export class Test3dScene extends ModuleScene {
     // platform.resource = "house_png";
     // platform.texture = leaf.PointTexture.getTexture(0xff0000);//
 
-    let polygon = ecs.Entity.create().addComponent(leaf.Polygon);
-    polygon.entity.parent = this.scene;
-    polygon.transform.translate(0,-1,0);
-    let vertices = polygon.vertices;
-    let colors = polygon.colors;
-    let indices = polygon.indices;
-    let alphas = polygon.alphas;
-
-    // 0.5, 0.5, 0,
-    //   -0.5, 0.5, 0,
-    //   -0.5, -0.5, 0,
-    vertices[0] = 0.5;
-    vertices[1] = 0.5;
-    vertices[2] = 0;
-
-    vertices[3] = -0.5;
-    vertices[4] = 0.5;
-    vertices[5] = 0;
-
-    vertices[6] = -0.5;
-    vertices[7] = -0.5;
-    vertices[8] = 0;
-
-    alphas[0] = 0;
-    alphas[1] = 1;
-    alphas[2] = 1;
-
-    for (let i = 0; i < vertices.length; i++) {
-      colors[i] = 1;
-    }
-    indices[0] = 0;
-    indices[1] = 1;
-    indices[2] = 2;
+    let tail = ecs.Entity.create().addComponent(Tail, this.scene);
+    // tail.addComponent(CircleMove2D, 1, 0.001);
+    tail.parent = this.scene;
+    tail.normal = ecs.Vector3.create(0, 0, 1);
+    tail.width = 0.01;
+    tail.addComponent(tween.Tween, tail.transform, 1000, { x: 0.8 }).onComplete = () => {
+      tail.addComponent(tween.Tween, tail.transform, 1000, { x: 0, y: 0.8 }).onComplete = () => {
+        tail.addComponent(tween.Tween, tail.transform, 1000, { x: -0.8, y: 0 })
+      }
+    };
 
     this.scene.addComponent(SpotRotate);
     let kb = this.scene.addComponent(leaf.KeyBoard);
@@ -109,24 +86,75 @@ export class Test3dScene extends ModuleScene {
     y = 0;
   }
 
-  addTriangle(pos: number[]) {
-    let t = ecs.Entity.create().addComponent(leaf.Triangle);
-    t.point1.x = pos[0];
-    t.point1.y = pos[1];
-    t.point1.z = pos[2];
+}
 
-    t.point2.x = pos[3];
-    t.point2.y = pos[4];
-    t.point2.z = pos[5];
+class CircleMove2D extends ecs.Component {
 
-    t.point3.x = pos[6];
-    t.point3.y = pos[7];
-    t.point3.z = pos[8];
+  radius: number;
+  speed: number;
+  time: number;
 
+  init(radius: number = 1, speed: number = 1) {
+    this.radius = radius;
+    this.speed = speed;
+    this.time = 0;
+  }
 
-    t.parent = this.scene;
+  update(dt: number) {
+    this.time += dt;
+    this.transform.x = Math.cos(this.time * this.speed) * this.radius;
+    this.transform.y = Math.sin(this.time * this.speed) * this.radius;
+  }
 
-    return t;
+}
+
+class Tail extends ecs.Component {
+
+  points: leaf.Vertex3[] = [];
+  lifeTime: number;
+  tail: leaf.Triangles;
+  normal: ecs.Vector3;
+  width: number;
+  color: number;
+
+  init(p: ecs.Entity) {
+    this.points.length = 0;
+    this.lifeTime = 1000;
+    this.width = 0.1;
+    this.color = 0xffffff;
+    this.tail = ecs.Entity.create().addComponent(leaf.Triangles);
+    this.tail.parent = p;
+
+  }
+
+  update(dt: number) {
+    for (let i = 0; i < this.points.length; i++) {
+      let p = this.points[i];
+      p.alpha = Math.max(p.alpha - dt / this.lifeTime, 0);
+      if (p.alpha <= 0 && (i === 1 || i === 0 && this.points.length === 1)) {
+        this.points.shift();
+        i--;
+      }
+    }
+    for (let i = 1; i < this.points.length - 1; i++) {
+      let lp = this.points[i - 1];
+      let p = this.points[i];
+      let np = this.points[i + 1];
+      let p1 = p.clone().add(p.clone().reduce(lp).dot(p.normal).normalize().scale(this.width / 2));
+      let p2 = p.clone().add(p.clone().reduce(lp).dot(p.normal).normalize().scale(-this.width / 2));
+      let p3 = np.clone().add(np.clone().reduce(p).dot(np.normal).normalize().scale(this.width / 2));
+      let p4 = np.clone().add(np.clone().reduce(p).dot(np.normal).normalize().scale(-this.width / 2));
+      this.tail.setTriangle(p1, p2, p3, i * 2 + 0);
+      this.tail.setTriangle(p2, p4, p3, i * 2 + 1);
+    }
+    this.tail.length = (this.points.length - 1) * 2;
+    if (this.points.length) {
+      let p = this.points[this.points.length - 1];
+      if (p.x === this.transform.x && p.y === this.transform.y && p.z === this.transform.z) return;
+    }
+    let center = leaf.Vertex3.create(this.transform.x, this.transform.y, this.transform.z, 1, this.color);
+    center.normal.set(this.normal.x, this.normal.y, this.normal.z);
+    this.points.push(center);
   }
 
 }

@@ -14,7 +14,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    };
+    }
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -1491,6 +1491,1123 @@ var ecs;
 })(ecs || (ecs = {}));
 var ecs;
 (function (ecs) {
+    ecs.$componentRecyclePool = null;
+    function setComponentRecyclePool(pool) {
+        ecs.$componentRecyclePool = pool;
+    }
+    ecs.setComponentRecyclePool = setComponentRecyclePool;
+    var RecyclableClassType = /** @class */ (function () {
+        function RecyclableClassType() {
+        }
+        return RecyclableClassType;
+    }());
+    ecs.RecyclableClassType = RecyclableClassType;
+    var ObjectPools = /** @class */ (function () {
+        function ObjectPools() {
+        }
+        ObjectPools.prototype.releaseComponent = function (component) {
+            ObjectPools.components[component.classType.id].push(component);
+        };
+        ObjectPools.prototype.createComponent = function (componentClass) {
+            var pools = ObjectPools.components;
+            var id = componentClass.classType.id;
+            if (pools[id] === undefined)
+                pools[id] = [];
+            if (pools[id].length) {
+                var c = pools[id].pop();
+                ObjectPools.setId(c, false);
+                return c;
+            }
+            else
+                return new componentClass();
+        };
+        ObjectPools.releaseRecyableObject = function (obj) {
+            this.releaseId(obj.id);
+            obj.onDestroy && obj.onDestroy();
+            this.objects[obj.classType.id].push(obj);
+        };
+        ObjectPools.createRecyableObject = function (objectClass) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            this.registerRecyclableClass(objectClass);
+            var obj;
+            if (this.objects[objectClass.classType.id].length) {
+                obj = this.objects[objectClass.classType.id].pop();
+                this.setId(obj, false);
+                objectClass.classType.realNewCount++;
+            }
+            else {
+                obj = new objectClass();
+                this.setId(obj);
+            }
+            objectClass.classType.newCount++;
+            obj.classType = objectClass.classType;
+            obj.init && obj.init.apply(obj, args);
+            return obj;
+        };
+        ObjectPools.registerRecyclableClass = function (clazz) {
+            if (clazz.classType && clazz.classType.define === clazz)
+                return;
+            ObjectPools.objectClasses.push(clazz);
+            var type = new RecyclableClassType();
+            clazz.classType = type;
+            ObjectPools.setId(type);
+            type.define = clazz;
+            type.name = clazz.name;
+            type.newCount = 0;
+            type.realNewCount = 0;
+            this.objects[type.id] = [];
+        };
+        ObjectPools.setId = function (obj, isNew) {
+            if (isNew === void 0) { isNew = true; }
+            this.id++;
+            var id = this.id;
+            this.all[id] = obj;
+            obj.id = id;
+            if (isNew) {
+                this.realNewObjectCount++;
+            }
+            ecs.debug && this.weakSet.add(obj);
+            this.allCount++;
+            return id;
+        };
+        /**
+         * @internal
+         */
+        ObjectPools.releaseIds = function () {
+            while (this.waitToDeleteIds.length) {
+                delete this.all[this.waitToDeleteIds.pop()];
+            }
+        };
+        ObjectPools.releaseId = function (id) {
+            if (ecs.debug) {
+                if (!this.all[id]) {
+                    ecs.error(ecs.EMError.RELEASE_ID_ERROR);
+                    return;
+                }
+            }
+            this.allCount--;
+            delete this.all[id];
+            this.waitToDeleteIds.push(id);
+        };
+        ObjectPools.clearLinkPrePool = function () {
+            var prepool = this.linkPrePool;
+            var pool = this.linkPool;
+            for (var i = 0, len = prepool.length; i < len; i++) {
+                var node = prepool.pop();
+                if (!node)
+                    return;
+                node._next = node.prev = null;
+                pool.push(node);
+            }
+        };
+        ObjectPools.objects = {};
+        ObjectPools.objectClasses = [];
+        ObjectPools.components = {};
+        ObjectPools.componentClasses = [];
+        ObjectPools.entities = [];
+        ObjectPools.id = 1;
+        ObjectPools.realNewObjectCount = 0;
+        /**
+         * 所有存活的对象
+         */
+        ObjectPools.all = { 0: null };
+        /**
+         * 所有存活对象的数量
+         */
+        ObjectPools.allCount = 0;
+        ObjectPools.weakSet = new WeakSet();
+        /**
+         * @internal
+         */
+        ObjectPools.waitToDeleteIds = [];
+        ObjectPools.linkPool = [];
+        ObjectPools.linkPrePool = [];
+        return ObjectPools;
+    }());
+    ecs.ObjectPools = ObjectPools;
+})(ecs || (ecs = {}));
+var ecs;
+(function (ecs) {
+    var Query = /** @class */ (function (_super) {
+        __extends(Query, _super);
+        function Query() {
+            return _super.call(this) || this;
+        }
+        return Query;
+    }(ecs.Link));
+    ecs.Query = Query;
+    var EntityQuery = /** @class */ (function (_super) {
+        __extends(EntityQuery, _super);
+        function EntityQuery() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.componentClassList = [];
+            _this.componentClassMap = {};
+            return _this;
+        }
+        EntityQuery.prototype.init = function (componentClasses) {
+            this.componentClassList = componentClasses;
+            for (var i = 0; i < this.componentClassList.length; i++) {
+                this.componentClassList[i].register(this.componentClassList[i]);
+                this.componentClassMap[this.componentClassList[i].classType.id] = this.componentClassList[i];
+            }
+        };
+        EntityQuery.prototype.onAddEntity = function (entity) {
+            if (this.componentClassList.length == 1) {
+                if (!entity.componentEnableCount[this.componentClassList[0].classType.id]) {
+                    return;
+                }
+            }
+            else {
+                var list = this.componentClassList;
+                for (var i = 0; i < list.length; i++) {
+                    if (!entity.componentEnableCount[list[i].classType.id]) {
+                        return;
+                    }
+                }
+            }
+            this.add(entity);
+        };
+        EntityQuery.prototype.onRemoveEntity = function (entity) {
+            if (!this.has(entity))
+                return;
+            this.remove(entity);
+        };
+        EntityQuery.prototype.onAddComponent = function (entity, component) {
+            // if (this.has(entity) || this.componentClassMap[component.classType.id] === undefined) return;
+            if (this.has(entity))
+                return;
+            var list = this.componentClassList;
+            for (var i = 0; i < list.length; i++) {
+                if (!entity.componentEnableCount[list[i].classType.id]) {
+                    return;
+                }
+            }
+            this.add(entity);
+        };
+        EntityQuery.prototype.onRemoveComponent = function (entity, component) {
+            // if (!this.has(entity) || this.componentClassMap[component.classType.id] === undefined) return;
+            if (!this.has(entity))
+                return;
+            var list = this.componentClassList;
+            for (var i = 0; i < list.length; i++) {
+                var id = list[i].classType.id;
+                if (component.classType.typeMap[id]) {
+                    if (entity.componentEnableCount[id] <= 1) {
+                        this.remove(entity);
+                        return;
+                    }
+                }
+                else {
+                    if (!entity.componentEnableCount[id]) {
+                        this.remove(entity);
+                        return;
+                    }
+                }
+            }
+        };
+        return EntityQuery;
+    }(Query));
+    ecs.EntityQuery = EntityQuery;
+    var ComponentQuery = /** @class */ (function (_super) {
+        __extends(ComponentQuery, _super);
+        function ComponentQuery() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        ComponentQuery.prototype.init = function (callName) {
+            this.callName = callName;
+        };
+        ComponentQuery.prototype.onAddEntity = function (entity) {
+            for (var i = 0; i < entity.components.length; i++) {
+                var component = entity.components[i];
+                if (component[this.callName] !== undefined && typeof component[this.callName] === 'function') {
+                    this.add(component);
+                }
+            }
+        };
+        ComponentQuery.prototype.onRemoveEntity = function (entity) {
+            for (var i = 0; i < entity.components.length; i++) {
+                this.remove(entity.components[i]);
+            }
+        };
+        ComponentQuery.prototype.onAddComponent = function (entity, component) {
+            if (this.has(component))
+                return;
+            if (component[this.callName] !== undefined && typeof component[this.callName] === 'function') {
+                this.add(component);
+            }
+        };
+        ComponentQuery.prototype.onRemoveComponent = function (entity, component) {
+            if (!this.has(component))
+                return;
+            this.remove(component);
+        };
+        return ComponentQuery;
+    }(Query));
+    ecs.ComponentQuery = ComponentQuery;
+})(ecs || (ecs = {}));
+var ecs;
+(function (ecs) {
+    var System = /** @class */ (function () {
+        function System() {
+            this.updateFixTime = 0;
+            this.lateUpdateFixTime = 0;
+            /**
+             * @internal
+             */
+            this.updateMoreTime = 0;
+            /**
+             * @internal
+             */
+            this.lateUpdateMoreTime = 0;
+            this.isRunning = true;
+        }
+        System.prototype.init = function (query) {
+            this.query = query;
+        };
+        System.prototype.destroy = function () {
+            if (this.query) {
+                this.query.clear();
+                ecs.ObjectPools.releaseRecyableObject(this.query);
+                this.query = null;
+            }
+            this.updateMoreTime = 0;
+            this.lateUpdateMoreTime = 0;
+        };
+        System.recycleEnable = false;
+        System.sync = false;
+        System.syncSystemClasses = {};
+        return System;
+    }());
+    ecs.System = System;
+    var EMSyncSystemMode;
+    (function (EMSyncSystemMode) {
+        EMSyncSystemMode[EMSyncSystemMode["SUB_WORLD_ONLY"] = 1] = "SUB_WORLD_ONLY";
+        EMSyncSystemMode[EMSyncSystemMode["ALL_WORLD"] = 2] = "ALL_WORLD";
+    })(EMSyncSystemMode = ecs.EMSyncSystemMode || (ecs.EMSyncSystemMode = {}));
+    function syncSystem(mode) {
+        if (mode === void 0) { mode = EMSyncSystemMode.SUB_WORLD_ONLY; }
+        return function (c) {
+            c["sync"] = true;
+            System.syncSystemClasses[c.name] = {
+                define: c,
+                mode: mode
+            };
+            return c;
+        };
+    }
+    ecs.syncSystem = syncSystem;
+})(ecs || (ecs = {}));
+var ecs;
+(function (ecs) {
+    var UpdateInfo = /** @class */ (function () {
+        function UpdateInfo() {
+        }
+        return UpdateInfo;
+    }());
+    ecs.UpdateInfo = UpdateInfo;
+})(ecs || (ecs = {}));
+var ecs;
+(function (ecs) {
+    var Vector4 = /** @class */ (function () {
+        function Vector4() {
+            this.elements = [0, 0, 0, 1];
+        }
+        return Vector4;
+    }());
+    ecs.Vector4 = Vector4;
+})(ecs || (ecs = {}));
+var ecs;
+(function (ecs) {
+    var World = /** @class */ (function () {
+        function World() {
+            this.entities = new ecs.Link();
+            this.queries = [];
+            this.systems = [];
+            this.subWorld = false;
+            this.syncWorldEnable = false;
+            this.syncComponents = new ecs.Link();
+            this.syncDeleteComponents = [];
+            this.syncFrames = [];
+            this.syncSystems = [];
+            this.syncDeleteSystems = [];
+            this.waitToSyncFrames = [];
+            this.runInfo = new ecs.RunInfo;
+            this.root = new RootEntity();
+            this.root.world = this;
+            this.onAddEntity(this.root);
+            this._lastTime = Date.now();
+            this.addSystem(ecs.AwakeSystem, null, -1);
+            this.addSystem(ecs.StartSystem, null, -1);
+            this.addSystem(ecs.UpdateSystem, null, -1);
+            this.addSystem(ecs.LateUpdateSystem, null, -1);
+        }
+        World.prototype.update = function (dt) {
+            var e_7, _a, e_8, _b;
+            World.subWorld = this.subWorld;
+            while (this.waitToSyncFrames.length) {
+                this.decodeSyncComponents(this.waitToSyncFrames.shift());
+            }
+            var start = Date.now();
+            dt = dt != null ? dt : (start - this._lastTime);
+            if (dt < 0)
+                dt = 0;
+            this._lastTime = start;
+            try {
+                for (var _c = __values(this.systems), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var sys = _d.value;
+                    if (!sys.isRunning)
+                        continue;
+                    if (sys.updateFixTime) {
+                        var sysdt = dt;
+                        while (sysdt >= sys.updateFixTime) {
+                            sys.update && sys.update(sys.updateFixTime);
+                            sysdt -= sys.updateFixTime;
+                        }
+                        sys.updateMoreTime = sysdt;
+                    }
+                    else {
+                        sys.update && sys.update(dt);
+                    }
+                }
+            }
+            catch (e_7_1) { e_7 = { error: e_7_1 }; }
+            finally {
+                try {
+                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                }
+                finally { if (e_7) throw e_7.error; }
+            }
+            var ut = (Date.now() - start);
+            try {
+                for (var _e = __values(this.systems), _f = _e.next(); !_f.done; _f = _e.next()) {
+                    var sys = _f.value;
+                    if (!sys.isRunning)
+                        continue;
+                    if (sys.lateUpdateFixTime) {
+                        var sysdt = dt;
+                        var sysut = ut;
+                        while (sysdt >= sys.lateUpdateFixTime) {
+                            sysdt -= sys.lateUpdateFixTime;
+                            ut -= sys.lateUpdateFixTime;
+                        }
+                        sysdt = dt;
+                        while (sysdt >= sys.lateUpdateFixTime) {
+                            sysut += sys.lateUpdateFixTime;
+                            sys.lateUpdate && sys.lateUpdate(sys.lateUpdateFixTime, sysut);
+                            sysdt -= sys.updateFixTime;
+                        }
+                    }
+                    else {
+                        sys.lateUpdate && sys.lateUpdate(dt, ut);
+                    }
+                }
+            }
+            catch (e_8_1) { e_8 = { error: e_8_1 }; }
+            finally {
+                try {
+                    if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                }
+                finally { if (e_8) throw e_8.error; }
+            }
+            var at = Date.now() - start;
+            // if (at < 5 || ObjectPools.linkPrePool.length > 10000) {
+            //     ObjectPools.clearLinkPrePool();
+            // }
+            ecs.ObjectPools.clearLinkPrePool();
+            this.runInfo.frame++;
+            this.runInfo.lastProcessTime = at;
+            if (this.syncWorldEnable) {
+                if (this.syncComponents.length || !this.subWorld && this.syncDeleteComponents.length ||
+                    this.syncSystems.length || !this.subWorld && this.syncDeleteSystems.length) {
+                    this.syncFrames.push(this.encodeSyncWorld());
+                }
+            }
+        };
+        World.prototype.onAddEntity = function (entity) {
+            var e_9, _a;
+            this.entities.add(entity);
+            try {
+                for (var _b = __values(entity.components), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var component = _c.value;
+                    if (component.syncProperties.length) {
+                        if (!this.syncComponents.has(component)) {
+                            this.syncComponents.add(component);
+                        }
+                    }
+                }
+            }
+            catch (e_9_1) { e_9 = { error: e_9_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                }
+                finally { if (e_9) throw e_9.error; }
+            }
+            if (entity.components.length) {
+                for (var i = 0, len = this.queries.length; i < len; i++) {
+                    this.queries[i].onAddEntity(entity);
+                }
+            }
+        };
+        World.prototype.onRemoveEntity = function (entity) {
+            var e_10, _a;
+            this.entities.remove(entity);
+            if (entity.components.length) {
+                try {
+                    for (var _b = __values(entity.components), _c = _b.next(); !_c.done; _c = _b.next()) {
+                        var component = _c.value;
+                        if (component.syncProperties.length) {
+                            this.syncComponents.remove(component);
+                            this.syncDeleteComponents.push(component.id);
+                            for (var node = component.syncProperties.head; node; node = node.next) {
+                                node.value.target = null;
+                                ecs.SyncProperty.pools.push(node.value);
+                            }
+                            component.syncProperties.clear();
+                        }
+                    }
+                }
+                catch (e_10_1) { e_10 = { error: e_10_1 }; }
+                finally {
+                    try {
+                        if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                    }
+                    finally { if (e_10) throw e_10.error; }
+                }
+                for (var i = 0, len = this.queries.length; i < len; i++) {
+                    this.queries[i].onRemoveEntity(entity);
+                }
+            }
+        };
+        World.prototype.onAddComponent = function (entity, component) {
+            if (component.syncProperties.length) {
+                if (!this.syncComponents.has(component)) {
+                    this.syncComponents.add(component);
+                }
+            }
+            for (var i = 0; i < this.queries.length; i++) {
+                this.queries[i].onAddComponent(entity, component);
+            }
+        };
+        World.prototype.onRemoveComponent = function (entity, component) {
+            for (var i = 0; i < this.queries.length; i++) {
+                this.queries[i].onRemoveComponent(entity, component);
+            }
+        };
+        World.prototype.addSystem = function (systemClass, initArgs, reverseIndex) {
+            if (reverseIndex === void 0) { reverseIndex = 2; }
+            var e_11, _a, e_12, _b;
+            if (initArgs && !(typeof initArgs === 'string')) {
+                try {
+                    for (var initArgs_1 = __values(initArgs), initArgs_1_1 = initArgs_1.next(); !initArgs_1_1.done; initArgs_1_1 = initArgs_1.next()) {
+                        var comp = initArgs_1_1.value;
+                        ecs.Component.register(comp);
+                    }
+                }
+                catch (e_11_1) { e_11 = { error: e_11_1 }; }
+                finally {
+                    try {
+                        if (initArgs_1_1 && !initArgs_1_1.done && (_a = initArgs_1.return)) _a.call(initArgs_1);
+                    }
+                    finally { if (e_11) throw e_11.error; }
+                }
+            }
+            var data = ecs.System.syncSystemClasses[systemClass.name];
+            if (this.syncWorldEnable && data && !this.subWorld) {
+                var comps = void 0;
+                if (typeof initArgs === 'string')
+                    comps = initArgs;
+                else {
+                    comps = [];
+                    try {
+                        for (var initArgs_2 = __values(initArgs), initArgs_2_1 = initArgs_2.next(); !initArgs_2_1.done; initArgs_2_1 = initArgs_2.next()) {
+                            var comp = initArgs_2_1.value;
+                            comps.push(comp.classType.name);
+                        }
+                    }
+                    catch (e_12_1) { e_12 = { error: e_12_1 }; }
+                    finally {
+                        try {
+                            if (initArgs_2_1 && !initArgs_2_1.done && (_b = initArgs_2.return)) _b.call(initArgs_2);
+                        }
+                        finally { if (e_12) throw e_12.error; }
+                    }
+                }
+                this.syncSystems.push({
+                    system: systemClass.name,
+                    components: comps
+                });
+                if (data.mode === ecs.EMSyncSystemMode.SUB_WORLD_ONLY)
+                    return;
+            }
+            var system = ecs.ObjectPools.createRecyableObject(systemClass, initArgs);
+            if (this.systems.indexOf(system) !== -1)
+                return;
+            if (reverseIndex === -1)
+                this.systems.push(system);
+            else
+                this.systems.splice(this.systems.length - reverseIndex, 0, system);
+            if (system.query) {
+                this.queries.push(system.query);
+                for (var entityNode = this.entities.head; entityNode; entityNode = entityNode.next) {
+                    system.query.onAddEntity(entityNode.value);
+                }
+            }
+        };
+        World.prototype.removeSystem = function (system) {
+            var systemClass;
+            var singleSystem;
+            if (system instanceof ecs.System) {
+                systemClass = system.constructor;
+                singleSystem = system;
+            }
+            else {
+                systemClass = system;
+            }
+            var data = ecs.System.syncSystemClasses[systemClass.name];
+            if (data && !this.subWorld) {
+                this.syncDeleteSystems.push(systemClass.name);
+                if (data.mode === ecs.EMSyncSystemMode.SUB_WORLD_ONLY)
+                    return;
+            }
+            for (var i = 0; i < this.systems.length; i++) {
+                var sys = this.systems[i];
+                if (sys instanceof systemClass) {
+                    if (!singleSystem || singleSystem && singleSystem === sys) {
+                        this.systems.splice(this.systems.indexOf(sys), 1);
+                        sys.query && this.queries.splice(this.queries.indexOf(sys.query), 1);
+                        sys.destroy();
+                        if (sys.constructor["recycleEnable"]) {
+                            ecs.ObjectPools.releaseRecyableObject(sys);
+                        }
+                        else {
+                            ecs.ObjectPools.releaseId(sys.id);
+                        }
+                        i--;
+                    }
+                }
+            }
+        };
+        World.prototype.getSystem = function (system) {
+            var systemClass;
+            var singleSystem;
+            if (system instanceof ecs.System) {
+                systemClass = system.constructor;
+                singleSystem = system;
+            }
+            else {
+                systemClass = system;
+            }
+            var data = ecs.System.syncSystemClasses[systemClass.name];
+            if (data && !this.subWorld) {
+                this.syncDeleteSystems.push(systemClass.name);
+                if (data.mode === ecs.EMSyncSystemMode.SUB_WORLD_ONLY)
+                    return;
+            }
+            for (var i = 0; i < this.systems.length; i++) {
+                var sys = this.systems[i];
+                if (sys instanceof systemClass) {
+                    if (!singleSystem || singleSystem && singleSystem === sys) {
+                        return sys;
+                    }
+                }
+            }
+        };
+        World.prototype.encodeSyncWorld = function () {
+            var components = this.syncComponents;
+            var entities = {};
+            var entityList = [];
+            for (var node = components.head; node; node = node.next) {
+                if (node.value.syncProperties.length) {
+                    var entity = void 0;
+                    var id = node.value.entity.id;
+                    if (this.subWorld)
+                        id = World.resyncIds[id];
+                    if (entities[id] == null) {
+                        entities[id] = {
+                            id: id,
+                            components: []
+                        };
+                        entityList.push(entities[id]);
+                    }
+                    entity = entities[id];
+                    id = node.value.id;
+                    if (this.subWorld)
+                        id = World.resyncIds[id];
+                    var obj = {
+                        define: node.value.classType.name,
+                        id: id,
+                    };
+                    for (var p = node.value.syncProperties.head; p; p = p.next) {
+                        if (p.value.hasChange) {
+                            if (p.value.type === ecs.EMSyncType.BASE)
+                                obj[p.value.id] = p.value.value;
+                            else if (p.value.type === ecs.EMSyncType.COMPONENT) {
+                                if (!this.subWorld)
+                                    obj[p.value.id] = p.value.value;
+                                else {
+                                    if (p.value.reValue)
+                                        obj[p.value.id] = p.value.value;
+                                    else
+                                        obj[p.value.id] = World.resyncIds[p.value.value];
+                                }
+                                if (obj[p.value.id] == null)
+                                    obj[p.value.id] = 0;
+                            }
+                            p.value.hasChange = false;
+                        }
+                    }
+                    entity.components.push(obj);
+                }
+            }
+            this.syncComponents.clear(false);
+            var ids = this.subWorld ? [] : this.syncDeleteComponents.concat();
+            this.syncDeleteComponents.length = 0;
+            var syncSystems = this.syncSystems.concat();
+            this.syncSystems.length = 0;
+            var syncDeleteSystems = this.subWorld ? [] : this.syncDeleteSystems.concat();
+            this.syncDeleteSystems.length = 0;
+            return {
+                entities: entityList,
+                deleteIds: ids,
+                systems: syncSystems,
+                deleteSystems: syncDeleteSystems
+            };
+        };
+        World.prototype.decodeSyncComponents = function (syncWorld) {
+            var e_13, _a, e_14, _b, e_15, _c, e_16, _d, e_17, _e, e_18, _f;
+            if (!syncWorld)
+                return;
+            World.isSyncing = true;
+            var world = this;
+            if (syncWorld.systems.length) {
+                try {
+                    for (var _g = __values(syncWorld.systems), _h = _g.next(); !_h.done; _h = _g.next()) {
+                        var syncSystem_1 = _h.value;
+                        var systemClass = ecs.System.syncSystemClasses[syncSystem_1.system].define;
+                        var comps = void 0;
+                        if (syncSystem_1.components) {
+                            if (typeof syncSystem_1.components === 'string')
+                                comps = syncSystem_1.components;
+                            else {
+                                comps = [];
+                                try {
+                                    for (var _j = __values(syncSystem_1.components), _k = _j.next(); !_k.done; _k = _j.next()) {
+                                        var syncComponent = _k.value;
+                                        comps.push(ecs.Component.syncComponents[syncComponent]);
+                                    }
+                                }
+                                catch (e_14_1) { e_14 = { error: e_14_1 }; }
+                                finally {
+                                    try {
+                                        if (_k && !_k.done && (_b = _j.return)) _b.call(_j);
+                                    }
+                                    finally { if (e_14) throw e_14.error; }
+                                }
+                            }
+                        }
+                        this.addSystem(systemClass, comps);
+                    }
+                }
+                catch (e_13_1) { e_13 = { error: e_13_1 }; }
+                finally {
+                    try {
+                        if (_h && !_h.done && (_a = _g.return)) _a.call(_g);
+                    }
+                    finally { if (e_13) throw e_13.error; }
+                }
+            }
+            if (syncWorld.deleteSystems.length) {
+                try {
+                    for (var _l = __values(syncWorld.deleteSystems), _m = _l.next(); !_m.done; _m = _l.next()) {
+                        var syncSystem_2 = _m.value;
+                        var systemClass = ecs.System.syncSystemClasses[syncSystem_2].define;
+                        this.removeSystem(systemClass);
+                    }
+                }
+                catch (e_15_1) { e_15 = { error: e_15_1 }; }
+                finally {
+                    try {
+                        if (_m && !_m.done && (_c = _l.return)) _c.call(_l);
+                    }
+                    finally { if (e_15) throw e_15.error; }
+                }
+            }
+            if (syncWorld.entities.length) {
+                try {
+                    for (var _o = __values(syncWorld.entities), _p = _o.next(); !_p.done; _p = _o.next()) {
+                        var syncEntity = _p.value;
+                        var entity = void 0;
+                        if (this.subWorld) {
+                            if (!World.syncIds[syncEntity.id]) {
+                                entity = ecs.Entity.create();
+                                World.syncIds[syncEntity.id] = entity.id;
+                                World.resyncIds[entity.id] = syncEntity.id;
+                                entity.parent = world.root;
+                            }
+                            else {
+                                entity = ecs.ObjectPools.all[World.syncIds[syncEntity.id]];
+                            }
+                        }
+                        else {
+                            entity = ecs.ObjectPools.all[syncEntity.id];
+                            if (!entity)
+                                continue;
+                        }
+                        try {
+                            for (var _q = __values(syncEntity.components), _r = _q.next(); !_r.done; _r = _q.next()) {
+                                var syncComponent = _r.value;
+                                var component = void 0;
+                                if (this.subWorld) {
+                                    if (!World.syncIds[syncComponent.id]) {
+                                        component = entity.addComponent(ecs.Component.syncComponents[syncComponent.define]);
+                                        World.syncIds[syncComponent.id] = component.id;
+                                        World.resyncIds[component.id] = syncComponent.id;
+                                    }
+                                    else {
+                                        component = ecs.ObjectPools.all[World.syncIds[syncComponent.id]];
+                                    }
+                                }
+                                else {
+                                    component = ecs.ObjectPools.all[syncComponent.id];
+                                    if (!component)
+                                        continue;
+                                }
+                                for (var key in syncComponent) {
+                                    if (key === "id")
+                                        continue;
+                                    component[key] = syncComponent[key];
+                                }
+                            }
+                        }
+                        catch (e_17_1) { e_17 = { error: e_17_1 }; }
+                        finally {
+                            try {
+                                if (_r && !_r.done && (_e = _q.return)) _e.call(_q);
+                            }
+                            finally { if (e_17) throw e_17.error; }
+                        }
+                    }
+                }
+                catch (e_16_1) { e_16 = { error: e_16_1 }; }
+                finally {
+                    try {
+                        if (_p && !_p.done && (_d = _o.return)) _d.call(_o);
+                    }
+                    finally { if (e_16) throw e_16.error; }
+                }
+            }
+            if (syncWorld.deleteIds.length) {
+                try {
+                    for (var _s = __values(syncWorld.deleteIds), _t = _s.next(); !_t.done; _t = _s.next()) {
+                        var id = _t.value;
+                        if (!World.syncIds[id])
+                            continue;
+                        var reid = World.syncIds[id];
+                        delete World.syncIds[id];
+                        delete World.resyncIds[reid];
+                        var comp = ecs.ObjectPools.all[reid];
+                        if (!comp)
+                            continue;
+                        var entity = comp.entity;
+                        comp.destroy();
+                        if (entity && entity.components.length === 0) {
+                            reid = entity.id;
+                            id = World.resyncIds[reid];
+                            delete World.syncIds[id];
+                            delete World.resyncIds[reid];
+                            entity.destroy();
+                        }
+                    }
+                }
+                catch (e_18_1) { e_18 = { error: e_18_1 }; }
+                finally {
+                    try {
+                        if (_t && !_t.done && (_f = _s.return)) _f.call(_s);
+                    }
+                    finally { if (e_18) throw e_18.error; }
+                }
+            }
+            World.isSyncing = false;
+        };
+        Object.defineProperty(World.prototype, "scene", {
+            get: function () {
+                return this.$scene;
+            },
+            set: function (val) {
+                this.$scene && (this.$scene.parent = null);
+                this.$scene = val;
+                this.$scene && this.root.addChildAt(this.$scene, 1);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        World.subWorld = false;
+        World.syncIds = { 0: 0 };
+        World.resyncIds = { 0: 0 };
+        World.isSyncing = false;
+        return World;
+    }());
+    ecs.World = World;
+    var RootEntity = /** @class */ (function (_super) {
+        __extends(RootEntity, _super);
+        function RootEntity() {
+            var _this = _super.call(this) || this;
+            ecs.Entity.realNewCount++;
+            ecs.Entity.newCount++;
+            ecs.Entity.aliveCount++;
+            ecs.Entity.onCreateEntity && ecs.Entity.onCreateEntity(_this);
+            return _this;
+        }
+        RootEntity.prototype.$setParent = function () {
+            return;
+        };
+        RootEntity.prototype.$setWorld = function () {
+            return;
+        };
+        return RootEntity;
+    }(ecs.Entity));
+})(ecs || (ecs = {}));
+window["ecs"] = ecs;
+var ecs;
+(function (ecs) {
+    var DebugTool = /** @class */ (function () {
+        function DebugTool() {
+        }
+        DebugTool.componentCreated = function (id, call) {
+            var _this = this;
+            if (ecs.debug) {
+                this.debugPointTip("组件 " + id + " 何时被创建?");
+            }
+            ecs.Entity.componentCreatedPoints.add({
+                id: id,
+                call: function () {
+                    if (ecs.debug) {
+                        _this.debugPointTip("发现组件 " + id + " 被创建!!!", false);
+                    }
+                    call && call();
+                }
+            });
+        };
+        DebugTool.componentDestroyed = function (id, call) {
+            var _this = this;
+            if (ecs.debug) {
+                this.debugPointTip("组件 " + id + " 何时被销毁?");
+            }
+            ecs.Component.componentDestroyedPoints.add({
+                id: id,
+                call: function () {
+                    if (ecs.debug) {
+                        _this.debugPointTip("发现组件 " + id + " 被销毁!!!", false);
+                    }
+                    call && call();
+                }
+            });
+        };
+        DebugTool.addedToLink = function (id, call) {
+            var _this = this;
+            if (ecs.debug) {
+                this.debugPointTip("组件 " + id + " 何时加入队列?");
+            }
+            ecs.Link.debugPoints = true;
+            ecs.Link.addPoints.add({
+                id: id,
+                call: function () {
+                    if (ecs.debug) {
+                        _this.debugPointTip("发现组件 " + id + " 加入队列!!!", false);
+                    }
+                    call && call();
+                }
+            });
+        };
+        DebugTool.remvedFromLink = function (id, call) {
+            var _this = this;
+            if (ecs.debug) {
+                this.debugPointTip("组件 " + id + " 何时移出队列?");
+            }
+            ecs.Link.debugPoints = true;
+            ecs.Link.addPoints.add({
+                id: id,
+                call: function () {
+                    if (ecs.debug) {
+                        _this.debugPointTip("发现组件 " + id + " 移出队列!!!", false);
+                    }
+                    call && call();
+                }
+            });
+        };
+        DebugTool.debugPointTip = function (name, tip) {
+            if (tip === void 0) { tip = true; }
+            if (tip) {
+                console.warn("调试点:" + name);
+            }
+            else {
+                console.warn("调试点:" + name);
+            }
+        };
+        return DebugTool;
+    }());
+    ecs.DebugTool = DebugTool;
+})(ecs || (ecs = {}));
+var ecs;
+(function (ecs) {
+    ecs.debug = false;
+    var EMError;
+    (function (EMError) {
+        EMError[EMError["RELEASE_ID_ERROR"] = 10001] = "RELEASE_ID_ERROR";
+        EMError[EMError["ENEIEY_HAS_DESTROYED"] = 10002] = "ENEIEY_HAS_DESTROYED";
+        EMError[EMError["NOT_ALLOW_MUTIPLY_COMPONENT"] = 11000] = "NOT_ALLOW_MUTIPLY_COMPONENT";
+        EMError[EMError["COMPONENT_EXIST"] = 11001] = "COMPONENT_EXIST";
+        EMError[EMError["COMPONENT_HAS_DESTROYED"] = 11002] = "COMPONENT_HAS_DESTROYED";
+        EMError[EMError["COMPONENT_REQUIRE"] = 11003] = "COMPONENT_REQUIRE";
+        EMError[EMError["COMPONENT_REQUIRE_COUNT"] = 11004] = "COMPONENT_REQUIRE_COUNT";
+        EMError[EMError["COMPONENT_REQUIRE_INDEX_ERROR"] = 11005] = "COMPONENT_REQUIRE_INDEX_ERROR";
+        EMError[EMError["COMPONENT_REQUIRE_DELETE"] = 11006] = "COMPONENT_REQUIRE_DELETE";
+        EMError[EMError["SYNC_COMPONENT_SAME_NAME"] = 11007] = "SYNC_COMPONENT_SAME_NAME";
+        EMError[EMError["COMPONENT_REMOVED_INDEX_ERROR"] = 11008] = "COMPONENT_REMOVED_INDEX_ERROR";
+    })(EMError = ecs.EMError || (ecs.EMError = {}));
+    var ErrorMessage = {
+        10001: "对象已释放",
+        10002: "Entity 已销毁",
+        11000: "Component 不容许有重复，类 : $arg0",
+        11001: "Component 对象已存在",
+        11002: "Component 已销毁",
+        11003: "Component $arg0 缺少依赖，类 : $arg1",
+        11004: "Component 依赖计数器错误",
+        11005: "Component 依赖索引错误",
+        11006: "Component $arg0 无法删除，存在依赖",
+        11007: "异步 Component 重名 : $arg0",
+        11008: "Component 删除索引错误 : $arg0",
+    };
+    var onError;
+    function setOnError(call) {
+        onError = call;
+    }
+    ecs.setOnError = setOnError;
+    function error(type) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        if (onError) {
+            onError(type);
+        }
+        if (ecs.debug) {
+            var str = ErrorMessage[type];
+            if (args && args.length) {
+                for (var i = 0; i < args.length; i++) {
+                    str = str.replace("$arg" + i, args[i]);
+                }
+            }
+            logError(str);
+        }
+    }
+    ecs.error = error;
+    function logError() {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (ecs.debug) {
+            console.error.apply(null, args);
+        }
+    }
+    ecs.logError = logError;
+    function logWarn() {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (ecs.debug) {
+            console.error.apply(null, args);
+        }
+    }
+    ecs.logWarn = logWarn;
+    function logInfo() {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (ecs.debug) {
+            console.error.apply(null, args);
+        }
+    }
+    ecs.logInfo = logInfo;
+})(ecs || (ecs = {}));
+var ecs;
+(function (ecs) {
+    var RunInfo = /** @class */ (function () {
+        function RunInfo() {
+            this.frame = 0;
+            this.lastProcessTime = 0;
+        }
+        return RunInfo;
+    }());
+    ecs.RunInfo = RunInfo;
+})(ecs || (ecs = {}));
+var ecs;
+(function (ecs) {
+    var Color = /** @class */ (function () {
+        function Color() {
+            this._r = 0;
+            this._g = 0;
+            this._b = 0;
+        }
+        Object.defineProperty(Color.prototype, "r", {
+            get: function () { return this._r; },
+            set: function (val) { this._r = val; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Color.prototype, "g", {
+            get: function () { return this._g; },
+            set: function (val) { this._g = val; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Color.prototype, "b", {
+            get: function () { return this._b; },
+            set: function (val) { this._b = val; },
+            enumerable: true,
+            configurable: true
+        });
+        Color.prototype.init = function (r, g, b) {
+            if (r === void 0) { r = 0; }
+            if (g === void 0) { g = 0; }
+            if (b === void 0) { b = 0; }
+            this.r = r;
+            this.g = g;
+            this.b = b;
+        };
+        Color.prototype.set = function (r, g, b) {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+        };
+        Object.defineProperty(Color.prototype, "value", {
+            get: function () {
+                return (~~(this.r * 256)) << 16 | (~~(this.g * 256)) << 8 | (~~(this.b * 256));
+            },
+            set: function (val) {
+                this.r = ((val >> 16) & 0xFF) / 0xFF;
+                this.g = ((val >> 8) & 0xFF) / 0xFF;
+                this.b = (val & 0xFF) / 0xFF;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Color.prototype.clone = function () {
+            return ecs.ObjectPools.createRecyableObject(Color, this.r, this.g, this.b);
+        };
+        return Color;
+    }());
+    ecs.Color = Color;
+})(ecs || (ecs = {}));
+var ecs;
+(function (ecs) {
     var Matrix = /** @class */ (function () {
         function Matrix() {
             this.a = 1;
@@ -2282,317 +3399,6 @@ var ecs;
 })(ecs || (ecs = {}));
 var ecs;
 (function (ecs) {
-    ecs.$componentRecyclePool = null;
-    function setComponentRecyclePool(pool) {
-        ecs.$componentRecyclePool = pool;
-    }
-    ecs.setComponentRecyclePool = setComponentRecyclePool;
-    var RecyclableClassType = /** @class */ (function () {
-        function RecyclableClassType() {
-        }
-        return RecyclableClassType;
-    }());
-    ecs.RecyclableClassType = RecyclableClassType;
-    var ObjectPools = /** @class */ (function () {
-        function ObjectPools() {
-        }
-        ObjectPools.prototype.releaseComponent = function (component) {
-            ObjectPools.components[component.classType.id].push(component);
-        };
-        ObjectPools.prototype.createComponent = function (componentClass) {
-            var pools = ObjectPools.components;
-            var id = componentClass.classType.id;
-            if (pools[id] === undefined)
-                pools[id] = [];
-            if (pools[id].length) {
-                var c = pools[id].pop();
-                ObjectPools.setId(c, false);
-                return c;
-            }
-            else
-                return new componentClass();
-        };
-        ObjectPools.releaseRecyableObject = function (obj) {
-            this.releaseId(obj.id);
-            obj.onDestroy && obj.onDestroy();
-            this.objects[obj.classType.id].push(obj);
-        };
-        ObjectPools.createRecyableObject = function (objectClass) {
-            var args = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                args[_i - 1] = arguments[_i];
-            }
-            this.registerRecyclableClass(objectClass);
-            var obj;
-            if (this.objects[objectClass.classType.id].length) {
-                obj = this.objects[objectClass.classType.id].pop();
-                this.setId(obj, false);
-                objectClass.classType.realNewCount++;
-            }
-            else {
-                obj = new objectClass();
-                this.setId(obj);
-            }
-            objectClass.classType.newCount++;
-            obj.classType = objectClass.classType;
-            obj.init && obj.init.apply(obj, args);
-            return obj;
-        };
-        ObjectPools.registerRecyclableClass = function (clazz) {
-            if (clazz.classType && clazz.classType.define === clazz)
-                return;
-            ObjectPools.objectClasses.push(clazz);
-            var type = new RecyclableClassType();
-            clazz.classType = type;
-            ObjectPools.setId(type);
-            type.define = clazz;
-            type.name = clazz.name;
-            type.newCount = 0;
-            type.realNewCount = 0;
-            this.objects[type.id] = [];
-        };
-        ObjectPools.setId = function (obj, isNew) {
-            if (isNew === void 0) { isNew = true; }
-            this.id++;
-            var id = this.id;
-            this.all[id] = obj;
-            obj.id = id;
-            if (isNew) {
-                this.realNewObjectCount++;
-            }
-            ecs.debug && this.weakSet.add(obj);
-            this.allCount++;
-            return id;
-        };
-        /**
-         * @internal
-         */
-        ObjectPools.releaseIds = function () {
-            while (this.waitToDeleteIds.length) {
-                delete this.all[this.waitToDeleteIds.pop()];
-            }
-        };
-        ObjectPools.releaseId = function (id) {
-            if (ecs.debug) {
-                if (!this.all[id]) {
-                    ecs.error(ecs.EMError.RELEASE_ID_ERROR);
-                    return;
-                }
-            }
-            this.allCount--;
-            delete this.all[id];
-            this.waitToDeleteIds.push(id);
-        };
-        ObjectPools.clearLinkPrePool = function () {
-            var prepool = this.linkPrePool;
-            var pool = this.linkPool;
-            for (var i = 0, len = prepool.length; i < len; i++) {
-                var node = prepool.pop();
-                if (!node)
-                    return;
-                node._next = node.prev = null;
-                pool.push(node);
-            }
-        };
-        ObjectPools.objects = {};
-        ObjectPools.objectClasses = [];
-        ObjectPools.components = {};
-        ObjectPools.componentClasses = [];
-        ObjectPools.entities = [];
-        ObjectPools.id = 1;
-        ObjectPools.realNewObjectCount = 0;
-        /**
-         * 所有存活的对象
-         */
-        ObjectPools.all = { 0: null };
-        /**
-         * 所有存活对象的数量
-         */
-        ObjectPools.allCount = 0;
-        ObjectPools.weakSet = new WeakSet();
-        /**
-         * @internal
-         */
-        ObjectPools.waitToDeleteIds = [];
-        ObjectPools.linkPool = [];
-        ObjectPools.linkPrePool = [];
-        return ObjectPools;
-    }());
-    ecs.ObjectPools = ObjectPools;
-})(ecs || (ecs = {}));
-var ecs;
-(function (ecs) {
-    var Query = /** @class */ (function (_super) {
-        __extends(Query, _super);
-        function Query() {
-            return _super.call(this) || this;
-        }
-        return Query;
-    }(ecs.Link));
-    ecs.Query = Query;
-    var EntityQuery = /** @class */ (function (_super) {
-        __extends(EntityQuery, _super);
-        function EntityQuery() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.componentClassList = [];
-            _this.componentClassMap = {};
-            return _this;
-        }
-        EntityQuery.prototype.init = function (componentClasses) {
-            this.componentClassList = componentClasses;
-            for (var i = 0; i < this.componentClassList.length; i++) {
-                this.componentClassList[i].register(this.componentClassList[i]);
-                this.componentClassMap[this.componentClassList[i].classType.id] = this.componentClassList[i];
-            }
-        };
-        EntityQuery.prototype.onAddEntity = function (entity) {
-            if (this.componentClassList.length == 1) {
-                if (!entity.componentEnableCount[this.componentClassList[0].classType.id]) {
-                    return;
-                }
-            }
-            else {
-                var list = this.componentClassList;
-                for (var i = 0; i < list.length; i++) {
-                    if (!entity.componentEnableCount[list[i].classType.id]) {
-                        return;
-                    }
-                }
-            }
-            this.add(entity);
-        };
-        EntityQuery.prototype.onRemoveEntity = function (entity) {
-            if (!this.has(entity))
-                return;
-            this.remove(entity);
-        };
-        EntityQuery.prototype.onAddComponent = function (entity, component) {
-            // if (this.has(entity) || this.componentClassMap[component.classType.id] === undefined) return;
-            if (this.has(entity))
-                return;
-            var list = this.componentClassList;
-            for (var i = 0; i < list.length; i++) {
-                if (!entity.componentEnableCount[list[i].classType.id]) {
-                    return;
-                }
-            }
-            this.add(entity);
-        };
-        EntityQuery.prototype.onRemoveComponent = function (entity, component) {
-            // if (!this.has(entity) || this.componentClassMap[component.classType.id] === undefined) return;
-            if (!this.has(entity))
-                return;
-            var list = this.componentClassList;
-            for (var i = 0; i < list.length; i++) {
-                var id = list[i].classType.id;
-                if (component.classType.typeMap[id]) {
-                    if (entity.componentEnableCount[id] <= 1) {
-                        this.remove(entity);
-                        return;
-                    }
-                }
-                else {
-                    if (!entity.componentEnableCount[id]) {
-                        this.remove(entity);
-                        return;
-                    }
-                }
-            }
-        };
-        return EntityQuery;
-    }(Query));
-    ecs.EntityQuery = EntityQuery;
-    var ComponentQuery = /** @class */ (function (_super) {
-        __extends(ComponentQuery, _super);
-        function ComponentQuery() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        ComponentQuery.prototype.init = function (callName) {
-            this.callName = callName;
-        };
-        ComponentQuery.prototype.onAddEntity = function (entity) {
-            for (var i = 0; i < entity.components.length; i++) {
-                var component = entity.components[i];
-                if (component[this.callName] !== undefined && typeof component[this.callName] === 'function') {
-                    this.add(component);
-                }
-            }
-        };
-        ComponentQuery.prototype.onRemoveEntity = function (entity) {
-            for (var i = 0; i < entity.components.length; i++) {
-                this.remove(entity.components[i]);
-            }
-        };
-        ComponentQuery.prototype.onAddComponent = function (entity, component) {
-            if (this.has(component))
-                return;
-            if (component[this.callName] !== undefined && typeof component[this.callName] === 'function') {
-                this.add(component);
-            }
-        };
-        ComponentQuery.prototype.onRemoveComponent = function (entity, component) {
-            if (!this.has(component))
-                return;
-            this.remove(component);
-        };
-        return ComponentQuery;
-    }(Query));
-    ecs.ComponentQuery = ComponentQuery;
-})(ecs || (ecs = {}));
-var ecs;
-(function (ecs) {
-    var System = /** @class */ (function () {
-        function System() {
-            this.updateFixTime = 0;
-            this.lateUpdateFixTime = 0;
-            /**
-             * @internal
-             */
-            this.updateMoreTime = 0;
-            /**
-             * @internal
-             */
-            this.lateUpdateMoreTime = 0;
-            this.isRunning = true;
-        }
-        System.prototype.init = function (query) {
-            this.query = query;
-        };
-        System.prototype.destroy = function () {
-            if (this.query) {
-                this.query.clear();
-                ecs.ObjectPools.releaseRecyableObject(this.query);
-                this.query = null;
-            }
-            this.updateMoreTime = 0;
-            this.lateUpdateMoreTime = 0;
-        };
-        System.recycleEnable = false;
-        System.sync = false;
-        System.syncSystemClasses = {};
-        return System;
-    }());
-    ecs.System = System;
-    var EMSyncSystemMode;
-    (function (EMSyncSystemMode) {
-        EMSyncSystemMode[EMSyncSystemMode["SUB_WORLD_ONLY"] = 1] = "SUB_WORLD_ONLY";
-        EMSyncSystemMode[EMSyncSystemMode["ALL_WORLD"] = 2] = "ALL_WORLD";
-    })(EMSyncSystemMode = ecs.EMSyncSystemMode || (ecs.EMSyncSystemMode = {}));
-    function syncSystem(mode) {
-        if (mode === void 0) { mode = EMSyncSystemMode.SUB_WORLD_ONLY; }
-        return function (c) {
-            c["sync"] = true;
-            System.syncSystemClasses[c.name] = {
-                define: c,
-                mode: mode
-            };
-            return c;
-        };
-    }
-    ecs.syncSystem = syncSystem;
-})(ecs || (ecs = {}));
-var ecs;
-(function (ecs) {
     var Transform = /** @class */ (function (_super) {
         __extends(Transform, _super);
         function Transform(entity) {
@@ -2825,19 +3631,22 @@ var ecs;
         });
         Object.defineProperty(Transform.prototype, "local", {
             get: function () {
-                // if (this.dirty) {
-                //     this.dirty = false;
-                //     let local = this._local;
-                //     local.identity();
-                //     local.translate(-this._anchorOffsetX, -this._anchorOffsetY, 0);
-                //     if (this._x || this._y || this._z) local.translate(this._x, this._y, this._z);
-                //     if (this._angleX) local.rotate(this._angleX, 1, 0, 0);
-                //     if (this._angleY) local.rotate(this._angleY, 0, 1, 0);
-                //     if (this._angleZ) local.rotate(this._angleZ, 0, 0, 1);
-                //     if (this._scaleX != 1 || this._scaleY != 1 || this._scaleZ != 1) local.scale(this._scaleX, this._scaleY, this._scaleZ);
-                // }
-                // this._local.id = this.entity.id;
-                // return this._local;
+                if (this.dirty) {
+                    this.dirty = false;
+                    var local = this;
+                    local.identity();
+                    local.translate(-this._anchorOffsetX, -this._anchorOffsetY, 0);
+                    if (this._x || this._y || this._z)
+                        local.translate(this._x, this._y, this._z);
+                    if (this._angleX)
+                        local.rotate(this._angleX, 1, 0, 0);
+                    if (this._angleY)
+                        local.rotate(this._angleY, 0, 1, 0);
+                    if (this._angleZ)
+                        local.rotate(this._angleZ, 0, 0, 1);
+                    if (this._scaleX != 1 || this._scaleY != 1 || this._scaleZ != 1)
+                        local.scale(this._scaleX, this._scaleY, this._scaleZ);
+                }
                 return this;
             },
             enumerable: true,
@@ -2882,6 +3691,7 @@ var ecs;
             configurable: true
         });
         Transform.prototype.reset = function () {
+            this.identity();
             this._local.identity();
             this._reverse.identity();
             this.dirty = false;
@@ -2895,780 +3705,100 @@ var ecs;
 })(ecs || (ecs = {}));
 var ecs;
 (function (ecs) {
-    var UpdateInfo = /** @class */ (function () {
-        function UpdateInfo() {
-        }
-        return UpdateInfo;
-    }());
-    ecs.UpdateInfo = UpdateInfo;
-})(ecs || (ecs = {}));
-var ecs;
-(function (ecs) {
     var Vector3 = /** @class */ (function () {
         function Vector3() {
             this.elements = [0, 0, 0];
         }
+        Object.defineProperty(Vector3.prototype, "x", {
+            get: function () { return this.elements[0]; },
+            set: function (val) { this.elements[0] = val; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Vector3.prototype, "y", {
+            get: function () { return this.elements[1]; },
+            set: function (val) { this.elements[1] = val; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Vector3.prototype, "z", {
+            get: function () { return this.elements[2]; },
+            set: function (val) { this.elements[2] = val; },
+            enumerable: true,
+            configurable: true
+        });
+        Vector3.prototype.init = function (x, y, z) {
+            if (x === void 0) { x = 0; }
+            if (y === void 0) { y = 0; }
+            if (z === void 0) { z = 0; }
+            this.elements[0] = x;
+            this.elements[1] = y;
+            this.elements[2] = z;
+        };
+        Vector3.prototype.set = function (x, y, z) {
+            if (x === void 0) { x = 0; }
+            if (y === void 0) { y = 0; }
+            if (z === void 0) { z = 0; }
+            this.elements[0] = x;
+            this.elements[1] = y;
+            this.elements[2] = z;
+            return this;
+        };
+        Vector3.prototype.dot = function (v) {
+            var x1 = this.elements[0];
+            var y1 = this.elements[1];
+            var z1 = this.elements[2];
+            this.elements[0] = y1 * v.z - v.y * z1;
+            this.elements[1] = v.x * z1 - x1 * v.z;
+            this.elements[2] = x1 * v.y - v.x * y1;
+            return this;
+        };
         Vector3.prototype.normalize = function () {
-            var v = this.elements;
-            var c = v[0], d = v[1], e = v[2], g = Math.sqrt(c * c + d * d + e * e);
-            if (g) {
-                if (g == 1)
-                    return this;
-            }
-            else {
-                v[0] = 0;
-                v[1] = 0;
-                v[2] = 0;
+            var v = this;
+            var l = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+            if (l === 0) {
+                v.x = v.y = v.z = 0;
                 return this;
             }
-            g = 1 / g;
-            v[0] = c * g;
-            v[1] = d * g;
-            v[2] = e * g;
+            else if (l === 1) {
+                return this;
+            }
+            l = 1 / l;
+            v.x *= l;
+            v.y *= l;
+            v.z *= l;
             return this;
+        };
+        Vector3.prototype.add = function (v) {
+            this.elements[0] += v.x;
+            this.elements[1] += v.y;
+            this.elements[2] += v.z;
+            return this;
+        };
+        Vector3.prototype.reduce = function (v) {
+            this.elements[0] -= v.x;
+            this.elements[1] -= v.y;
+            this.elements[2] -= v.z;
+            return this;
+        };
+        Vector3.prototype.scale = function (v) {
+            this.elements[0] *= v;
+            this.elements[1] *= v;
+            this.elements[2] *= v;
+            return this;
+        };
+        Vector3.prototype.clone = function () {
+            return ecs.ObjectPools.createRecyableObject(Vector3, this.x, this.y, this.z);
+        };
+        Vector3.create = function (x, y, z) {
+            if (x === void 0) { x = 0; }
+            if (y === void 0) { y = 0; }
+            if (z === void 0) { z = 0; }
+            return ecs.ObjectPools.createRecyableObject(Vector3, x, y, z);
         };
         return Vector3;
     }());
     ecs.Vector3 = Vector3;
-})(ecs || (ecs = {}));
-var ecs;
-(function (ecs) {
-    var Vector4 = /** @class */ (function () {
-        function Vector4() {
-            this.elements = [0, 0, 0, 1];
-        }
-        return Vector4;
-    }());
-    ecs.Vector4 = Vector4;
-})(ecs || (ecs = {}));
-var ecs;
-(function (ecs) {
-    var World = /** @class */ (function () {
-        function World() {
-            this.entities = new ecs.Link();
-            this.queries = [];
-            this.systems = [];
-            this.subWorld = false;
-            this.syncWorldEnable = false;
-            this.syncComponents = new ecs.Link();
-            this.syncDeleteComponents = [];
-            this.syncFrames = [];
-            this.syncSystems = [];
-            this.syncDeleteSystems = [];
-            this.waitToSyncFrames = [];
-            this.runInfo = new ecs.RunInfo;
-            this.root = new RootEntity();
-            this.root.world = this;
-            this.onAddEntity(this.root);
-            this._lastTime = Date.now();
-            this.addSystem(ecs.AwakeSystem, null, -1);
-            this.addSystem(ecs.StartSystem, null, -1);
-            this.addSystem(ecs.UpdateSystem, null, -1);
-            this.addSystem(ecs.LateUpdateSystem, null, -1);
-        }
-        World.prototype.update = function (dt) {
-            var e_7, _a, e_8, _b;
-            World.subWorld = this.subWorld;
-            while (this.waitToSyncFrames.length) {
-                this.decodeSyncComponents(this.waitToSyncFrames.shift());
-            }
-            var start = Date.now();
-            dt = dt != null ? dt : (start - this._lastTime);
-            if (dt < 0)
-                dt = 0;
-            this._lastTime = start;
-            try {
-                for (var _c = __values(this.systems), _d = _c.next(); !_d.done; _d = _c.next()) {
-                    var sys = _d.value;
-                    if (!sys.isRunning)
-                        continue;
-                    if (sys.updateFixTime) {
-                        var sysdt = dt;
-                        while (sysdt >= sys.updateFixTime) {
-                            sys.update && sys.update(sys.updateFixTime);
-                            sysdt -= sys.updateFixTime;
-                        }
-                        sys.updateMoreTime = sysdt;
-                    }
-                    else {
-                        sys.update && sys.update(dt);
-                    }
-                }
-            }
-            catch (e_7_1) { e_7 = { error: e_7_1 }; }
-            finally {
-                try {
-                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
-                }
-                finally { if (e_7) throw e_7.error; }
-            }
-            var ut = (Date.now() - start);
-            try {
-                for (var _e = __values(this.systems), _f = _e.next(); !_f.done; _f = _e.next()) {
-                    var sys = _f.value;
-                    if (!sys.isRunning)
-                        continue;
-                    if (sys.lateUpdateFixTime) {
-                        var sysdt = dt;
-                        var sysut = ut;
-                        while (sysdt >= sys.lateUpdateFixTime) {
-                            sysdt -= sys.lateUpdateFixTime;
-                            ut -= sys.lateUpdateFixTime;
-                        }
-                        sysdt = dt;
-                        while (sysdt >= sys.lateUpdateFixTime) {
-                            sysut += sys.lateUpdateFixTime;
-                            sys.lateUpdate && sys.lateUpdate(sys.lateUpdateFixTime, sysut);
-                            sysdt -= sys.updateFixTime;
-                        }
-                    }
-                    else {
-                        sys.lateUpdate && sys.lateUpdate(dt, ut);
-                    }
-                }
-            }
-            catch (e_8_1) { e_8 = { error: e_8_1 }; }
-            finally {
-                try {
-                    if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
-                }
-                finally { if (e_8) throw e_8.error; }
-            }
-            var at = Date.now() - start;
-            // if (at < 5 || ObjectPools.linkPrePool.length > 10000) {
-            //     ObjectPools.clearLinkPrePool();
-            // }
-            ecs.ObjectPools.clearLinkPrePool();
-            this.runInfo.frame++;
-            this.runInfo.lastProcessTime = at;
-            if (this.syncWorldEnable) {
-                if (this.syncComponents.length || !this.subWorld && this.syncDeleteComponents.length ||
-                    this.syncSystems.length || !this.subWorld && this.syncDeleteSystems.length) {
-                    this.syncFrames.push(this.encodeSyncWorld());
-                }
-            }
-        };
-        World.prototype.onAddEntity = function (entity) {
-            var e_9, _a;
-            this.entities.add(entity);
-            try {
-                for (var _b = __values(entity.components), _c = _b.next(); !_c.done; _c = _b.next()) {
-                    var component = _c.value;
-                    if (component.syncProperties.length) {
-                        if (!this.syncComponents.has(component)) {
-                            this.syncComponents.add(component);
-                        }
-                    }
-                }
-            }
-            catch (e_9_1) { e_9 = { error: e_9_1 }; }
-            finally {
-                try {
-                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-                }
-                finally { if (e_9) throw e_9.error; }
-            }
-            if (entity.components.length) {
-                for (var i = 0, len = this.queries.length; i < len; i++) {
-                    this.queries[i].onAddEntity(entity);
-                }
-            }
-        };
-        World.prototype.onRemoveEntity = function (entity) {
-            var e_10, _a;
-            this.entities.remove(entity);
-            if (entity.components.length) {
-                try {
-                    for (var _b = __values(entity.components), _c = _b.next(); !_c.done; _c = _b.next()) {
-                        var component = _c.value;
-                        if (component.syncProperties.length) {
-                            this.syncComponents.remove(component);
-                            this.syncDeleteComponents.push(component.id);
-                            for (var node = component.syncProperties.head; node; node = node.next) {
-                                node.value.target = null;
-                                ecs.SyncProperty.pools.push(node.value);
-                            }
-                            component.syncProperties.clear();
-                        }
-                    }
-                }
-                catch (e_10_1) { e_10 = { error: e_10_1 }; }
-                finally {
-                    try {
-                        if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-                    }
-                    finally { if (e_10) throw e_10.error; }
-                }
-                for (var i = 0, len = this.queries.length; i < len; i++) {
-                    this.queries[i].onRemoveEntity(entity);
-                }
-            }
-        };
-        World.prototype.onAddComponent = function (entity, component) {
-            if (component.syncProperties.length) {
-                if (!this.syncComponents.has(component)) {
-                    this.syncComponents.add(component);
-                }
-            }
-            for (var i = 0; i < this.queries.length; i++) {
-                this.queries[i].onAddComponent(entity, component);
-            }
-        };
-        World.prototype.onRemoveComponent = function (entity, component) {
-            for (var i = 0; i < this.queries.length; i++) {
-                this.queries[i].onRemoveComponent(entity, component);
-            }
-        };
-        World.prototype.addSystem = function (systemClass, initArgs, reverseIndex) {
-            if (reverseIndex === void 0) { reverseIndex = 2; }
-            var e_11, _a, e_12, _b;
-            if (initArgs && !(typeof initArgs === 'string')) {
-                try {
-                    for (var initArgs_1 = __values(initArgs), initArgs_1_1 = initArgs_1.next(); !initArgs_1_1.done; initArgs_1_1 = initArgs_1.next()) {
-                        var comp = initArgs_1_1.value;
-                        ecs.Component.register(comp);
-                    }
-                }
-                catch (e_11_1) { e_11 = { error: e_11_1 }; }
-                finally {
-                    try {
-                        if (initArgs_1_1 && !initArgs_1_1.done && (_a = initArgs_1.return)) _a.call(initArgs_1);
-                    }
-                    finally { if (e_11) throw e_11.error; }
-                }
-            }
-            var data = ecs.System.syncSystemClasses[systemClass.name];
-            if (this.syncWorldEnable && data && !this.subWorld) {
-                var comps = void 0;
-                if (typeof initArgs === 'string')
-                    comps = initArgs;
-                else {
-                    comps = [];
-                    try {
-                        for (var initArgs_2 = __values(initArgs), initArgs_2_1 = initArgs_2.next(); !initArgs_2_1.done; initArgs_2_1 = initArgs_2.next()) {
-                            var comp = initArgs_2_1.value;
-                            comps.push(comp.classType.name);
-                        }
-                    }
-                    catch (e_12_1) { e_12 = { error: e_12_1 }; }
-                    finally {
-                        try {
-                            if (initArgs_2_1 && !initArgs_2_1.done && (_b = initArgs_2.return)) _b.call(initArgs_2);
-                        }
-                        finally { if (e_12) throw e_12.error; }
-                    }
-                }
-                this.syncSystems.push({
-                    system: systemClass.name,
-                    components: comps
-                });
-                if (data.mode === ecs.EMSyncSystemMode.SUB_WORLD_ONLY)
-                    return;
-            }
-            var system = ecs.ObjectPools.createRecyableObject(systemClass, initArgs);
-            if (this.systems.indexOf(system) !== -1)
-                return;
-            if (reverseIndex === -1)
-                this.systems.push(system);
-            else
-                this.systems.splice(this.systems.length - reverseIndex, 0, system);
-            if (system.query) {
-                this.queries.push(system.query);
-                for (var entityNode = this.entities.head; entityNode; entityNode = entityNode.next) {
-                    system.query.onAddEntity(entityNode.value);
-                }
-            }
-        };
-        World.prototype.removeSystem = function (system) {
-            var systemClass;
-            var singleSystem;
-            if (system instanceof ecs.System) {
-                systemClass = system.constructor;
-                singleSystem = system;
-            }
-            else {
-                systemClass = system;
-            }
-            var data = ecs.System.syncSystemClasses[systemClass.name];
-            if (data && !this.subWorld) {
-                this.syncDeleteSystems.push(systemClass.name);
-                if (data.mode === ecs.EMSyncSystemMode.SUB_WORLD_ONLY)
-                    return;
-            }
-            for (var i = 0; i < this.systems.length; i++) {
-                var sys = this.systems[i];
-                if (sys instanceof systemClass) {
-                    if (!singleSystem || singleSystem && singleSystem === sys) {
-                        this.systems.splice(this.systems.indexOf(sys), 1);
-                        sys.query && this.queries.splice(this.queries.indexOf(sys.query), 1);
-                        sys.destroy();
-                        if (sys.constructor["recycleEnable"]) {
-                            ecs.ObjectPools.releaseRecyableObject(sys);
-                        }
-                        else {
-                            ecs.ObjectPools.releaseId(sys.id);
-                        }
-                        i--;
-                    }
-                }
-            }
-        };
-        World.prototype.getSystem = function (system) {
-            var systemClass;
-            var singleSystem;
-            if (system instanceof ecs.System) {
-                systemClass = system.constructor;
-                singleSystem = system;
-            }
-            else {
-                systemClass = system;
-            }
-            var data = ecs.System.syncSystemClasses[systemClass.name];
-            if (data && !this.subWorld) {
-                this.syncDeleteSystems.push(systemClass.name);
-                if (data.mode === ecs.EMSyncSystemMode.SUB_WORLD_ONLY)
-                    return;
-            }
-            for (var i = 0; i < this.systems.length; i++) {
-                var sys = this.systems[i];
-                if (sys instanceof systemClass) {
-                    if (!singleSystem || singleSystem && singleSystem === sys) {
-                        return sys;
-                    }
-                }
-            }
-        };
-        World.prototype.encodeSyncWorld = function () {
-            var components = this.syncComponents;
-            var entities = {};
-            var entityList = [];
-            for (var node = components.head; node; node = node.next) {
-                if (node.value.syncProperties.length) {
-                    var entity = void 0;
-                    var id = node.value.entity.id;
-                    if (this.subWorld)
-                        id = World.resyncIds[id];
-                    if (entities[id] == null) {
-                        entities[id] = {
-                            id: id,
-                            components: []
-                        };
-                        entityList.push(entities[id]);
-                    }
-                    entity = entities[id];
-                    id = node.value.id;
-                    if (this.subWorld)
-                        id = World.resyncIds[id];
-                    var obj = {
-                        define: node.value.classType.name,
-                        id: id,
-                    };
-                    for (var p = node.value.syncProperties.head; p; p = p.next) {
-                        if (p.value.hasChange) {
-                            if (p.value.type === ecs.EMSyncType.BASE)
-                                obj[p.value.id] = p.value.value;
-                            else if (p.value.type === ecs.EMSyncType.COMPONENT) {
-                                if (!this.subWorld)
-                                    obj[p.value.id] = p.value.value;
-                                else {
-                                    if (p.value.reValue)
-                                        obj[p.value.id] = p.value.value;
-                                    else
-                                        obj[p.value.id] = World.resyncIds[p.value.value];
-                                }
-                                if (obj[p.value.id] == null)
-                                    obj[p.value.id] = 0;
-                            }
-                            p.value.hasChange = false;
-                        }
-                    }
-                    entity.components.push(obj);
-                }
-            }
-            this.syncComponents.clear(false);
-            var ids = this.subWorld ? [] : this.syncDeleteComponents.concat();
-            this.syncDeleteComponents.length = 0;
-            var syncSystems = this.syncSystems.concat();
-            this.syncSystems.length = 0;
-            var syncDeleteSystems = this.subWorld ? [] : this.syncDeleteSystems.concat();
-            this.syncDeleteSystems.length = 0;
-            return {
-                entities: entityList,
-                deleteIds: ids,
-                systems: syncSystems,
-                deleteSystems: syncDeleteSystems
-            };
-        };
-        World.prototype.decodeSyncComponents = function (syncWorld) {
-            var e_13, _a, e_14, _b, e_15, _c, e_16, _d, e_17, _e, e_18, _f;
-            if (!syncWorld)
-                return;
-            World.isSyncing = true;
-            var world = this;
-            if (syncWorld.systems.length) {
-                try {
-                    for (var _g = __values(syncWorld.systems), _h = _g.next(); !_h.done; _h = _g.next()) {
-                        var syncSystem_1 = _h.value;
-                        var systemClass = ecs.System.syncSystemClasses[syncSystem_1.system].define;
-                        var comps = void 0;
-                        if (syncSystem_1.components) {
-                            if (typeof syncSystem_1.components === 'string')
-                                comps = syncSystem_1.components;
-                            else {
-                                comps = [];
-                                try {
-                                    for (var _j = __values(syncSystem_1.components), _k = _j.next(); !_k.done; _k = _j.next()) {
-                                        var syncComponent = _k.value;
-                                        comps.push(ecs.Component.syncComponents[syncComponent]);
-                                    }
-                                }
-                                catch (e_14_1) { e_14 = { error: e_14_1 }; }
-                                finally {
-                                    try {
-                                        if (_k && !_k.done && (_b = _j.return)) _b.call(_j);
-                                    }
-                                    finally { if (e_14) throw e_14.error; }
-                                }
-                            }
-                        }
-                        this.addSystem(systemClass, comps);
-                    }
-                }
-                catch (e_13_1) { e_13 = { error: e_13_1 }; }
-                finally {
-                    try {
-                        if (_h && !_h.done && (_a = _g.return)) _a.call(_g);
-                    }
-                    finally { if (e_13) throw e_13.error; }
-                }
-            }
-            if (syncWorld.deleteSystems.length) {
-                try {
-                    for (var _l = __values(syncWorld.deleteSystems), _m = _l.next(); !_m.done; _m = _l.next()) {
-                        var syncSystem_2 = _m.value;
-                        var systemClass = ecs.System.syncSystemClasses[syncSystem_2].define;
-                        this.removeSystem(systemClass);
-                    }
-                }
-                catch (e_15_1) { e_15 = { error: e_15_1 }; }
-                finally {
-                    try {
-                        if (_m && !_m.done && (_c = _l.return)) _c.call(_l);
-                    }
-                    finally { if (e_15) throw e_15.error; }
-                }
-            }
-            if (syncWorld.entities.length) {
-                try {
-                    for (var _o = __values(syncWorld.entities), _p = _o.next(); !_p.done; _p = _o.next()) {
-                        var syncEntity = _p.value;
-                        var entity = void 0;
-                        if (this.subWorld) {
-                            if (!World.syncIds[syncEntity.id]) {
-                                entity = ecs.Entity.create();
-                                World.syncIds[syncEntity.id] = entity.id;
-                                World.resyncIds[entity.id] = syncEntity.id;
-                                entity.parent = world.root;
-                            }
-                            else {
-                                entity = ecs.ObjectPools.all[World.syncIds[syncEntity.id]];
-                            }
-                        }
-                        else {
-                            entity = ecs.ObjectPools.all[syncEntity.id];
-                            if (!entity)
-                                continue;
-                        }
-                        try {
-                            for (var _q = __values(syncEntity.components), _r = _q.next(); !_r.done; _r = _q.next()) {
-                                var syncComponent = _r.value;
-                                var component = void 0;
-                                if (this.subWorld) {
-                                    if (!World.syncIds[syncComponent.id]) {
-                                        component = entity.addComponent(ecs.Component.syncComponents[syncComponent.define]);
-                                        World.syncIds[syncComponent.id] = component.id;
-                                        World.resyncIds[component.id] = syncComponent.id;
-                                    }
-                                    else {
-                                        component = ecs.ObjectPools.all[World.syncIds[syncComponent.id]];
-                                    }
-                                }
-                                else {
-                                    component = ecs.ObjectPools.all[syncComponent.id];
-                                    if (!component)
-                                        continue;
-                                }
-                                for (var key in syncComponent) {
-                                    if (key === "id")
-                                        continue;
-                                    component[key] = syncComponent[key];
-                                }
-                            }
-                        }
-                        catch (e_17_1) { e_17 = { error: e_17_1 }; }
-                        finally {
-                            try {
-                                if (_r && !_r.done && (_e = _q.return)) _e.call(_q);
-                            }
-                            finally { if (e_17) throw e_17.error; }
-                        }
-                    }
-                }
-                catch (e_16_1) { e_16 = { error: e_16_1 }; }
-                finally {
-                    try {
-                        if (_p && !_p.done && (_d = _o.return)) _d.call(_o);
-                    }
-                    finally { if (e_16) throw e_16.error; }
-                }
-            }
-            if (syncWorld.deleteIds.length) {
-                try {
-                    for (var _s = __values(syncWorld.deleteIds), _t = _s.next(); !_t.done; _t = _s.next()) {
-                        var id = _t.value;
-                        if (!World.syncIds[id])
-                            continue;
-                        var reid = World.syncIds[id];
-                        delete World.syncIds[id];
-                        delete World.resyncIds[reid];
-                        var comp = ecs.ObjectPools.all[reid];
-                        if (!comp)
-                            continue;
-                        var entity = comp.entity;
-                        comp.destroy();
-                        if (entity && entity.components.length === 0) {
-                            reid = entity.id;
-                            id = World.resyncIds[reid];
-                            delete World.syncIds[id];
-                            delete World.resyncIds[reid];
-                            entity.destroy();
-                        }
-                    }
-                }
-                catch (e_18_1) { e_18 = { error: e_18_1 }; }
-                finally {
-                    try {
-                        if (_t && !_t.done && (_f = _s.return)) _f.call(_s);
-                    }
-                    finally { if (e_18) throw e_18.error; }
-                }
-            }
-            World.isSyncing = false;
-        };
-        Object.defineProperty(World.prototype, "scene", {
-            get: function () {
-                return this.$scene;
-            },
-            set: function (val) {
-                this.$scene && (this.$scene.parent = null);
-                this.$scene = val;
-                this.$scene && this.root.addChildAt(this.$scene, 1);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        World.subWorld = false;
-        World.syncIds = { 0: 0 };
-        World.resyncIds = { 0: 0 };
-        World.isSyncing = false;
-        return World;
-    }());
-    ecs.World = World;
-    var RootEntity = /** @class */ (function (_super) {
-        __extends(RootEntity, _super);
-        function RootEntity() {
-            var _this = _super.call(this) || this;
-            ecs.Entity.realNewCount++;
-            ecs.Entity.newCount++;
-            ecs.Entity.aliveCount++;
-            ecs.Entity.onCreateEntity && ecs.Entity.onCreateEntity(_this);
-            return _this;
-        }
-        RootEntity.prototype.$setParent = function () {
-            return;
-        };
-        RootEntity.prototype.$setWorld = function () {
-            return;
-        };
-        return RootEntity;
-    }(ecs.Entity));
-})(ecs || (ecs = {}));
-window["ecs"] = ecs;
-var ecs;
-(function (ecs) {
-    var DebugTool = /** @class */ (function () {
-        function DebugTool() {
-        }
-        DebugTool.componentCreated = function (id, call) {
-            var _this = this;
-            if (ecs.debug) {
-                this.debugPointTip("组件 " + id + " 何时被创建?");
-            }
-            ecs.Entity.componentCreatedPoints.add({
-                id: id,
-                call: function () {
-                    if (ecs.debug) {
-                        _this.debugPointTip("发现组件 " + id + " 被创建!!!", false);
-                    }
-                    call && call();
-                }
-            });
-        };
-        DebugTool.componentDestroyed = function (id, call) {
-            var _this = this;
-            if (ecs.debug) {
-                this.debugPointTip("组件 " + id + " 何时被销毁?");
-            }
-            ecs.Component.componentDestroyedPoints.add({
-                id: id,
-                call: function () {
-                    if (ecs.debug) {
-                        _this.debugPointTip("发现组件 " + id + " 被销毁!!!", false);
-                    }
-                    call && call();
-                }
-            });
-        };
-        DebugTool.addedToLink = function (id, call) {
-            var _this = this;
-            if (ecs.debug) {
-                this.debugPointTip("组件 " + id + " 何时加入队列?");
-            }
-            ecs.Link.debugPoints = true;
-            ecs.Link.addPoints.add({
-                id: id,
-                call: function () {
-                    if (ecs.debug) {
-                        _this.debugPointTip("发现组件 " + id + " 加入队列!!!", false);
-                    }
-                    call && call();
-                }
-            });
-        };
-        DebugTool.remvedFromLink = function (id, call) {
-            var _this = this;
-            if (ecs.debug) {
-                this.debugPointTip("组件 " + id + " 何时移出队列?");
-            }
-            ecs.Link.debugPoints = true;
-            ecs.Link.addPoints.add({
-                id: id,
-                call: function () {
-                    if (ecs.debug) {
-                        _this.debugPointTip("发现组件 " + id + " 移出队列!!!", false);
-                    }
-                    call && call();
-                }
-            });
-        };
-        DebugTool.debugPointTip = function (name, tip) {
-            if (tip === void 0) { tip = true; }
-            if (tip) {
-                console.warn("调试点:" + name);
-            }
-            else {
-                console.warn("调试点:" + name);
-            }
-        };
-        return DebugTool;
-    }());
-    ecs.DebugTool = DebugTool;
-})(ecs || (ecs = {}));
-var ecs;
-(function (ecs) {
-    ecs.debug = false;
-    var EMError;
-    (function (EMError) {
-        EMError[EMError["RELEASE_ID_ERROR"] = 10001] = "RELEASE_ID_ERROR";
-        EMError[EMError["ENEIEY_HAS_DESTROYED"] = 10002] = "ENEIEY_HAS_DESTROYED";
-        EMError[EMError["NOT_ALLOW_MUTIPLY_COMPONENT"] = 11000] = "NOT_ALLOW_MUTIPLY_COMPONENT";
-        EMError[EMError["COMPONENT_EXIST"] = 11001] = "COMPONENT_EXIST";
-        EMError[EMError["COMPONENT_HAS_DESTROYED"] = 11002] = "COMPONENT_HAS_DESTROYED";
-        EMError[EMError["COMPONENT_REQUIRE"] = 11003] = "COMPONENT_REQUIRE";
-        EMError[EMError["COMPONENT_REQUIRE_COUNT"] = 11004] = "COMPONENT_REQUIRE_COUNT";
-        EMError[EMError["COMPONENT_REQUIRE_INDEX_ERROR"] = 11005] = "COMPONENT_REQUIRE_INDEX_ERROR";
-        EMError[EMError["COMPONENT_REQUIRE_DELETE"] = 11006] = "COMPONENT_REQUIRE_DELETE";
-        EMError[EMError["SYNC_COMPONENT_SAME_NAME"] = 11007] = "SYNC_COMPONENT_SAME_NAME";
-        EMError[EMError["COMPONENT_REMOVED_INDEX_ERROR"] = 11008] = "COMPONENT_REMOVED_INDEX_ERROR";
-    })(EMError = ecs.EMError || (ecs.EMError = {}));
-    var ErrorMessage = {
-        10001: "对象已释放",
-        10002: "Entity 已销毁",
-        11000: "Component 不容许有重复，类 : $arg0",
-        11001: "Component 对象已存在",
-        11002: "Component 已销毁",
-        11003: "Component $arg0 缺少依赖，类 : $arg1",
-        11004: "Component 依赖计数器错误",
-        11005: "Component 依赖索引错误",
-        11006: "Component $arg0 无法删除，存在依赖",
-        11007: "异步 Component 重名 : $arg0",
-        11008: "Component 删除索引错误 : $arg0",
-    };
-    var onError;
-    function setOnError(call) {
-        onError = call;
-    }
-    ecs.setOnError = setOnError;
-    function error(type) {
-        var args = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            args[_i - 1] = arguments[_i];
-        }
-        if (onError) {
-            onError(type);
-        }
-        if (ecs.debug) {
-            var str = ErrorMessage[type];
-            if (args && args.length) {
-                for (var i = 0; i < args.length; i++) {
-                    str = str.replace("$arg" + i, args[i]);
-                }
-            }
-            logError(str);
-        }
-    }
-    ecs.error = error;
-    function logError() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        if (ecs.debug) {
-            console.error.apply(null, args);
-        }
-    }
-    ecs.logError = logError;
-    function logWarn() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        if (ecs.debug) {
-            console.error.apply(null, args);
-        }
-    }
-    ecs.logWarn = logWarn;
-    function logInfo() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        if (ecs.debug) {
-            console.error.apply(null, args);
-        }
-    }
-    ecs.logInfo = logInfo;
-})(ecs || (ecs = {}));
-var ecs;
-(function (ecs) {
-    var RunInfo = /** @class */ (function () {
-        function RunInfo() {
-            this.frame = 0;
-            this.lastProcessTime = 0;
-        }
-        return RunInfo;
-    }());
-    ecs.RunInfo = RunInfo;
 })(ecs || (ecs = {}));
 var ecs;
 (function (ecs) {

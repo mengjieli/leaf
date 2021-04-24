@@ -71,7 +71,6 @@ namespace leaf {
                 })
             }
 
-
             this.width = w;
             this.height = h;
             var names = ["experimental-webgl", "webgl"];
@@ -84,7 +83,7 @@ namespace leaf {
                     gl.viewport(0, 0, GLCore.width, GLCore.height);
                     // gl.enable(gl.DEPTH_TEST);
                     // gl.enable(gl.CULL_FACE);
-                    // gl.enable(gl.BLEND);
+                    gl.enable(gl.BLEND);
                     gl.enable(gl.DEPTH_TEST);
                     gl.enable(gl.STENCIL_TEST);
                     gl.blendColor(1.0, 1.0, 1.0, 1.0);
