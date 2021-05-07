@@ -35,8 +35,8 @@ export class Main {
         leaf.Res.loadResources().then(() => {
             leaf.Res.getRes("block_png").load().then(
                 () => {
-                    new Test3dScene();
-                    // new BullScene();
+                    // new Test3dScene();
+                    new BullScene();
                     // new MainScene();
                     // new FaceScene(true);
                     // new PuzzleScene();
