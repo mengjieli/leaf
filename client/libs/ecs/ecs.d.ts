@@ -209,108 +209,6 @@ declare namespace ecs {
     }
 }
 declare namespace ecs {
-    class Matrix {
-        a: number;
-        b: number;
-        c: number;
-        d: number;
-        tx: number;
-        ty: number;
-        _storeList: any[];
-        id: number;
-        identity(): this;
-        setTo(a: any, b: any, c: any, d: any, tx: any, ty: any): this;
-        translate(x: any, y: any): this;
-        rotate(angle: any): this;
-        scale(scaleX: any, scaleY: any): this;
-        $updateSR(scaleX: any, scaleY: any, rotation: any): this;
-        $updateRST(rotation: any, scaleX: any, scaleY: any, tx: any, ty: any): this;
-        $transformRectangle(rect: any): this;
-        concat(other: any): this;
-        reconcat(other: any): this;
-        readonly deformation: boolean;
-        save(): this;
-        restore(): this;
-        static $matrix: Matrix;
-        static matrixPool: any[];
-        static release(matrix: any): void;
-        /**
-         * 创建出来的矩阵可能不是规范矩阵
-         * @returns {Matrix}
-         */
-        static create(): any;
-    }
-}
-declare namespace ecs {
-    class Matrix4 {
-        id: number;
-        elements: number[];
-        constructor(src?: number[]);
-        identity(): this;
-        set(src: Matrix4): this;
-        orthographicCamera(left: number, right: number, top: number, bottom: number, near: number, far: number): void;
-        perspectiveCamera(fovy: number, aspect: number, near: number, far: number): this;
-        /**
-         * 透视投影
-         * @param left
-         * @param right
-         * @param bottom
-         * @param top
-         * @param near
-         * @param far
-         * @returns
-         */
-        setFrustum(left: any, right: any, bottom: any, top: any, near: any, far: any): this;
-        scale(x: any, y: any, z: any): this;
-        translate(x: any, y: any, z: any): this;
-        rotate(angle: any, x: any, y: any, z: any): this;
-        lookAt(eyeX: any, eyeY: any, eyeZ: any, centerX: any, centerY: any, centerZ: any, upX: any, upY: any, upZ: any): this;
-        setLookAt(eyeX: any, eyeY: any, eyeZ: any, centerX: any, centerY: any, centerZ: any, upX: any, upY: any, upZ: any): this;
-        setScale(x: any, y: any, z: any): this;
-        setRotate(angle: any, x: any, y: any, z: any): this;
-        setTranslate(x: any, y: any, z: any): this;
-        /**
-         *
-         * @param other
-         * @returns
-         */
-        concat(other: any): this;
-        multiplyVector3(pos: any): Vector3;
-        multiplyVector4(pos: any): Vector4;
-        /**
-         * 转置
-         * @returns
-         */
-        transpose(): this;
-        /**
-         * 求 other 的逆矩阵并写入本矩阵
-         * @param other
-         * @returns
-         */
-        setInverseOf(other: any): this;
-        /**
-         * 求逆矩阵并写入ßß
-         * @returns
-         */
-        invert(): this;
-        /**
-         *
-         * ultiply the perspective projection matrix from the right.
-         * @param left
-         * @param right
-         * @param bottom
-         * @param top
-         * @param near
-         * @param far
-         * @returns
-         */
-        frustum(left: any, right: any, bottom: any, top: any, near: any, far: any): this;
-        perspective(fovy: any, aspect: any, near: any, far: any): this;
-        dropShadow(plane: any, light: any): this;
-        dropShadowDirectionally(normX: any, normY: any, normZ: any, planeX: any, planeY: any, planeZ: any, lightX: any, lightY: any, lightZ: any): this;
-    }
-}
-declare namespace ecs {
     interface IComponentRecyclePool {
         releaseComponent(component: Component): any;
         createComponent<T extends Component>(componentClass: IComponentClass<T>): T;
@@ -431,32 +329,6 @@ declare namespace ecs {
     function syncSystem(mode?: EMSyncSystemMode): <T extends new () => System<any>>(c: T) => T;
 }
 declare namespace ecs {
-    class Transform extends Matrix4 {
-        constructor(entity: Entity);
-        private _reverse;
-        readonly entity: Entity;
-        x: number;
-        y: number;
-        z: number;
-        anchorOffsetX: number;
-        anchorOffsetY: number;
-        anchorOffsetZ: number;
-        scaleX: number;
-        scaleY: number;
-        scaleZ: number;
-        angleX: number;
-        angleY: number;
-        angleZ: number;
-        alpha: number;
-        readonly parent: Transform;
-        readonly local: Matrix4;
-        readonly reverse: Matrix4;
-        readonly worldMatrix: Matrix4;
-        readonly worldAlpha: number;
-        reset(): void;
-    }
-}
-declare namespace ecs {
     class UpdateInfo {
         /**
          * 距离上一帧的时间间隔
@@ -474,12 +346,6 @@ declare namespace ecs {
          * 从启动开始的帧数
          */
         frame: number;
-    }
-}
-declare namespace ecs {
-    class Vector3 {
-        elements: number[];
-        normalize(): this;
     }
 }
 declare namespace ecs {
@@ -589,6 +455,174 @@ declare namespace ecs {
     class RunInfo {
         frame: number;
         lastProcessTime: number;
+    }
+}
+declare namespace ecs {
+    class Color {
+        readonly id: number;
+        private _r;
+        private _g;
+        private _b;
+        r: number;
+        g: number;
+        b: number;
+        init(r?: number, g?: number, b?: number): void;
+        set(r: number, g: number, b: number): void;
+        value: number;
+        clone(): Color;
+    }
+}
+declare namespace ecs {
+    interface IVector3 {
+        x: number;
+        y: number;
+        z: number;
+    }
+}
+declare namespace ecs {
+    class Matrix {
+        a: number;
+        b: number;
+        c: number;
+        d: number;
+        tx: number;
+        ty: number;
+        _storeList: any[];
+        id: number;
+        identity(): this;
+        setTo(a: any, b: any, c: any, d: any, tx: any, ty: any): this;
+        translate(x: any, y: any): this;
+        rotate(angle: any): this;
+        scale(scaleX: any, scaleY: any): this;
+        $updateSR(scaleX: any, scaleY: any, rotation: any): this;
+        $updateRST(rotation: any, scaleX: any, scaleY: any, tx: any, ty: any): this;
+        $transformRectangle(rect: any): this;
+        concat(other: any): this;
+        reconcat(other: any): this;
+        readonly deformation: boolean;
+        save(): this;
+        restore(): this;
+        static $matrix: Matrix;
+        static matrixPool: any[];
+        static release(matrix: any): void;
+        /**
+         * 创建出来的矩阵可能不是规范矩阵
+         * @returns {Matrix}
+         */
+        static create(): any;
+    }
+}
+declare namespace ecs {
+    class Matrix4 {
+        id: number;
+        elements: number[];
+        constructor(src?: number[]);
+        identity(): this;
+        set(src: Matrix4): this;
+        orthographicCamera(left: number, right: number, top: number, bottom: number, near: number, far: number): void;
+        perspectiveCamera(fovy: number, aspect: number, near: number, far: number): this;
+        /**
+         * 透视投影
+         * @param left
+         * @param right
+         * @param bottom
+         * @param top
+         * @param near
+         * @param far
+         * @returns
+         */
+        setFrustum(left: any, right: any, bottom: any, top: any, near: any, far: any): this;
+        scale(x: any, y: any, z: any): this;
+        translate(x: any, y: any, z: any): this;
+        rotate(angle: any, x: any, y: any, z: any): this;
+        lookAt(eyeX: any, eyeY: any, eyeZ: any, centerX: any, centerY: any, centerZ: any, upX: any, upY: any, upZ: any): this;
+        setLookAt(eyeX: any, eyeY: any, eyeZ: any, centerX: any, centerY: any, centerZ: any, upX: any, upY: any, upZ: any): this;
+        setScale(x: any, y: any, z: any): this;
+        setRotate(angle: any, x: any, y: any, z: any): this;
+        setTranslate(x: any, y: any, z: any): this;
+        /**
+         *
+         * @param other
+         * @returns
+         */
+        concat(other: any): this;
+        multiplyVector3(pos: any): Vector3;
+        multiplyVector4(pos: any): Vector4;
+        /**
+         * 转置
+         * @returns
+         */
+        transpose(): this;
+        /**
+         * 求 other 的逆矩阵并写入本矩阵
+         * @param other
+         * @returns
+         */
+        setInverseOf(other: any): this;
+        /**
+         * 求逆矩阵并写入ßß
+         * @returns
+         */
+        invert(): this;
+        /**
+         *
+         * ultiply the perspective projection matrix from the right.
+         * @param left
+         * @param right
+         * @param bottom
+         * @param top
+         * @param near
+         * @param far
+         * @returns
+         */
+        frustum(left: any, right: any, bottom: any, top: any, near: any, far: any): this;
+        perspective(fovy: any, aspect: any, near: any, far: any): this;
+        dropShadow(plane: any, light: any): this;
+        dropShadowDirectionally(normX: any, normY: any, normZ: any, planeX: any, planeY: any, planeZ: any, lightX: any, lightY: any, lightZ: any): this;
+    }
+}
+declare namespace ecs {
+    class Transform extends Matrix4 {
+        constructor(entity: Entity);
+        private _reverse;
+        readonly entity: Entity;
+        x: number;
+        y: number;
+        z: number;
+        anchorOffsetX: number;
+        anchorOffsetY: number;
+        anchorOffsetZ: number;
+        scaleX: number;
+        scaleY: number;
+        scaleZ: number;
+        angleX: number;
+        angleY: number;
+        angleZ: number;
+        alpha: number;
+        readonly parent: Transform;
+        readonly local: Matrix4;
+        readonly reverse: Matrix4;
+        readonly worldMatrix: Matrix4;
+        readonly worldAlpha: number;
+        reset(): void;
+    }
+}
+declare namespace ecs {
+    class Vector3 {
+        readonly id: number;
+        elements: number[];
+        x: number;
+        y: number;
+        z: number;
+        init(x?: number, y?: number, z?: number): void;
+        set(x?: number, y?: number, z?: number): this;
+        dot(v: IVector3): this;
+        normalize(): this;
+        add(v: IVector3): this;
+        reduce(v: IVector3): this;
+        scale(v: number): this;
+        clone(): Vector3;
+        static create(x?: number, y?: number, z?: number): Vector3;
     }
 }
 declare namespace ecs {

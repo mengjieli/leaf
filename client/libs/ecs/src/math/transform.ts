@@ -202,19 +202,17 @@ namespace ecs {
         }
 
         get local(): Matrix4 {
-            // if (this.dirty) {
-            //     this.dirty = false;
-            //     let local = this._local;
-            //     local.identity();
-            //     local.translate(-this._anchorOffsetX, -this._anchorOffsetY, 0);
-            //     if (this._x || this._y || this._z) local.translate(this._x, this._y, this._z);
-            //     if (this._angleX) local.rotate(this._angleX, 1, 0, 0);
-            //     if (this._angleY) local.rotate(this._angleY, 0, 1, 0);
-            //     if (this._angleZ) local.rotate(this._angleZ, 0, 0, 1);
-            //     if (this._scaleX != 1 || this._scaleY != 1 || this._scaleZ != 1) local.scale(this._scaleX, this._scaleY, this._scaleZ);
-            // }
-            // this._local.id = this.entity.id;
-            // return this._local;
+            if (this.dirty) {
+                this.dirty = false;
+                let local = this;
+                local.identity();
+                local.translate(-this._anchorOffsetX, -this._anchorOffsetY, 0);
+                if (this._x || this._y || this._z) local.translate(this._x, this._y, this._z);
+                if (this._angleX) local.rotate(this._angleX, 1, 0, 0);
+                if (this._angleY) local.rotate(this._angleY, 0, 1, 0);
+                if (this._angleZ) local.rotate(this._angleZ, 0, 0, 1);
+                if (this._scaleX != 1 || this._scaleY != 1 || this._scaleZ != 1) local.scale(this._scaleX, this._scaleY, this._scaleZ);
+            }
             return this;
         }
 
@@ -248,6 +246,7 @@ namespace ecs {
         }
 
         reset() {
+            this.identity();
             this._local.identity();
             this._reverse.identity();
             this.dirty = false;

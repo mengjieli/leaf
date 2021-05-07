@@ -66,6 +66,17 @@ declare namespace leaf {
     }
 }
 declare namespace leaf {
+    class Vertex3 extends ecs.Vector3 {
+        alpha: number;
+        readonly color: ecs.Color;
+        readonly normal: ecs.Vector3;
+        init(x?: number, y?: number, z?: number): void;
+        onDestroy(): void;
+        clone(): Vertex3;
+        static create(x?: number, y?: number, z?: number, alpha?: number, color?: number): Vertex3;
+    }
+}
+declare namespace leaf {
     class RectMask extends ecs.Component {
         x: number;
         y: number;
@@ -202,13 +213,9 @@ declare namespace leaf {
 declare namespace leaf {
     class Polygon extends Render {
         shader: Polygon3DTask;
-        private _vertices;
         readonly vertices: number[];
-        private _colors;
         readonly colors: number[];
-        private _indices;
         readonly indices: number[];
-        private _alphas;
         readonly alphas: number[];
         preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader): void;
         onDestroy(): void;
@@ -233,26 +240,10 @@ declare namespace leaf {
     }
 }
 declare namespace leaf {
-    class Triangle extends Render {
-        shader: Normal3DTask;
-        point1: {
-            x: number;
-            y: number;
-            z: number;
-        };
-        point2: {
-            x: number;
-            y: number;
-            z: number;
-        };
-        point3: {
-            x: number;
-            y: number;
-            z: number;
-        };
-        color: number;
-        preRender(): void;
-        preRender2(matrix: ecs.Matrix4, alpha: number, shader?: Shader): void;
+    class Triangles extends Polygon {
+        private _length;
+        length: number;
+        setTriangle(v1: Vertex3, v2: Vertex3, v3: Vertex3, index: number): void;
         onDestroy(): void;
     }
 }

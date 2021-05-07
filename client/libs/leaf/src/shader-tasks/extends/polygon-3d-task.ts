@@ -47,7 +47,7 @@ namespace leaf {
         'varying vec3 v_Color;\n' +
         'varying float v_Alpha;\n' +
         'void main() {\n' +
-        '  gl_FragColor = vec4(v_Color.xyz, v_Alpha) ;\n' +
+        '  gl_FragColor = vec4(v_Color.xyz,1.0) * v_Alpha ;\n' +
         '}\n';
       var vertexShader = this.createShader(gl.VERTEX_SHADER, VSHADER_SOURCE);
       var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, FSHADER_SOURCE);

@@ -173,6 +173,13 @@ var Main = /** @class */ (function () {
                                 // new PuzzleScene();
                             });
                         });
+                        (new orange.native.File("libs/")).watch(function (url, content) {
+                            if (url.split(".").length === 2 && url.split(".")[1] === "js") {
+                                eval(content);
+                                leaf.init();
+                                orange.autoloadLink("Test3dScene");
+                            }
+                        });
                         return [2 /*return*/];
                 }
             });
@@ -222,54 +229,24 @@ var Test3dScene = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         var x = 0;
         var y = 0;
-        // let t1 = this.addTriangle([
-        //   x, y, -1,
-        //   x + 640, y, -1,
-        //   x, y + 640, -1
-        // ]);
-        // t1.color = 0xff5555;
-        // t1.transform.x = 0;
-        // t1.transform.y = 0;
-        // let cb = ecs.Entity.create().addComponent(leaf.Cube);
-        // cb.size = 4;
-        // cb.entity.parent = this.scene;
-        // cb.transform.setRotate(90, 0, 1, 0);
-        // cb.color = 0xffffff;
-        // cb.resource = "house_png";
-        // let platform = ecs.Entity.create().addComponent(leaf.Platform);
-        // platform.width = 1.5;
-        // platform.height = 1.5 * 1052 / 678;
-        // platform.entity.parent = this.scene;
-        // platform.resource = "house_png";
-        // platform.texture = leaf.PointTexture.getTexture(0xff0000);//
-        var polygon = ecs.Entity.create().addComponent(leaf.Polygon);
-        polygon.entity.parent = _this.scene;
-        polygon.transform.translate(0, -1, 0);
-        var vertices = polygon.vertices;
-        var colors = polygon.colors;
-        var indices = polygon.indices;
-        var alphas = polygon.alphas;
-        // 0.5, 0.5, 0,
-        //   -0.5, 0.5, 0,
-        //   -0.5, -0.5, 0,
-        vertices[0] = 0.5;
-        vertices[1] = 0.5;
-        vertices[2] = 0;
-        vertices[3] = -0.5;
-        vertices[4] = 0.5;
-        vertices[5] = 0;
-        vertices[6] = -0.5;
-        vertices[7] = -0.5;
-        vertices[8] = 0;
-        alphas[0] = 0;
-        alphas[1] = 0;
-        alphas[2] = 0.5;
-        for (var i = 0; i < vertices.length; i++) {
-            colors[i] = 1;
-        }
-        indices[0] = 0;
-        indices[1] = 1;
-        indices[2] = 2;
+        var tail = ecs.Entity.create().addComponent(Tail, _this.scene);
+        tail.parent = _this.scene;
+        tail.normal = ecs.Vector3.create(0, 0, 1);
+        tail.width = 0.01;
+        tail.lifeTime = 1000;
+        var time = 300;
+        var call = function () {
+            tail.addComponent(tween.Tween, tail.transform, time, { x: 0.8 }).onComplete = function () {
+                // time = Math.max(time - 100, 300);
+                tail.addComponent(tween.Tween, tail.transform, time, { x: 0, y: 0.8 }).onComplete = function () {
+                    // time = Math.max(time - 100, 300);
+                    // tail.addComponent(tween.Tween, tail.transform, time, { x: -0.8, y: 0 }).onComplete = call;
+                    // time = Math.max(time - 100, 300);
+                };
+            };
+        };
+        call();
+        // tail.addComponent(CircleMove2D, 1, 0.003);
         _this.scene.addComponent(SpotRotate);
         var kb = _this.scene.addComponent(leaf.KeyBoard);
         kb.onPressRight.on(function () {
@@ -310,26 +287,80 @@ var Test3dScene = /** @class */ (function (_super) {
         y = 0;
         return _this;
     }
-    Test3dScene.prototype.addTriangle = function (pos) {
-        var t = ecs.Entity.create().addComponent(leaf.Triangle);
-        t.point1.x = pos[0];
-        t.point1.y = pos[1];
-        t.point1.z = pos[2];
-        t.point2.x = pos[3];
-        t.point2.y = pos[4];
-        t.point2.z = pos[5];
-        t.point3.x = pos[6];
-        t.point3.y = pos[7];
-        t.point3.z = pos[8];
-        t.parent = this.scene;
-        return t;
-    };
     Test3dScene = __decorate([
         orange.autoload("Test3dScene")
     ], Test3dScene);
     return Test3dScene;
 }(module_scene_1.ModuleScene));
 exports.Test3dScene = Test3dScene;
+var CircleMove2D = /** @class */ (function (_super) {
+    __extends(CircleMove2D, _super);
+    function CircleMove2D() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    CircleMove2D.prototype.init = function (radius, speed) {
+        if (radius === void 0) { radius = 1; }
+        if (speed === void 0) { speed = 1; }
+        this.radius = radius;
+        this.speed = speed;
+        this.time = 0;
+    };
+    CircleMove2D.prototype.update = function (dt) {
+        this.time += dt;
+        this.transform.x = Math.cos(this.time * this.speed) * this.radius;
+        this.transform.y = Math.sin(this.time * this.speed) * this.radius;
+    };
+    return CircleMove2D;
+}(ecs.Component));
+var Tail = /** @class */ (function (_super) {
+    __extends(Tail, _super);
+    function Tail() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.points = [];
+        return _this;
+    }
+    Tail.prototype.init = function () {
+        this.points.length = 0;
+        this.lifeTime = 1000;
+        this.width = 0.1;
+        this.color = 0xffffff;
+        this.tail = ecs.Entity.create().addComponent(leaf.Triangles);
+    };
+    Tail.prototype.update = function (dt) {
+        if (this.tail.parent != this.entity.parent) {
+            this.tail.parent = this.entity.parent;
+        }
+        for (var i = 0; i < this.points.length; i++) {
+            var p = this.points[i];
+            p.alpha = Math.max(p.alpha - dt / this.lifeTime, 0);
+            if (p.alpha <= 0 && (i === 1 || i === 0 && this.points.length === 1)) {
+                this.points.shift();
+                i--;
+            }
+        }
+        for (var i = 1; i < this.points.length - 1; i++) {
+            var lp = this.points[i - 1];
+            var p = this.points[i];
+            var np = this.points[i + 1];
+            var p1 = p.clone().add(p.clone().reduce(lp).dot(p.normal).normalize().scale(this.width / 2));
+            var p2 = p.clone().add(p.clone().reduce(lp).dot(p.normal).normalize().scale(-this.width / 2));
+            var p3 = np.clone().add(np.clone().reduce(p).dot(np.normal).normalize().scale(this.width / 2));
+            var p4 = np.clone().add(np.clone().reduce(p).dot(np.normal).normalize().scale(-this.width / 2));
+            this.tail.setTriangle(p1, p2, p3, i * 2 + 0);
+            this.tail.setTriangle(p2, p4, p3, i * 2 + 1);
+        }
+        this.tail.length = (this.points.length - 1) * 2;
+        if (this.points.length) {
+            var p = this.points[this.points.length - 1];
+            if (p.x === this.transform.x && p.y === this.transform.y && p.z === this.transform.z)
+                return;
+        }
+        var center = leaf.Vertex3.create(this.transform.x, this.transform.y, this.transform.z, 1, this.color);
+        center.normal.set(this.normal.x, this.normal.y, this.normal.z);
+        this.points.push(center);
+    };
+    return Tail;
+}(ecs.Component));
 var SpotRotate = /** @class */ (function (_super) {
     __extends(SpotRotate, _super);
     function SpotRotate() {

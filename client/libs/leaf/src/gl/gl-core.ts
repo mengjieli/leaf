@@ -71,7 +71,6 @@ namespace leaf {
                 })
             }
 
-
             this.width = w;
             this.height = h;
             var names = ["experimental-webgl", "webgl"];

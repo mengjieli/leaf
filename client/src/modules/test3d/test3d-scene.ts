@@ -9,62 +9,24 @@ export class Test3dScene extends ModuleScene {
 
     let x = 0;
     let y = 0;
-    // let t1 = this.addTriangle([
-    //   x, y, -1,
-    //   x + 640, y, -1,
-    //   x, y + 640, -1
-    // ]);
-    // t1.color = 0xff5555;
-    // t1.transform.x = 0;
-    // t1.transform.y = 0;
-
-    // let cb = ecs.Entity.create().addComponent(leaf.Cube);
-    // cb.size = 4;
-    // cb.entity.parent = this.scene;
-    // cb.transform.setRotate(90, 0, 1, 0);
-    // cb.color = 0xffffff;
-    // cb.resource = "house_png";
-
-    // let platform = ecs.Entity.create().addComponent(leaf.Platform);
-    // platform.width = 1.5;
-    // platform.height = 1.5 * 1052 / 678;
-    // platform.entity.parent = this.scene;
-    // platform.resource = "house_png";
-    // platform.texture = leaf.PointTexture.getTexture(0xff0000);//
-
-    let polygon = ecs.Entity.create().addComponent(leaf.Polygon);
-    polygon.entity.parent = this.scene;
-    polygon.transform.translate(0,-1,0);
-    let vertices = polygon.vertices;
-    let colors = polygon.colors;
-    let indices = polygon.indices;
-    let alphas = polygon.alphas;
-
-    // 0.5, 0.5, 0,
-    //   -0.5, 0.5, 0,
-    //   -0.5, -0.5, 0,
-    vertices[0] = 0.5;
-    vertices[1] = 0.5;
-    vertices[2] = 0;
-
-    vertices[3] = -0.5;
-    vertices[4] = 0.5;
-    vertices[5] = 0;
-
-    vertices[6] = -0.5;
-    vertices[7] = -0.5;
-    vertices[8] = 0;
-
-    alphas[0] = 0;
-    alphas[1] = 0;
-    alphas[2] = 0.5;
-
-    for (let i = 0; i < vertices.length; i++) {
-      colors[i] = 1;
+    let tail = ecs.Entity.create().addComponent(Tail, this.scene);
+    tail.parent = this.scene;
+    tail.normal = ecs.Vector3.create(0, 0, 1);
+    tail.width = 0.01;
+    tail.lifeTime = 1000;
+    let time = 300;
+    let call = () => {
+      tail.addComponent(tween.Tween, tail.transform, time, { x: 0.8 }).onComplete = () => {
+        // time = Math.max(time - 100, 300);
+        tail.addComponent(tween.Tween, tail.transform, time, { x: 0, y: 0.8 }).onComplete = () => {
+          // time = Math.max(time - 100, 300);
+          // tail.addComponent(tween.Tween, tail.transform, time, { x: -0.8, y: 0 }).onComplete = call;
+          // time = Math.max(time - 100, 300);
+        }
+      };
     }
-    indices[0] = 0;
-    indices[1] = 1;
-    indices[2] = 2;
+    call();
+    // tail.addComponent(CircleMove2D, 1, 0.003);
 
     this.scene.addComponent(SpotRotate);
     let kb = this.scene.addComponent(leaf.KeyBoard);
@@ -109,24 +71,76 @@ export class Test3dScene extends ModuleScene {
     y = 0;
   }
 
-  addTriangle(pos: number[]) {
-    let t = ecs.Entity.create().addComponent(leaf.Triangle);
-    t.point1.x = pos[0];
-    t.point1.y = pos[1];
-    t.point1.z = pos[2];
+}
 
-    t.point2.x = pos[3];
-    t.point2.y = pos[4];
-    t.point2.z = pos[5];
+class CircleMove2D extends ecs.Component {
 
-    t.point3.x = pos[6];
-    t.point3.y = pos[7];
-    t.point3.z = pos[8];
+  radius: number;
+  speed: number;
+  time: number;
 
+  init(radius: number = 1, speed: number = 1) {
+    this.radius = radius;
+    this.speed = speed;
+    this.time = 0;
+  }
 
-    t.parent = this.scene;
+  update(dt: number) {
+    this.time += dt;
+    this.transform.x = Math.cos(this.time * this.speed) * this.radius;
+    this.transform.y = Math.sin(this.time * this.speed) * this.radius;
+  }
 
-    return t;
+}
+
+class Tail extends ecs.Component {
+
+  points: leaf.Vertex3[] = [];
+  lifeTime: number;
+  tail: leaf.Triangles;
+  normal: ecs.Vector3;
+  width: number;
+  color: number;
+
+  init() {
+    this.points.length = 0;
+    this.lifeTime = 1000;
+    this.width = 0.1;
+    this.color = 0xffffff;
+    this.tail = ecs.Entity.create().addComponent(leaf.Triangles);
+  }
+
+  update(dt: number) {
+    if (this.tail.parent != this.entity.parent) {
+      this.tail.parent = this.entity.parent;
+    }
+    for (let i = 0; i < this.points.length; i++) {
+      let p = this.points[i];
+      p.alpha = Math.max(p.alpha - dt / this.lifeTime, 0);
+      if (p.alpha <= 0 && (i === 1 || i === 0 && this.points.length === 1)) {
+        this.points.shift();
+        i--;
+      }
+    }
+    for (let i = 1; i < this.points.length - 1; i++) {
+      let lp = this.points[i - 1];
+      let p = this.points[i];
+      let np = this.points[i + 1];
+      let p1 = p.clone().add(p.clone().reduce(lp).dot(p.normal).normalize().scale(this.width / 2));
+      let p2 = p.clone().add(p.clone().reduce(lp).dot(p.normal).normalize().scale(-this.width / 2));
+      let p3 = np.clone().add(np.clone().reduce(p).dot(np.normal).normalize().scale(this.width / 2));
+      let p4 = np.clone().add(np.clone().reduce(p).dot(np.normal).normalize().scale(-this.width / 2));
+      this.tail.setTriangle(p1, p2, p3, i * 2 + 0);
+      this.tail.setTriangle(p2, p4, p3, i * 2 + 1);
+    }
+    this.tail.length = (this.points.length - 1) * 2;
+    if (this.points.length) {
+      let p = this.points[this.points.length - 1];
+      if (p.x === this.transform.x && p.y === this.transform.y && p.z === this.transform.z) return;
+    }
+    let center = leaf.Vertex3.create(this.transform.x, this.transform.y, this.transform.z, 1, this.color);
+    center.normal.set(this.normal.x, this.normal.y, this.normal.z);
+    this.points.push(center);
   }
 
 }
