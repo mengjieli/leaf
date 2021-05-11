@@ -53,6 +53,7 @@ declare namespace leaf {
         static width: number;
         static height: number;
         static textureId: number;
+        static canvasScaleFactor: number;
         static readonly scale: number;
         static init(): WebGLRenderingContext;
         /**

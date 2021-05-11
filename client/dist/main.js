@@ -219,9 +219,9 @@ var Main = /** @class */ (function () {
                         leaf.Res.loadResources().then(function () {
                             leaf.Res.getRes("block_png").load().then(function () {
                                 // new BullScene();
-                                new main_scene_1.MainScene();
                                 // new FaceScene(true);
                                 // new PuzzleScene();
+                                new main_scene_1.MainScene();
                                 // new BubbleScene();
                             });
                         });
@@ -549,13 +549,6 @@ var MainUI = /** @class */ (function (_super) {
         bg2.transform.scaleX = leaf.getStageWidth();
         bg2.transform.y = this.top;
         bg2.transform.scaleY = leaf.getStageHeight() - bg2.transform.y;
-        for (var i = 0; i < 10; i++) {
-            var ball = ecs.Entity.create().addComponent(leaf.Bitmap);
-            ball.entity.parent = this.entity;
-            ball.resource = "bubble_ball1_png";
-            ball.entity.transform.x = 52 * i;
-            ball.entity.transform.y = 300;
-        }
     };
     return MainUI;
 }(ecs.Component));

@@ -10,6 +10,8 @@ namespace leaf {
 
         static textureId: number = 0;
 
+        static canvasScaleFactor = 1;
+
         static get scale(): number {
             return leaf.world ? leaf.world.root.transform.scaleX : 1;
         }
@@ -21,51 +23,51 @@ namespace leaf {
 
         static init() {
             var canvas = (window["canvas"] || document.getElementById('leaf')) as HTMLCanvasElement;
-            var backingStore = 1//window.devicePixelRatio || 1;
-            let canvasScaleFactor = backingStore;
+            var backingStore = 1 * ((window.devicePixelRatio || 1));
+            let canvasScaleFactor = GLCore.canvasScaleFactor = backingStore;
 
             let w = canvas.width * backingStore;
             let h = canvas.height * backingStore;
 
-            // let m = new ecs.Matrix();
-            // m.identity();
-            // m.scale(1 / canvasScaleFactor, 1 / canvasScaleFactor);
-            // var transform = "matrix(" + m.a + "," + m.b + "," + m.c + "," + m.d + "," + m.tx + "," + m.ty + ")";
-            // canvas.style.transformOrigin = "0% 0% 0px";
-            // canvas.style["transform"] = transform;
-            // canvas.width *= canvasScaleFactor;
-            // canvas.height *= canvasScaleFactor;
+            let m = new ecs.Matrix();
+            m.identity();
+            m.scale(1 / canvasScaleFactor, 1 / canvasScaleFactor);
+            var transform = "matrix(" + m.a + "," + m.b + "," + m.c + "," + m.d + "," + m.tx + "," + m.ty + ")";
+            canvas.style.transformOrigin = "0% 0% 0px";
+            canvas.style["transform"] = transform;
+            canvas.width *= canvasScaleFactor;
+            canvas.height *= canvasScaleFactor;
 
             if (window["wx"]) {
                 window["wx"].onTouchStart((e) => {
                     for (let t of e.changedTouches) {
-                        TouchManager.start(t.identifier, t.clientX, t.clientY);
+                        TouchManager.start(t.identifier, t.clientX * canvasScaleFactor, t.clientY * canvasScaleFactor);
                     }
                 });
                 window["wx"].onTouchMove((e) => {
                     for (let t of e.changedTouches) {
-                        TouchManager.move(t.identifier, t.clientX, t.clientY);
+                        TouchManager.move(t.identifier, t.clientX * canvasScaleFactor, t.clientY * canvasScaleFactor);
                     }
                 })
                 window["wx"].onTouchEnd((e) => {
                     for (let t of e.changedTouches) {
-                        TouchManager.end(t.identifier, t.clientX, t.clientY);
+                        TouchManager.end(t.identifier, t.clientX * canvasScaleFactor, t.clientY * canvasScaleFactor);
                     }
                 })
             } else {
                 canvas.addEventListener("touchstart", function (e: any) {
                     for (let t of e.changedTouches) {
-                        TouchManager.start(t.identifier, t.clientX, t.clientY);
+                        TouchManager.start(t.identifier, t.clientX * canvasScaleFactor, t.clientY * canvasScaleFactor);
                     }
                 })
                 canvas.addEventListener("touchmove", function (e: any) {
                     for (let t of e.changedTouches) {
-                        TouchManager.move(t.identifier, t.clientX, t.clientY);
+                        TouchManager.move(t.identifier, t.clientX * canvasScaleFactor, t.clientY * canvasScaleFactor);
                     }
                 })
                 canvas.addEventListener("touchend", function (e: any) {
                     for (let t of e.changedTouches) {
-                        TouchManager.end(t.identifier, t.clientX, t.clientY);
+                        TouchManager.end(t.identifier, t.clientX * canvasScaleFactor, t.clientY * canvasScaleFactor);
                     }
                 })
             }
@@ -120,9 +122,9 @@ namespace leaf {
             texture["width"] = image.width;
             texture["height"] = image.height;
             this.textureId++;
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.bindTexture(gl.TEXTURE_2D, texture);//NEAREST LINEAR
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, <any>image);
@@ -133,8 +135,8 @@ namespace leaf {
         public static updateTexture(texture: WebGLTexture, image: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | ImageData): void {
             var gl = this.gl;
             gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, <any>image);

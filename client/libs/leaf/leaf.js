@@ -196,25 +196,25 @@ var leaf;
         });
         GLCore.init = function () {
             var canvas = (window["canvas"] || document.getElementById('leaf'));
-            var backingStore = 1; //window.devicePixelRatio || 1;
-            var canvasScaleFactor = backingStore;
+            var backingStore = 1 * ((window.devicePixelRatio || 1));
+            var canvasScaleFactor = GLCore.canvasScaleFactor = backingStore;
             var w = canvas.width * backingStore;
             var h = canvas.height * backingStore;
-            // let m = new ecs.Matrix();
-            // m.identity();
-            // m.scale(1 / canvasScaleFactor, 1 / canvasScaleFactor);
-            // var transform = "matrix(" + m.a + "," + m.b + "," + m.c + "," + m.d + "," + m.tx + "," + m.ty + ")";
-            // canvas.style.transformOrigin = "0% 0% 0px";
-            // canvas.style["transform"] = transform;
-            // canvas.width *= canvasScaleFactor;
-            // canvas.height *= canvasScaleFactor;
+            var m = new ecs.Matrix();
+            m.identity();
+            m.scale(1 / canvasScaleFactor, 1 / canvasScaleFactor);
+            var transform = "matrix(" + m.a + "," + m.b + "," + m.c + "," + m.d + "," + m.tx + "," + m.ty + ")";
+            canvas.style.transformOrigin = "0% 0% 0px";
+            canvas.style["transform"] = transform;
+            canvas.width *= canvasScaleFactor;
+            canvas.height *= canvasScaleFactor;
             if (window["wx"]) {
                 window["wx"].onTouchStart(function (e) {
                     var e_1, _a;
                     try {
                         for (var _b = __values(e.changedTouches), _c = _b.next(); !_c.done; _c = _b.next()) {
                             var t = _c.value;
-                            leaf.TouchManager.start(t.identifier, t.clientX, t.clientY);
+                            leaf.TouchManager.start(t.identifier, t.clientX * canvasScaleFactor, t.clientY * canvasScaleFactor);
                         }
                     }
                     catch (e_1_1) { e_1 = { error: e_1_1 }; }
@@ -230,7 +230,7 @@ var leaf;
                     try {
                         for (var _b = __values(e.changedTouches), _c = _b.next(); !_c.done; _c = _b.next()) {
                             var t = _c.value;
-                            leaf.TouchManager.move(t.identifier, t.clientX, t.clientY);
+                            leaf.TouchManager.move(t.identifier, t.clientX * canvasScaleFactor, t.clientY * canvasScaleFactor);
                         }
                     }
                     catch (e_2_1) { e_2 = { error: e_2_1 }; }
@@ -246,7 +246,7 @@ var leaf;
                     try {
                         for (var _b = __values(e.changedTouches), _c = _b.next(); !_c.done; _c = _b.next()) {
                             var t = _c.value;
-                            leaf.TouchManager.end(t.identifier, t.clientX, t.clientY);
+                            leaf.TouchManager.end(t.identifier, t.clientX * canvasScaleFactor, t.clientY * canvasScaleFactor);
                         }
                     }
                     catch (e_3_1) { e_3 = { error: e_3_1 }; }
@@ -264,7 +264,7 @@ var leaf;
                     try {
                         for (var _b = __values(e.changedTouches), _c = _b.next(); !_c.done; _c = _b.next()) {
                             var t = _c.value;
-                            leaf.TouchManager.start(t.identifier, t.clientX, t.clientY);
+                            leaf.TouchManager.start(t.identifier, t.clientX * canvasScaleFactor, t.clientY * canvasScaleFactor);
                         }
                     }
                     catch (e_4_1) { e_4 = { error: e_4_1 }; }
@@ -280,7 +280,7 @@ var leaf;
                     try {
                         for (var _b = __values(e.changedTouches), _c = _b.next(); !_c.done; _c = _b.next()) {
                             var t = _c.value;
-                            leaf.TouchManager.move(t.identifier, t.clientX, t.clientY);
+                            leaf.TouchManager.move(t.identifier, t.clientX * canvasScaleFactor, t.clientY * canvasScaleFactor);
                         }
                     }
                     catch (e_5_1) { e_5 = { error: e_5_1 }; }
@@ -296,7 +296,7 @@ var leaf;
                     try {
                         for (var _b = __values(e.changedTouches), _c = _b.next(); !_c.done; _c = _b.next()) {
                             var t = _c.value;
-                            leaf.TouchManager.end(t.identifier, t.clientX, t.clientY);
+                            leaf.TouchManager.end(t.identifier, t.clientX * canvasScaleFactor, t.clientY * canvasScaleFactor);
                         }
                     }
                     catch (e_6_1) { e_6 = { error: e_6_1 }; }
@@ -357,9 +357,9 @@ var leaf;
             texture["width"] = image.width;
             texture["height"] = image.height;
             this.textureId++;
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.bindTexture(gl.TEXTURE_2D, texture); //NEAREST LINEAR
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
@@ -369,14 +369,15 @@ var leaf;
         GLCore.updateTexture = function (texture, image) {
             var gl = this.gl;
             gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
             gl.bindTexture(gl.TEXTURE_2D, null);
         };
         GLCore.textureId = 0;
+        GLCore.canvasScaleFactor = 1;
         return GLCore;
     }());
     leaf.GLCore = GLCore;

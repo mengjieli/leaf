@@ -31,14 +31,14 @@ export class Main {
             });
         }
         leaf.init();
-        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 640 ;
+        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 640;
         leaf.Res.loadResources().then(() => {
             leaf.Res.getRes("block_png").load().then(
                 () => {
                     // new BullScene();
-                    new MainScene();
                     // new FaceScene(true);
                     // new PuzzleScene();
+                    new MainScene();
                     // new BubbleScene();
                 }
             )
