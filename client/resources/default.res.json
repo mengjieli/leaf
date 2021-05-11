@@ -4329,6 +4329,41 @@
       "type": 1
     },
     {
+      "name": "bubble_ball1_png",
+      "path": "assets/bubble/bubble_ball1.png",
+      "type": 1
+    },
+    {
+      "name": "bubble_ball2_png",
+      "path": "assets/bubble/bubble_ball2.png",
+      "type": 1
+    },
+    {
+      "name": "bubble_ball3_png",
+      "path": "assets/bubble/bubble_ball3.png",
+      "type": 1
+    },
+    {
+      "name": "bubble_ball4_png",
+      "path": "assets/bubble/bubble_ball4.png",
+      "type": 1
+    },
+    {
+      "name": "bubble_ball5_png",
+      "path": "assets/bubble/bubble_ball5.png",
+      "type": 1
+    },
+    {
+      "name": "bubble_ball6_png",
+      "path": "assets/bubble/bubble_ball6.png",
+      "type": 1
+    },
+    {
+      "name": "bubble_ball7_png",
+      "path": "assets/bubble/bubble_ball7.png",
+      "type": 1
+    },
+    {
       "name": "bull1-1-0_png",
       "path": "assets/bull/bull1-1-0.png",
       "type": 1

@@ -5,6 +5,7 @@ import { PlayerData } from "./net/player-data";
 import { Platform } from "./utils/platform";
 import { MainScene } from "./modules/main/main-scene";
 import { BullScene } from "./modules/bull/bull-scene";
+import { BubbleScene } from "./modules/bubble/bubble-scene";
 
 export class Main {
 
@@ -30,14 +31,15 @@ export class Main {
             });
         }
         leaf.init();
-        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 640;
+        leaf.world.root.transform.scaleX = leaf.world.root.transform.scaleY = leaf.GLCore.width / 640 ;
         leaf.Res.loadResources().then(() => {
             leaf.Res.getRes("block_png").load().then(
                 () => {
-                    new BullScene();
-                    // new MainScene();
+                    // new BullScene();
+                    new MainScene();
                     // new FaceScene(true);
                     // new PuzzleScene();
+                    // new BubbleScene();
                 }
             )
         })

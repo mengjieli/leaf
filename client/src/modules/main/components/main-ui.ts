@@ -89,5 +89,16 @@ export class MainUI extends ecs.Component {
         bg2.transform.scaleX = leaf.getStageWidth();
         bg2.transform.y = this.top;
         bg2.transform.scaleY = leaf.getStageHeight() - bg2.transform.y;
+
+
+
+
+        for (let i = 0; i < 10; i++) {
+            let ball = ecs.Entity.create().addComponent(leaf.Bitmap);
+            ball.entity.parent = this.entity;
+            ball.resource = "bubble_ball1_png";
+            ball.entity.transform.x = 52 * i;
+            ball.entity.transform.y = 300;
+        }
     }
 }

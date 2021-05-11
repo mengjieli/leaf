@@ -8,5 +8,6 @@ export class MainScene extends ModuleScene {
         super();
 
         ecs.Entity.create().addComponent(MainUI).parent = this.scene;
+
     }
 }
