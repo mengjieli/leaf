@@ -188,195 +188,6 @@ window["Main"] = Main;
 
 /***/ }),
 
-/***/ "../src/modules/pixi/components/pixi-world.ts":
-/*!****************************************************!*\
-  !*** ../src/modules/pixi/components/pixi-world.ts ***!
-  \****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __values = (this && this.__values) || function(o) {
-    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-    if (m) return m.call(o);
-    if (o && typeof o.length === "number") return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-orange.autoloadLink("PixiScene");
-var PixiWorld = /** @class */ (function (_super) {
-    __extends(PixiWorld, _super);
-    function PixiWorld() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.width = 40;
-        _this.height = 60;
-        return _this;
-    }
-    PixiWorld.prototype.init = function () {
-        this.backgrounds = [];
-        for (var y = 0; y < this.height; y++) {
-            this.backgrounds[y] = [];
-            for (var x = 0; x < this.width; x++) {
-                var bg = ecs.Entity.create().addComponent(Background, x, y);
-                bg.entity.parent = this.entity;
-                bg.entity.transform.x = x * 16;
-                bg.entity.transform.y = y * 16;
-                this.backgrounds[y][x] = bg;
-            }
-        }
-        this.addComponent(Light, this, 20, 30, 30);
-    };
-    return PixiWorld;
-}(ecs.Component));
-exports.PixiWorld = PixiWorld;
-var Background = /** @class */ (function (_super) {
-    __extends(Background, _super);
-    function Background() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.lightColors = [];
-        return _this;
-    }
-    Background.prototype.init = function (x, y) {
-        this.x = x;
-        this.y = y;
-        if (!this.show) {
-            this.show = this.addComponent(leaf.Bitmap);
-            this.show.texture = leaf.PointTexture.getTexture(0xffffff);
-            this.entity.transform.scaleX = this.entity.transform.scaleY = 16;
-        }
-        this.show.tint = 0;
-    };
-    Background.prototype.onDestroy = function () {
-        this.lightColors = [];
-    };
-    Background.prototype.addLight = function (light) {
-        var e_1, _a;
-        this.lightColors.push(light);
-        var val = 0;
-        try {
-            for (var _b = __values(this.lightColors), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var c = _c.value;
-                var dis = Math.sqrt((this.x - c.x) * (this.x - c.x) + (this.y - c.y) * (this.y - c.y));
-                var factor = dis > c.range ? 0 : 1 - dis / c.range;
-                var r = c.color.value * factor;
-                if (r > val)
-                    val = r;
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
-        val = val < 0 ? 0 : val > 1 ? 1 : val;
-        this.show.tint = ((~~(0xff * val)) << 16) + ((~~(0xff * val)) << 8) + (~~(0xff * val));
-    };
-    Background.prototype.removeLight = function (color) {
-        var e_2, _a;
-        if (this.lightColors.indexOf(color) != -1) {
-            this.lightColors.splice(this.lightColors.indexOf(color), 1);
-            var val = 0;
-            try {
-                for (var _b = __values(this.lightColors), _c = _b.next(); !_c.done; _c = _b.next()) {
-                    var c = _c.value;
-                    var dis = Math.abs(this.x - c.x) + Math.abs(this.y - c.y);
-                    var factor = dis > c.range ? 0 : dis / c.range;
-                    var r = c.color.value * factor;
-                    if (r > val)
-                        val = r;
-                }
-            }
-            catch (e_2_1) { e_2 = { error: e_2_1 }; }
-            finally {
-                try {
-                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-                }
-                finally { if (e_2) throw e_2.error; }
-            }
-            val = val < 0 ? 0 : val > 1 ? 1 : val;
-            this.show.tint = ((~~(0xff * val)) << 16) + ((~~(0xff * val)) << 8) + (~~(0xff * val));
-        }
-    };
-    return Background;
-}(ecs.Component));
-exports.Background = Background;
-var Light = /** @class */ (function (_super) {
-    __extends(Light, _super);
-    function Light() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.color = new LightColor();
-        return _this;
-    }
-    Light.prototype.init = function (pixiWorld, x, y, range, value) {
-        if (range === void 0) { range = 10; }
-        if (value === void 0) { value = 1; }
-        this.pixiWorld = pixiWorld;
-        this.x = x;
-        this.y = y;
-        this.range = range;
-        this.color.value = 1;
-        for (var y_1 = -range; y_1 <= range; y_1++) {
-            for (var x_1 = -range; x_1 <= range; x_1++) {
-                var px = x_1 + this.x;
-                var py = y_1 + this.y;
-                if (px >= 0 && px < this.pixiWorld.width &&
-                    py >= 0 && py < this.pixiWorld.height) {
-                    this.pixiWorld.backgrounds[py][px].addLight(this);
-                }
-            }
-        }
-    };
-    Light.prototype.onDestroy = function () {
-        this.color.onChange.removeAll();
-    };
-    return Light;
-}(ecs.Component));
-exports.Light = Light;
-var LightColor = /** @class */ (function () {
-    function LightColor() {
-        this.onChange = new ecs.Broadcast();
-    }
-    Object.defineProperty(LightColor.prototype, "value", {
-        get: function () {
-            return this._value;
-        },
-        set: function (val) {
-            if (this._value === val)
-                return;
-            this._value = val;
-            this.onChange.dispatch(val);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return LightColor;
-}());
-exports.LightColor = LightColor;
-
-
-/***/ }),
-
 /***/ "../src/modules/pixi/pixi-scene.ts":
 /*!*****************************************!*\
   !*** ../src/modules/pixi/pixi-scene.ts ***!
@@ -407,18 +218,32 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var module_scene_1 = __webpack_require__(/*! ../../utils/ui/module-scene */ "../src/utils/ui/module-scene.ts");
-var pixi_world_1 = __webpack_require__(/*! ./components/pixi-world */ "../src/modules/pixi/components/pixi-world.ts");
 var PixiScene = /** @class */ (function (_super) {
     __extends(PixiScene, _super);
     function PixiScene() {
         var _this_1 = _super.call(this) || this;
         leaf.StateWin.show();
-        var p = ecs.Entity.create().addComponent(Particle);
-        p.entity.parent = _this_1.scene;
-        p.resource = "gold";
-        _this_1.scene.addComponent(pixi_world_1.PixiWorld);
+        for (var i = 0; i < 1; i++) {
+            _this_1.addParticle(i * 50, i * 50);
+        }
         return _this_1;
     }
+    PixiScene.prototype.addParticle = function (x, y) {
+        if (x === void 0) { x = 0; }
+        if (y === void 0) { y = 0; }
+        var p = ecs.Entity.create().addComponent(Particle);
+        p.entity.parent = this.scene;
+        p.resource = "gold";
+        p.config = {
+            lifeTime: 1,
+            frequency: 0.001,
+            allTime: 1,
+            speedx: 0,
+            speedy: 0 //y 方向的速度
+        };
+        p.transform.x = x;
+        p.transform.y = y;
+    };
     PixiScene.prototype.close = function () {
         _super.prototype.close.call(this);
     };
@@ -527,29 +352,36 @@ var Particle = /** @class */ (function (_super) {
         //  attribute vec2 a_TexCoord;
         var positionData = [];
         var texture = this._texture;
-        var width = texture.sourceWidth;
-        var height = texture.sourceHeight;
         for (var i = 0; i < count; i++) {
             var index = i * 20;
             positionData[0 + index] = i;
-            positionData[2 + index] = texture.startX;
+            positionData[1 + index] = 0;
+            positionData[2 + index] = 1;
             positionData[3 + index] = texture.startX;
-            positionData[10 + index] = i;
-            positionData[5 + index] = texture.startX;
+            positionData[4 + index] = texture.startX;
+            positionData[5 + index] = i;
+            positionData[6 + index] = 0;
+            positionData[7 + index] = 0;
+            positionData[8 + index] = texture.startX;
             positionData[9 + index] = texture.startY;
             positionData[10 + index] = i;
-            positionData[14 + index] = texture.endX;
-            positionData[15 + index] = texture.endY;
-            positionData[10 + index] = i;
-            positionData[20 + index] = texture.endX;
-            positionData[21 + index] = texture.startY;
+            positionData[11 + index] = 1;
+            positionData[12 + index] = 1;
+            positionData[13 + index] = texture.endX;
+            positionData[14 + index] = texture.endY;
+            positionData[15 + index] = i;
+            positionData[16 + index] = 1;
+            positionData[17 + index] = 0;
+            positionData[18 + index] = texture.endX;
+            positionData[19 + index] = texture.startY;
         }
         var gl = leaf.GLCore.gl;
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         //切换混合模式
         // BlendModeFunc.changeBlendMode(this.blendMode[i]);
-        gl.vertexAttribPointer(this.shader.a_Index, 1, gl.FLOAT, false, exports.$size * 3, 0);
-        gl.vertexAttribPointer(this.shader.a_TexCoord, 2, gl.FLOAT, false, exports.$size * 3, exports.$size);
+        gl.vertexAttribPointer(this.shader.a_Index, 1, gl.FLOAT, false, exports.$size * 5, 0);
+        gl.vertexAttribPointer(this.shader.a_Pisition, 2, gl.FLOAT, false, exports.$size * 5, exports.$size);
+        gl.vertexAttribPointer(this.shader.a_TexCoord, 2, gl.FLOAT, false, exports.$size * 5, exports.$size * 3);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positionData), gl.STATIC_DRAW);
     };
     Particle.prototype.preRender = function () {
@@ -559,16 +391,17 @@ var Particle = /** @class */ (function (_super) {
         if (!this._texture || !this.config)
             return;
         var count = Math.ceil((1 / this.config.frequency) * this.config.lifeTime);
-        (this.shader).addTask(this.buffer, count, this.texture, {
-            x: this.entity.transform.worldMatrix.tx,
-            y: this.entity.transform.worldMatrix.ty
-        }, this.blendMode, this._tint);
+        (this.shader).addTask(this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
     };
     Particle.prototype.preRender2 = function (matrix, alpha, shader) {
-        if (!this._texture)
+        if (this._texture && this.bufferDirty) {
+            this.refreshBuffer();
+        }
+        if (!this._texture || !this.config)
             return;
         matrix.reconcat(this.entity.transform.local);
-        (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
+        var count = Math.ceil((1 / this.config.frequency) * this.config.lifeTime);
+        (shader || this.shader).addTask(this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
     };
     Particle.prototype.onDestroy = function () {
         this.texture = null;
@@ -582,12 +415,6 @@ var Particle = /** @class */ (function (_super) {
     return Particle;
 }(leaf.Render));
 exports.Particle = Particle;
-var ParticleConfig = /** @class */ (function () {
-    function ParticleConfig() {
-    }
-    return ParticleConfig;
-}());
-exports.ParticleConfig = ParticleConfig;
 exports.$size = (new Float32Array([0.0])).BYTES_PER_ELEMENT;
 var ParticleShaderTask = /** @class */ (function (_super) {
     __extends(ParticleShaderTask, _super);
@@ -601,7 +428,8 @@ var ParticleShaderTask = /** @class */ (function (_super) {
         ]);
         _this_1.attributes = [];
         _this_1.textures = [];
-        _this_1.positions = [];
+        _this_1.sizes = [];
+        _this_1.matrixs = [];
         _this_1.time = [];
         _this_1.configs = [];
         _this_1.count = [];
@@ -625,8 +453,8 @@ var ParticleShaderTask = /** @class */ (function (_super) {
      */
     ParticleShaderTask.prototype.initProgram = function () {
         var gl = leaf.GLCore.gl;
-        var vertexSource = "\n            attribute float a_Index;\n            attribute vec2 a_Pisition;\n            attribute vec2 a_TexCoord;\n\n             uniform vec4 u_Position;\n             uniform mat4 u_PMatrix;\n             uniform float u_LifeTime;\n             uniform float u_Frequency;\n             uniform float u_AllTime;\n             uniform float u_Speedx;\n             uniform float u_Speedy;\n             uniform float u_Time;\n\n             varying vec2 v_TexCoord;\n\n             void main(void)\n             {\n                gl_Position = u_PMatrix*a_Pisition + u_Position;\n                v_TexCoord = a_TexCoord;\n             }\n             ";
-        var fragmentSource = "\n             precision mediump float;\n             varying vec2 v_TexCoord;\n\n             uniform sampler2D u_Sampler;\n\n             vec4 getTextureColor(vec2 coord);\n\n             void main(void)\n             {\n                gl_FragColor = getTextureColor(v_TexCoord);\n             }\n\n             vec4 getTextureColor(vec2 coord) {\n                return texture2D(u_Sampler,v_TexCoord);\n             }\n             ";
+        var vertexSource = "\n            attribute float a_Index;\n            attribute vec2 a_Pisition;\n            attribute vec2 a_TexCoord;\n\n             uniform vec2 u_TexSize;\n             uniform mat4 u_PMatrix;\n             uniform mat3 u_VMatrix;\n             uniform float u_LifeTime;\n             uniform float u_Frequency;\n             uniform float u_AllTime;\n             uniform float u_Speedx;\n             uniform float u_Speedy;\n             uniform float u_Time;\n\n             varying vec2 v_TexCoord;\n             varying float v_Index;\n\n             void main(void)\n             {\n                vec3 pos = u_VMatrix * vec3(a_Pisition.x * u_TexSize.x,a_Pisition.y * u_TexSize.y, 1.0);\n                gl_Position = u_PMatrix*vec4(pos,1.0);\n                v_TexCoord = a_TexCoord;\n                v_Index = a_Index;\n             }\n             ";
+        var fragmentSource = "\n             precision mediump float;\n             varying vec2 v_TexCoord;\n             varying float v_Index;\n\n             uniform sampler2D u_Sampler;\n\n             vec4 getTextureColor(vec2 coord);\n\n             void main(void)\n             {\n                gl_FragColor = getTextureColor(v_TexCoord);\n             }\n\n             vec4 getTextureColor(vec2 coord) {\n                return texture2D(u_Sampler,v_TexCoord);\n             }\n             ";
         var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
         var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
         this.program = this.createWebGLProgram(vertexShader, fragmentShader);
@@ -668,11 +496,14 @@ var ParticleShaderTask = /** @class */ (function (_super) {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         this.a_Index = gl.getAttribLocation(program, "a_Index");
         gl.enableVertexAttribArray(this.a_Index);
+        this.a_Pisition = gl.getAttribLocation(program, "a_Pisition");
+        gl.enableVertexAttribArray(this.a_Pisition);
         this.a_TexCoord = gl.getAttribLocation(program, "a_TexCoord");
         gl.enableVertexAttribArray(this.a_TexCoord);
         this.u_Sampler = gl.getUniformLocation(program, "u_Sampler");
+        this.u_TexSize = gl.getUniformLocation(program, "u_TexSize");
         this.u_PMatrix = gl.getUniformLocation(program, "u_PMatrix");
-        gl.uniformMatrix4fv(this.u_PMatrix, false, projectionMatrix);
+        this.u_VMatrix = gl.getUniformLocation(program, "u_VMatrix");
         this.u_LifeTime = gl.getUniformLocation(program, "u_LifeTime");
         this.u_Frequency = gl.getUniformLocation(program, "u_Frequency");
         this.u_AllTime = gl.getUniformLocation(program, "u_AllTime");
@@ -680,10 +511,12 @@ var ParticleShaderTask = /** @class */ (function (_super) {
         this.u_Speedy = gl.getUniformLocation(program, "u_Speedy");
         this.u_Time = gl.getUniformLocation(program, "u_Time");
     };
-    ParticleShaderTask.prototype.addTask = function (attributes, count, texture, position, blendMode, tint) {
+    ParticleShaderTask.prototype.addTask = function (attributes, count, texture, config, matrix, blendMode, tint) {
         this.attributes.push(attributes);
-        this.textures.push([texture.texture]);
-        this.positions.push(position);
+        this.textures.push(texture.texture);
+        this.configs.push(config);
+        this.sizes.push({ width: texture.sourceWidth, height: texture.sourceHeight });
+        this.matrixs.push(matrix);
         this.count.push(0);
         this.blendMode.push(blendMode);
         this.count[this.count.length - 1] += count;
@@ -702,24 +535,34 @@ var ParticleShaderTask = /** @class */ (function (_super) {
         var gl = leaf.GLCore.gl;
         var max = this.renderCounts.shift();
         gl.useProgram(_this.program);
+        gl.uniformMatrix4fv(this.u_PMatrix, false, this.projectionMatrix);
         var i = this.renderIndex;
         //开始渲染任务
         for (var len = _this.textures.length; i < len && i < max; i++) {
+            gl.uniform2f(this.u_TexSize, _this.sizes[i].width, _this.sizes[i].height);
             //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
             gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[i]);
+            gl.vertexAttribPointer(this.a_Index, 1, gl.FLOAT, false, exports.$size * 5, 0);
+            gl.vertexAttribPointer(this.a_Pisition, 2, gl.FLOAT, false, exports.$size * 5, exports.$size);
+            gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, exports.$size * 5, exports.$size * 3);
             //切换混合模式
             // BlendModeFunc.changeBlendMode(this.blendMode[i]);
-            gl.vertexAttribPointer(_this.a_Index, 1, gl.FLOAT, false, exports.$size * 3, 0);
-            gl.vertexAttribPointer(_this.a_TexCoord, 2, gl.FLOAT, false, exports.$size * 3, exports.$size);
+            // gl.vertexAttribPointer(_this.a_Index, 1, gl.FLOAT, false, $size * 3, 0);
+            // gl.vertexAttribPointer(_this.a_TexCoord, 2, gl.FLOAT, false, $size * 3, $size);
             // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.positionData[i]), gl.STATIC_DRAW);
             var cfg = this.configs[i];
-            gl.uniform1i(this.u_LifeTime, cfg.lifeTime);
-            gl.uniform1i(this.u_Frequency, cfg.frequency);
-            gl.uniform1i(this.u_AllTime, cfg.allTime);
-            gl.uniform1i(this.u_Speedx, cfg.speedx);
-            gl.uniform1i(this.u_Speedy, cfg.speedy);
-            gl.uniform1i(this.u_Time, this.time[i]);
-            gl.uniform2i(this.u_Position, this.positions[i].x, this.positions[i].y);
+            gl.uniform1f(this.u_LifeTime, cfg.lifeTime);
+            gl.uniform1f(this.u_Frequency, cfg.frequency);
+            gl.uniform1f(this.u_AllTime, cfg.allTime);
+            gl.uniform1f(this.u_Speedx, cfg.speedx);
+            gl.uniform1f(this.u_Speedy, cfg.speedy);
+            gl.uniform1f(this.u_Time, this.time[i]);
+            var m = this.matrixs[i];
+            gl.uniformMatrix3fv(this.u_VMatrix, false, [
+                m.a, m.b, 0,
+                m.c, m.d, 0,
+                m.tx, m.ty, 1
+            ]);
             gl.uniform1i(this.u_Sampler, 0);
             gl.activeTexture(gl["TEXTURE0"]);
             gl.bindTexture(gl.TEXTURE_2D, _this.textures[i]);
@@ -737,7 +580,8 @@ var ParticleShaderTask = /** @class */ (function (_super) {
     ParticleShaderTask.prototype.reset = function () {
         this.attributes = [];
         this.textures = [];
-        this.positions = [];
+        this.sizes = [];
+        this.matrixs = [];
         this.count = [];
         this.blendMode = [];
         this.configs = [];

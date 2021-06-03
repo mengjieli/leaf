@@ -210,6 +210,7 @@ namespace leaf {
             positionData[3 + index] = texture.endY;
             positionData[4 + index] = alpha;
             positionData[5 + index] = txtureIndex;
+            
 
             positionData[6 + index] = matrix.tx;
             positionData[7 + index] = matrix.ty;
