@@ -6,6 +6,9 @@ import { Platform } from "./utils/platform";
 import { MainScene } from "./modules/main/main-scene";
 import { BullScene } from "./modules/bull/bull-scene";
 import { BubbleScene } from "./modules/bubble/bubble-scene";
+import { SquareManScene } from "./modules/square-man/square-man-scene";
+import { WaterScene } from "./modules/water/water-scene";
+import { PixiScene } from "./modules/pixi/pixi-scene";
 
 export class Main {
 
@@ -38,8 +41,10 @@ export class Main {
                     // new BullScene();
                     // new FaceScene(true);
                     // new PuzzleScene();
-                    new MainScene();
+                    // new MainScene();
                     // new BubbleScene();
+                    // new SquareManScene();
+                    new PixiScene();
                 }
             )
         })

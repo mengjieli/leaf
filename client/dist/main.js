@@ -86,58 +86,6 @@
 /************************************************************************/
 /******/ ({
 
-/***/ "../src/config/game-config.ts":
-/*!************************************!*\
-  !*** ../src/config/game-config.ts ***!
-  \************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var EMGameType;
-(function (EMGameType) {
-    EMGameType["PUZZLE"] = "puzzle";
-    EMGameType["VIEW"] = "view";
-})(EMGameType = exports.EMGameType || (exports.EMGameType = {}));
-exports.gameConfigs = {
-    "1": {
-        id: 1,
-        type: EMGameType.PUZZLE,
-        name: "初级推箱子",
-        desc: "难度相对比较简单，尽情的闯关吧！"
-    },
-    "2": {
-        id: 2,
-        type: EMGameType.PUZZLE,
-        name: "经典推箱子",
-        desc: "经典的推箱子玩法，难度适中"
-    },
-    "3": {
-        id: 3,
-        type: EMGameType.PUZZLE,
-        name: "勇闯迷宫",
-        desc: "敢问路在何方～～",
-    },
-    "4": {
-        id: 4,
-        type: EMGameType.PUZZLE,
-        name: "青蛇与红苹果",
-        desc: "小蛇看上了红红的大苹果？"
-    },
-    "5": {
-        id: 5,
-        type: EMGameType.PUZZLE,
-        name: "收藏有礼",
-        desc: "收藏游戏后可立即获得丰富奖励",
-        isActive: true
-    }
-};
-
-
-/***/ }),
-
 /***/ "../src/main.ts":
 /*!**********************!*\
   !*** ../src/main.ts ***!
@@ -184,7 +132,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var main_scene_1 = __webpack_require__(/*! ./modules/main/main-scene */ "../src/modules/main/main-scene.ts");
+var pixi_scene_1 = __webpack_require__(/*! ./modules/pixi/pixi-scene */ "../src/modules/pixi/pixi-scene.ts");
 var Main = /** @class */ (function () {
     function Main() {
         this.init();
@@ -221,8 +169,10 @@ var Main = /** @class */ (function () {
                                 // new BullScene();
                                 // new FaceScene(true);
                                 // new PuzzleScene();
-                                new main_scene_1.MainScene();
+                                // new MainScene();
                                 // new BubbleScene();
+                                // new SquareManScene();
+                                new pixi_scene_1.PixiScene();
                             });
                         });
                         return [2 /*return*/];
@@ -238,184 +188,10 @@ window["Main"] = Main;
 
 /***/ }),
 
-/***/ "../src/modules/main/components/game-item-renderer.ts":
-/*!************************************************************!*\
-  !*** ../src/modules/main/components/game-item-renderer.ts ***!
-  \************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var game_config_1 = __webpack_require__(/*! ../../../config/game-config */ "../src/config/game-config.ts");
-orange.autoloadLink("MainScene");
-var GameItemRenderer = /** @class */ (function (_super) {
-    __extends(GameItemRenderer, _super);
-    function GameItemRenderer() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    GameItemRenderer.prototype.init = function () {
-        var _this = this;
-        this.addComponent(leaf.TouchComponent).onTouchEnd.on(function () {
-            console.error("click", _this.data);
-        });
-    };
-    GameItemRenderer.prototype.onData = function (d) {
-        var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
-        bg.texture = leaf.PointTexture.getTexture(0xffffff);
-        bg.transform.scaleX = 300;
-        bg.transform.scaleY = 300;
-        bg.parent = this.entity;
-        var cfg = game_config_1.gameConfigs[d.id];
-        var shortCut = ecs.Entity.create().addComponent(leaf.Bitmap);
-        shortCut.resource = "game" + d.id + "_png";
-        shortCut.transform.x = (300 - 282) / 2;
-        shortCut.transform.y = (300 - 282) / 2;
-        shortCut.parent = this.entity;
-        var nameLabel = ecs.Entity.create().addComponent(leaf.Label);
-        nameLabel.text = cfg.name;
-        nameLabel.transform.x = shortCut.transform.x;
-        nameLabel.transform.y = 250;
-        nameLabel.fontColor = 0;
-        nameLabel.fontSize = 20;
-        nameLabel.parent = this.entity;
-    };
-    return GameItemRenderer;
-}(leaf.ListItemRenderer));
-exports.GameItemRenderer = GameItemRenderer;
-
-
-/***/ }),
-
-/***/ "../src/modules/main/components/main-top.ts":
-/*!**************************************************!*\
-  !*** ../src/modules/main/components/main-top.ts ***!
-  \**************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-orange.autoloadLink("MainScene");
-var MainTop = /** @class */ (function (_super) {
-    __extends(MainTop, _super);
-    function MainTop() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.onChangeMenu = new ecs.Broadcast();
-        return _this;
-    }
-    Object.defineProperty(MainTop.prototype, "selected", {
-        get: function () {
-            return this._selected;
-        },
-        set: function (val) {
-            if (this._selected === val)
-                return;
-            if (val < 0)
-                return;
-            if (val >= this.menuRoot.children.length)
-                return;
-            this._selected = val;
-            this.onChangeMenu.dispatch(val);
-            for (var i = 0; i < this.menuRoot.children.length; i++) {
-                if (i === val) {
-                    this.menuRoot.children[i].children[1].getComponent(leaf.Label).transform.alpha = 0;
-                    this.menuRoot.children[i].children[2].getComponent(leaf.Label).transform.alpha = 1;
-                }
-                else {
-                    this.menuRoot.children[i].children[1].getComponent(leaf.Label).transform.alpha = 1;
-                    this.menuRoot.children[i].children[2].getComponent(leaf.Label).transform.alpha = 0;
-                }
-            }
-        },
-        enumerable: true,
-        configurable: true
-    });
-    MainTop.prototype.init = function () {
-        this.menuIndex = 0;
-        this.menuRoot = ecs.Entity.create();
-        this.menuRoot.parent = this.entity;
-        this.menuRoot.transform.y = 200;
-        this.addMenu("收藏");
-        this.addMenu("活动");
-        this.addMenu("热门");
-        this.addMenu("推荐");
-        this.addMenu("其它");
-    };
-    MainTop.prototype.addMenu = function (name) {
-        var _this = this;
-        var index = this.menuIndex++;
-        var p = ecs.Entity.create();
-        p.transform.x = 17 + index * 121;
-        p.parent = this.menuRoot;
-        var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
-        bg.texture = leaf.PointTexture.getTexture(0);
-        bg.parent = p;
-        bg.transform.scaleX = 120;
-        bg.transform.scaleY = 50;
-        bg.transform.alpha = 0;
-        var label1 = ecs.Entity.create().addComponent(leaf.Label);
-        label1.fontSize = 28;
-        label1.fontColor = 0x777777;
-        label1.text = name;
-        label1.parent = p;
-        label1.transform.x = 33;
-        label1.transform.y = 10;
-        var label2 = ecs.Entity.create().addComponent(leaf.Label);
-        label2.fontSize = 31;
-        label2.fontColor = 0xfb76a3;
-        label2.text = name;
-        label2.parent = p;
-        label2.transform.x = label1.transform.x - 3;
-        label2.transform.y = label1.transform.y - 3;
-        label2.transform.alpha = 0;
-        p.addComponent(leaf.TouchComponent).onTouchStart.on(function () {
-            _this.selected = index;
-        });
-    };
-    MainTop.prototype.onDestroy = function () {
-        this.onChangeMenu.removeAll();
-        this.menuRoot = null;
-    };
-    return MainTop;
-}(ecs.Component));
-exports.MainTop = MainTop;
-
-
-/***/ }),
-
-/***/ "../src/modules/main/components/main-ui.ts":
-/*!*************************************************!*\
-  !*** ../src/modules/main/components/main-ui.ts ***!
-  \*************************************************/
+/***/ "../src/modules/pixi/components/pixi-world.ts":
+/*!****************************************************!*\
+  !*** ../src/modules/pixi/components/pixi-world.ts ***!
+  \****************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -446,194 +222,164 @@ var __values = (this && this.__values) || function(o) {
     throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var top_info_view_1 = __webpack_require__(/*! ./top-info-view */ "../src/modules/main/components/top-info-view.ts");
-var main_top_1 = __webpack_require__(/*! ./main-top */ "../src/modules/main/components/main-top.ts");
-var game_item_renderer_1 = __webpack_require__(/*! ./game-item-renderer */ "../src/modules/main/components/game-item-renderer.ts");
-var game_config_1 = __webpack_require__(/*! ../../../config/game-config */ "../src/config/game-config.ts");
-var game_tag_1 = __webpack_require__(/*! ../../../net/game-tag */ "../src/net/game-tag.ts");
-orange.autoloadLink("MainScene");
-var MainUI = /** @class */ (function (_super) {
-    __extends(MainUI, _super);
-    function MainUI() {
+orange.autoloadLink("PixiScene");
+var PixiWorld = /** @class */ (function (_super) {
+    __extends(PixiWorld, _super);
+    function PixiWorld() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.top = 255;
-        _this.bottom = 50;
+        _this.width = 40;
+        _this.height = 60;
         return _this;
     }
-    MainUI.prototype.init = function () {
-        this.addBg();
-        ecs.Entity.create().addComponent(top_info_view_1.TopInfoView).parent = this.entity;
-        var top = this.addComponent(main_top_1.MainTop);
-        top.selected = 0;
-        top.onChangeMenu.on(this.refresh, this);
-        var list = this.list = ecs.Entity.create().addComponent(leaf.List, [], game_item_renderer_1.GameItemRenderer, 640, leaf.getStageHeight() - this.top - this.bottom);
-        list.addComponent(leaf.TileLayout, 300, 300, 10, 10).addComponent(leaf.Scroller, list, false, true).speedV = 3;
-        list.parent = this.entity;
-        list.transform.y = this.top + 10;
-        list.transform.x = 15;
-        this.refresh(top.selected);
+    PixiWorld.prototype.init = function () {
+        this.backgrounds = [];
+        for (var y = 0; y < this.height; y++) {
+            this.backgrounds[y] = [];
+            for (var x = 0; x < this.width; x++) {
+                var bg = ecs.Entity.create().addComponent(Background, x, y);
+                bg.entity.parent = this.entity;
+                bg.entity.transform.x = x * 16;
+                bg.entity.transform.y = y * 16;
+                this.backgrounds[y][x] = bg;
+            }
+        }
+        this.addComponent(Light, this, 20, 30, 30);
     };
-    MainUI.prototype.refresh = function (index) {
-        var e_1, _a, e_2, _b;
-        if (this.emptyLabel) {
-            this.emptyLabel.entity.destroy();
-            this.emptyLabel = null;
+    return PixiWorld;
+}(ecs.Component));
+exports.PixiWorld = PixiWorld;
+var Background = /** @class */ (function (_super) {
+    __extends(Background, _super);
+    function Background() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.lightColors = [];
+        return _this;
+    }
+    Background.prototype.init = function (x, y) {
+        this.x = x;
+        this.y = y;
+        if (!this.show) {
+            this.show = this.addComponent(leaf.Bitmap);
+            this.show.texture = leaf.PointTexture.getTexture(0xffffff);
+            this.entity.transform.scaleX = this.entity.transform.scaleY = 16;
         }
-        var data = [];
-        if (index === 2) {
-            try {
-                for (var _c = __values(game_tag_1.GameTag.tags.hot.gameIds), _d = _c.next(); !_d.done; _d = _c.next()) {
-                    var id = _d.value;
-                    if (game_config_1.gameConfigs[id]) {
-                        data.push(game_config_1.gameConfigs[id]);
-                    }
-                }
-            }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
-                try {
-                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
-                }
-                finally { if (e_1) throw e_1.error; }
+        this.show.tint = 0;
+    };
+    Background.prototype.onDestroy = function () {
+        this.lightColors = [];
+    };
+    Background.prototype.addLight = function (light) {
+        var e_1, _a;
+        this.lightColors.push(light);
+        var val = 0;
+        try {
+            for (var _b = __values(this.lightColors), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var c = _c.value;
+                var dis = Math.sqrt((this.x - c.x) * (this.x - c.x) + (this.y - c.y) * (this.y - c.y));
+                var factor = dis > c.range ? 0 : 1 - dis / c.range;
+                var r = c.color.value * factor;
+                if (r > val)
+                    val = r;
             }
         }
-        else if (index === 3) {
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
             try {
-                for (var _e = __values(game_tag_1.GameTag.tags.push.gameIds), _f = _e.next(); !_f.done; _f = _e.next()) {
-                    var id = _f.value;
-                    if (game_config_1.gameConfigs[id]) {
-                        data.push(game_config_1.gameConfigs[id]);
-                    }
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        val = val < 0 ? 0 : val > 1 ? 1 : val;
+        this.show.tint = ((~~(0xff * val)) << 16) + ((~~(0xff * val)) << 8) + (~~(0xff * val));
+    };
+    Background.prototype.removeLight = function (color) {
+        var e_2, _a;
+        if (this.lightColors.indexOf(color) != -1) {
+            this.lightColors.splice(this.lightColors.indexOf(color), 1);
+            var val = 0;
+            try {
+                for (var _b = __values(this.lightColors), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var c = _c.value;
+                    var dis = Math.abs(this.x - c.x) + Math.abs(this.y - c.y);
+                    var factor = dis > c.range ? 0 : dis / c.range;
+                    var r = c.color.value * factor;
+                    if (r > val)
+                        val = r;
                 }
             }
             catch (e_2_1) { e_2 = { error: e_2_1 }; }
             finally {
                 try {
-                    if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                 }
                 finally { if (e_2) throw e_2.error; }
             }
+            val = val < 0 ? 0 : val > 1 ? 1 : val;
+            this.show.tint = ((~~(0xff * val)) << 16) + ((~~(0xff * val)) << 8) + (~~(0xff * val));
         }
-        else {
-            for (var k in game_config_1.gameConfigs) {
-                var cfg = game_config_1.gameConfigs[k];
-                if (index === 4) {
-                    if (!cfg.isActive)
-                        data.push(cfg);
-                }
-                if (index === 1) {
-                    if (cfg.isActive)
-                        data.push(cfg);
+    };
+    return Background;
+}(ecs.Component));
+exports.Background = Background;
+var Light = /** @class */ (function (_super) {
+    __extends(Light, _super);
+    function Light() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.color = new LightColor();
+        return _this;
+    }
+    Light.prototype.init = function (pixiWorld, x, y, range, value) {
+        if (range === void 0) { range = 10; }
+        if (value === void 0) { value = 1; }
+        this.pixiWorld = pixiWorld;
+        this.x = x;
+        this.y = y;
+        this.range = range;
+        this.color.value = 1;
+        for (var y_1 = -range; y_1 <= range; y_1++) {
+            for (var x_1 = -range; x_1 <= range; x_1++) {
+                var px = x_1 + this.x;
+                var py = y_1 + this.y;
+                if (px >= 0 && px < this.pixiWorld.width &&
+                    py >= 0 && py < this.pixiWorld.height) {
+                    this.pixiWorld.backgrounds[py][px].addLight(this);
                 }
             }
         }
-        this.list.data = data;
-        if (!data.length) {
-            this.emptyLabel = ecs.Entity.create().addComponent(leaf.Label);
-            this.emptyLabel.fontColor = 0x777777;
-            this.emptyLabel.text = "列表暂时是空的，看看其它分类吧~";
-            this.emptyLabel.parent = this.entity;
-            this.emptyLabel.transform.x = (leaf.getStageWidth() - this.emptyLabel.textWidth) / 2;
-            this.emptyLabel.transform.y = this.top + (leaf.getStageHeight() - this.top - this.emptyLabel.textHeight) / 2;
-        }
     };
-    MainUI.prototype.addBg = function () {
-        var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
-        bg.resource = "bg";
-        bg.parent = this.entity;
-        bg.transform.scaleX = leaf.getStageWidth();
-        bg.transform.scaleY = leaf.getStageHeight();
-        var bg2 = ecs.Entity.create().addComponent(leaf.Bitmap);
-        bg2.texture = leaf.PointTexture.getTexture(0xf4f4f4);
-        bg2.parent = this.entity;
-        bg2.transform.scaleX = leaf.getStageWidth();
-        bg2.transform.y = this.top;
-        bg2.transform.scaleY = leaf.getStageHeight() - bg2.transform.y;
+    Light.prototype.onDestroy = function () {
+        this.color.onChange.removeAll();
     };
-    return MainUI;
+    return Light;
 }(ecs.Component));
-exports.MainUI = MainUI;
-
-
-/***/ }),
-
-/***/ "../src/modules/main/components/top-info-view.ts":
-/*!*******************************************************!*\
-  !*** ../src/modules/main/components/top-info-view.ts ***!
-  \*******************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var system_1 = __webpack_require__(/*! ../../../utils/system */ "../src/utils/system.ts");
-orange.autoloadLink("MainScene");
-var TopInfoView = /** @class */ (function (_super) {
-    __extends(TopInfoView, _super);
-    function TopInfoView() {
-        return _super !== null && _super.apply(this, arguments) || this;
+exports.Light = Light;
+var LightColor = /** @class */ (function () {
+    function LightColor() {
+        this.onChange = new ecs.Broadcast();
     }
-    TopInfoView.prototype.init = function () {
-        this.entity.transform.y = system_1.System.topHeight;
-        var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
-        bg.resource = "top_info_bg_png";
-        bg.transform.x = 17;
-        bg.parent = this.entity;
-        var heart = ecs.Entity.create().addComponent(leaf.Bitmap);
-        heart.resource = "heart";
-        heart.transform.x = bg.transform.x + 15;
-        heart.transform.y = 4;
-        heart.parent = this.entity;
-        var heartCount = ecs.Entity.create().addComponent(leaf.Label);
-        heartCount.transform.x = heart.transform.x + 65;
-        heartCount.transform.y = 13;
-        heartCount.text = "9999";
-        heartCount.fontSize = 40;
-        heartCount.fontColor = 0x777777;
-        heartCount.bold = true;
-        heartCount.parent = this.entity;
-        bg = ecs.Entity.create().addComponent(leaf.Bitmap);
-        bg.resource = "top_info_bg";
-        bg.transform.x = 220;
-        bg.parent = this.entity;
-        var gold = ecs.Entity.create().addComponent(leaf.Bitmap);
-        gold.resource = "gold";
-        gold.transform.x = bg.transform.x + 15;
-        gold.transform.y = 4;
-        gold.parent = this.entity;
-        var goldCount = ecs.Entity.create().addComponent(leaf.Label);
-        goldCount.transform.x = gold.transform.x + 65;
-        goldCount.transform.y = 13;
-        goldCount.text = "9999";
-        goldCount.fontSize = 40;
-        goldCount.fontColor = 0x777777;
-        goldCount.bold = true;
-        goldCount.parent = this.entity;
-    };
-    return TopInfoView;
-}(ecs.Component));
-exports.TopInfoView = TopInfoView;
+    Object.defineProperty(LightColor.prototype, "value", {
+        get: function () {
+            return this._value;
+        },
+        set: function (val) {
+            if (this._value === val)
+                return;
+            this._value = val;
+            this.onChange.dispatch(val);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return LightColor;
+}());
+exports.LightColor = LightColor;
 
 
 /***/ }),
 
-/***/ "../src/modules/main/main-scene.ts":
+/***/ "../src/modules/pixi/pixi-scene.ts":
 /*!*****************************************!*\
-  !*** ../src/modules/main/main-scene.ts ***!
+  !*** ../src/modules/pixi/pixi-scene.ts ***!
   \*****************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
@@ -661,73 +407,358 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var module_scene_1 = __webpack_require__(/*! ../../utils/ui/module-scene */ "../src/utils/ui/module-scene.ts");
-var main_ui_1 = __webpack_require__(/*! ./components/main-ui */ "../src/modules/main/components/main-ui.ts");
-var MainScene = /** @class */ (function (_super) {
-    __extends(MainScene, _super);
-    function MainScene() {
-        var _this = _super.call(this) || this;
-        ecs.Entity.create().addComponent(main_ui_1.MainUI).parent = _this.scene;
-        return _this;
+var pixi_world_1 = __webpack_require__(/*! ./components/pixi-world */ "../src/modules/pixi/components/pixi-world.ts");
+var PixiScene = /** @class */ (function (_super) {
+    __extends(PixiScene, _super);
+    function PixiScene() {
+        var _this_1 = _super.call(this) || this;
+        leaf.StateWin.show();
+        var p = ecs.Entity.create().addComponent(Particle);
+        p.entity.parent = _this_1.scene;
+        p.resource = "gold";
+        _this_1.scene.addComponent(pixi_world_1.PixiWorld);
+        return _this_1;
     }
-    MainScene = __decorate([
-        orange.autoload("MainScene")
-    ], MainScene);
-    return MainScene;
+    PixiScene.prototype.close = function () {
+        _super.prototype.close.call(this);
+    };
+    PixiScene = __decorate([
+        orange.autoload("PixiScene")
+    ], PixiScene);
+    return PixiScene;
 }(module_scene_1.ModuleScene));
-exports.MainScene = MainScene;
-
-
-/***/ }),
-
-/***/ "../src/net/game-tag.ts":
-/*!******************************!*\
-  !*** ../src/net/game-tag.ts ***!
-  \******************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var GameTag = /** @class */ (function () {
-    function GameTag() {
-        this.gameIds = [];
+exports.PixiScene = PixiScene;
+var Particle = /** @class */ (function (_super) {
+    __extends(Particle, _super);
+    function Particle() {
+        var _this_1 = _super !== null && _super.apply(this, arguments) || this;
+        _this_1.shader = ParticleShaderTask.shader;
+        _this_1._tint = 0xffffff;
+        return _this_1;
     }
-    GameTag.tags = {
-        hot: {
-            name: "hot",
-            gameIds: [1, 4]
+    Object.defineProperty(Particle.prototype, "config", {
+        get: function () {
+            return this._config;
         },
-        push: {
-            name: "push",
-            gameIds: [2]
+        set: function (val) {
+            this._config = val;
+            if (this.buffer) {
+                leaf.GLCore.gl.deleteBuffer(this.buffer);
+            }
+            this.buffer = null;
+            if (val) {
+                this.bufferDirty = true;
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Particle.prototype, "texture", {
+        get: function () {
+            return this._texture;
+        },
+        set: function (val) {
+            this._texture = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Particle.prototype, "resource", {
+        get: function () {
+            return this._resource;
+        },
+        set: function (val) {
+            var _this_1 = this;
+            if (this._resource === val)
+                return;
+            if (this._res)
+                this._res.removeCount();
+            this._resource = val;
+            var res = this._res = leaf.Res.getRes(val);
+            if (!res) {
+                this.texture = null;
+                return;
+            }
+            if (res.data) {
+                this.texture = res.data;
+                res.addCount();
+            }
+            else {
+                res.addCount();
+                res.load().then(function () {
+                    if (_this_1._res !== res)
+                        return;
+                    _this_1.texture = res.data;
+                });
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Particle.prototype, "tint", {
+        get: function () {
+            return this._tint;
+        },
+        set: function (val) {
+            this._tint = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Particle.prototype, "width", {
+        get: function () {
+            return this._texture ? this._texture.sourceWidth : 0;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Particle.prototype, "height", {
+        get: function () {
+            return this._texture ? this._texture.sourceHeight : 0;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Particle.prototype.refreshBuffer = function () {
+        this.bufferDirty = false;
+        this.buffer = leaf.GLCore.gl.createBuffer();
+        var count = Math.ceil((1 / this.config.frequency) * this.config.lifeTime);
+        // attribute float a_Index;
+        //  attribute vec2 a_TexCoord;
+        var positionData = [];
+        var texture = this._texture;
+        var width = texture.sourceWidth;
+        var height = texture.sourceHeight;
+        for (var i = 0; i < count; i++) {
+            var index = i * 20;
+            positionData[0 + index] = i;
+            positionData[2 + index] = texture.startX;
+            positionData[3 + index] = texture.startX;
+            positionData[10 + index] = i;
+            positionData[5 + index] = texture.startX;
+            positionData[9 + index] = texture.startY;
+            positionData[10 + index] = i;
+            positionData[14 + index] = texture.endX;
+            positionData[15 + index] = texture.endY;
+            positionData[10 + index] = i;
+            positionData[20 + index] = texture.endX;
+            positionData[21 + index] = texture.startY;
+        }
+        var gl = leaf.GLCore.gl;
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+        //切换混合模式
+        // BlendModeFunc.changeBlendMode(this.blendMode[i]);
+        gl.vertexAttribPointer(this.shader.a_Index, 1, gl.FLOAT, false, exports.$size * 3, 0);
+        gl.vertexAttribPointer(this.shader.a_TexCoord, 2, gl.FLOAT, false, exports.$size * 3, exports.$size);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positionData), gl.STATIC_DRAW);
+    };
+    Particle.prototype.preRender = function () {
+        if (this._texture && this.bufferDirty) {
+            this.refreshBuffer();
+        }
+        if (!this._texture || !this.config)
+            return;
+        var count = Math.ceil((1 / this.config.frequency) * this.config.lifeTime);
+        (this.shader).addTask(this.buffer, count, this.texture, {
+            x: this.entity.transform.worldMatrix.tx,
+            y: this.entity.transform.worldMatrix.ty
+        }, this.blendMode, this._tint);
+    };
+    Particle.prototype.preRender2 = function (matrix, alpha, shader) {
+        if (!this._texture)
+            return;
+        matrix.reconcat(this.entity.transform.local);
+        (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
+    };
+    Particle.prototype.onDestroy = function () {
+        this.texture = null;
+        if (this._res)
+            this._res.removeCount();
+        this._resource = this._res = null;
+        this._tint = 0xffffff;
+        this.config = null;
+        _super.prototype.onDestroy.call(this);
+    };
+    return Particle;
+}(leaf.Render));
+exports.Particle = Particle;
+var ParticleConfig = /** @class */ (function () {
+    function ParticleConfig() {
+    }
+    return ParticleConfig;
+}());
+exports.ParticleConfig = ParticleConfig;
+exports.$size = (new Float32Array([0.0])).BYTES_PER_ELEMENT;
+var ParticleShaderTask = /** @class */ (function (_super) {
+    __extends(ParticleShaderTask, _super);
+    function ParticleShaderTask() {
+        var _this_1 = _super.call(this) || this;
+        _this_1.projectionMatrix = new Float32Array([
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            -1, 1, 0, 1
+        ]);
+        _this_1.attributes = [];
+        _this_1.textures = [];
+        _this_1.positions = [];
+        _this_1.time = [];
+        _this_1.configs = [];
+        _this_1.count = [];
+        _this_1.blendMode = [];
+        _this_1.indiceData = [];
+        _this_1.renderCounts = [];
+        _this_1.lastRenderCount = 0;
+        _this_1.renderIndex = 0;
+        //初始化作色器、program
+        _this_1.initProgram();
+        //初始化作色器固定变量 和 获取作色器中得变量
+        _this_1.initAttriLocation();
+        return _this_1;
+    }
+    /**
+     * 初始化作色器、program
+     * 1. 初始化 shader
+     * 2. 初始化 program
+     * 目前没有加 filter (滤镜) 的功能，后续可以继续扩展这两个 shader
+     * @param gl
+     */
+    ParticleShaderTask.prototype.initProgram = function () {
+        var gl = leaf.GLCore.gl;
+        var vertexSource = "\n            attribute float a_Index;\n            attribute vec2 a_Pisition;\n            attribute vec2 a_TexCoord;\n\n             uniform vec4 u_Position;\n             uniform mat4 u_PMatrix;\n             uniform float u_LifeTime;\n             uniform float u_Frequency;\n             uniform float u_AllTime;\n             uniform float u_Speedx;\n             uniform float u_Speedy;\n             uniform float u_Time;\n\n             varying vec2 v_TexCoord;\n\n             void main(void)\n             {\n                gl_Position = u_PMatrix*a_Pisition + u_Position;\n                v_TexCoord = a_TexCoord;\n             }\n             ";
+        var fragmentSource = "\n             precision mediump float;\n             varying vec2 v_TexCoord;\n\n             uniform sampler2D u_Sampler;\n\n             vec4 getTextureColor(vec2 coord);\n\n             void main(void)\n             {\n                gl_FragColor = getTextureColor(v_TexCoord);\n             }\n\n             vec4 getTextureColor(vec2 coord) {\n                return texture2D(u_Sampler,v_TexCoord);\n             }\n             ";
+        var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
+        var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
+        this.program = this.createWebGLProgram(vertexShader, fragmentShader);
+    };
+    /**
+     * 初始化作色器固定变量 和 获取作色器中得变量
+     * 主要初始化投影矩阵，投影矩阵不用每次调用都初始化，只要设置一次即可，除非舞台 (Stage) 的大小改变 (glViewPort)
+     * 获取一些变量。
+     * @param gl
+     * @param width
+     * @param height
+     */
+    ParticleShaderTask.prototype.initAttriLocation = function () {
+        var gl = leaf.GLCore.gl;
+        var projectionMatrix = this.projectionMatrix;
+        projectionMatrix[0] = 2 / leaf.GLCore.width;
+        projectionMatrix[5] = -2 / leaf.GLCore.height;
+        var program = this.program;
+        program["name"] = "normal program";
+        gl.useProgram(this.program);
+        if (!this.buffer) {
+            this.buffer = gl.createBuffer();
+            this.indexBuffer = gl.createBuffer();
+            var indiceData = this.indiceData;
+            var count = 30000;
+            for (var i = 0; i < count; i++) {
+                var index2 = i * 6;
+                var index2_2 = i * 4;
+                indiceData[0 + index2] = 0 + index2_2;
+                indiceData[1 + index2] = 1 + index2_2;
+                indiceData[2 + index2] = 2 + index2_2;
+                indiceData[3 + index2] = 2 + index2_2;
+                indiceData[4 + index2] = 1 + index2_2;
+                indiceData[5 + index2] = 3 + index2_2;
+            }
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indiceData), gl.STATIC_DRAW);
+        }
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+        this.a_Index = gl.getAttribLocation(program, "a_Index");
+        gl.enableVertexAttribArray(this.a_Index);
+        this.a_TexCoord = gl.getAttribLocation(program, "a_TexCoord");
+        gl.enableVertexAttribArray(this.a_TexCoord);
+        this.u_Sampler = gl.getUniformLocation(program, "u_Sampler");
+        this.u_PMatrix = gl.getUniformLocation(program, "u_PMatrix");
+        gl.uniformMatrix4fv(this.u_PMatrix, false, projectionMatrix);
+        this.u_LifeTime = gl.getUniformLocation(program, "u_LifeTime");
+        this.u_Frequency = gl.getUniformLocation(program, "u_Frequency");
+        this.u_AllTime = gl.getUniformLocation(program, "u_AllTime");
+        this.u_Speedx = gl.getUniformLocation(program, "u_Speedx");
+        this.u_Speedy = gl.getUniformLocation(program, "u_Speedy");
+        this.u_Time = gl.getUniformLocation(program, "u_Time");
+    };
+    ParticleShaderTask.prototype.addTask = function (attributes, count, texture, position, blendMode, tint) {
+        this.attributes.push(attributes);
+        this.textures.push([texture.texture]);
+        this.positions.push(position);
+        this.count.push(0);
+        this.blendMode.push(blendMode);
+        this.count[this.count.length - 1] += count;
+    };
+    ParticleShaderTask.prototype.startNewTask = function () {
+        if (this.lastRenderCount != this.textures.length) {
+            this.renderCounts.push(this.textures.length);
+            this.lastRenderCount = this.textures.length;
         }
     };
-    return GameTag;
-}());
-exports.GameTag = GameTag;
-
-
-/***/ }),
-
-/***/ "../src/utils/system.ts":
-/*!******************************!*\
-  !*** ../src/utils/system.ts ***!
-  \******************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var System = /** @class */ (function () {
-    function System() {
-    }
-    System.hasTop = true;
-    System.topHeight = 73;
-    return System;
-}());
-exports.System = System;
+    /**
+     * 渲染
+     */
+    ParticleShaderTask.prototype.render = function () {
+        var _this = this;
+        var gl = leaf.GLCore.gl;
+        var max = this.renderCounts.shift();
+        gl.useProgram(_this.program);
+        var i = this.renderIndex;
+        //开始渲染任务
+        for (var len = _this.textures.length; i < len && i < max; i++) {
+            //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[i]);
+            //切换混合模式
+            // BlendModeFunc.changeBlendMode(this.blendMode[i]);
+            gl.vertexAttribPointer(_this.a_Index, 1, gl.FLOAT, false, exports.$size * 3, 0);
+            gl.vertexAttribPointer(_this.a_TexCoord, 2, gl.FLOAT, false, exports.$size * 3, exports.$size);
+            // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.positionData[i]), gl.STATIC_DRAW);
+            var cfg = this.configs[i];
+            gl.uniform1i(this.u_LifeTime, cfg.lifeTime);
+            gl.uniform1i(this.u_Frequency, cfg.frequency);
+            gl.uniform1i(this.u_AllTime, cfg.allTime);
+            gl.uniform1i(this.u_Speedx, cfg.speedx);
+            gl.uniform1i(this.u_Speedy, cfg.speedy);
+            gl.uniform1i(this.u_Time, this.time[i]);
+            gl.uniform2i(this.u_Position, this.positions[i].x, this.positions[i].y);
+            gl.uniform1i(this.u_Sampler, 0);
+            gl.activeTexture(gl["TEXTURE0"]);
+            gl.bindTexture(gl.TEXTURE_2D, _this.textures[i]);
+            //真正的绘制，之前测试 drawElements 并不比 drawArrays 快，其实也很正常，因为二维里面顶点数据共用并不多，
+            //一个矩形也就对角线的两个顶点各被共用两次(两个三角形共用)，远小于 3D 里面的立方体一个顶点被 6 个三角形共用。
+            gl.drawElements(gl.TRIANGLES, _this.count[i] * 6, gl.UNSIGNED_SHORT, 0); //利用drawElements画三角形
+            leaf.runInfo.drawCount += _this.count[i];
+            leaf.runInfo.drawCall++;
+        }
+        _this.renderIndex = i;
+        if (_this.renderIndex === _this.textures.length) {
+            _this.reset();
+        }
+    };
+    ParticleShaderTask.prototype.reset = function () {
+        this.attributes = [];
+        this.textures = [];
+        this.positions = [];
+        this.count = [];
+        this.blendMode = [];
+        this.configs = [];
+        this.time = [];
+        this.renderCounts.length = 0;
+        this.lastRenderCount = 0;
+        this.renderIndex = 0;
+    };
+    Object.defineProperty(ParticleShaderTask, "shader", {
+        get: function () {
+            if (!this._shader) {
+                this._shader = new ParticleShaderTask();
+            }
+            return this._shader;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return ParticleShaderTask;
+}(leaf.Shader));
+exports.ParticleShaderTask = ParticleShaderTask;
 
 
 /***/ }),

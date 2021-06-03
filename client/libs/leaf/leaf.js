@@ -4288,7 +4288,7 @@ var leaf;
             this.transform.alpha = 0.8;
             this.addComponent(leaf.Label).fontSize = 16;
             this.getComponent(leaf.Label).lineSpacing = 3;
-            this.transform.scaleX = this.transform.scaleY = 1 / leaf.GLCore.scale;
+            // this.transform.scaleX = this.transform.scaleY = 1 / GLCore.scale;
             this.addComponent(leaf.TouchComponent).touchChildrenEnabled = false;
         };
         StateWin.prototype.lateUpdate = function () {
@@ -4301,7 +4301,7 @@ var leaf;
             txt += "render      " + leaf.runInfo.framePreRenderTime + "\n";
             txt += "webgl       " + leaf.runInfo.frameGlRenderTime + "\n";
             this.getComponent(leaf.Label).text = txt;
-            this.transform.y = (leaf.GLCore.height - 111) / leaf.GLCore.scale;
+            this.transform.y = (leaf.GLCore.height - 127) / leaf.GLCore.scale;
         };
         StateWin.show = function () {
             if (this.ist)
