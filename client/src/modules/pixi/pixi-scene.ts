@@ -8,8 +8,8 @@ export class PixiScene extends ModuleScene {
 
         leaf.StateWin.show();
 
-        for (let i = 0; i < 1; i++) {
-            this.addParticle(i * 50, i * 50);
+        for (let i = 0; i < 10; i++) {
+            this.addParticle((i + 1) * 50, (i + 1) * 50);
         }
     }
 
@@ -17,13 +17,15 @@ export class PixiScene extends ModuleScene {
         let p = ecs.Entity.create().addComponent(Particle);
         p.entity.parent = this.scene;
         p.resource = "gold";
+        // p.texture = leaf.PointTexture.getTexture(0xffffff);
         p.config = {
-            lifeTime: 1, //每个粒子的生命周期
+            lifeTime: 2, //每个粒子的生命周期
             frequency: 0.001, //发射频率
             allTime: 1, //粒子发射器发射时间
-            speedx: 0, //x 方向的速度
-            speedy: 0 //y 方向的速度
+            speedx: 100, //x 方向的速度
+            speedy: 100 //y 方向的速度
         }
+        p.transform.scaleX = p.transform.scaleY = 0.3;
         p.transform.x = x;
         p.transform.y = y;
     }
@@ -109,6 +111,8 @@ export class Particle extends leaf.Render {
         }
     }
 
+    time = 0;
+
     get width() {
         return this._texture ? this._texture.sourceWidth : 0;
     }
@@ -172,7 +176,7 @@ export class Particle extends leaf.Render {
         }
         if (!this._texture || !this.config) return;
         let count = Math.ceil((1 / this.config.frequency) * this.config.lifeTime);
-        (this.shader).addTask(this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
+        (this.shader).addTask(this.time * 0.001,this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
     }
 
     preRender2(matrix: ecs.Matrix, alpha: number, shader?: leaf.Shader) {
@@ -182,7 +186,11 @@ export class Particle extends leaf.Render {
         if (!this._texture || !this.config) return;
         matrix.reconcat(this.entity.transform.local);
         let count = Math.ceil((1 / this.config.frequency) * this.config.lifeTime);
-        (shader || this.shader).addTask(this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
+        (shader || this.shader).addTask(this.time * 0.001,this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
+    }
+
+    update(dt) {
+        this.time += dt;
     }
 
     onDestroy() {
@@ -191,6 +199,7 @@ export class Particle extends leaf.Render {
         this._resource = this._res = null;
         this._tint = 0xffffff;
         this.config = null;
+        this.time = 0;
         super.onDestroy();
     }
 }
@@ -261,7 +270,9 @@ export class ParticleShaderTask extends leaf.Shader {
 
              void main(void)
              {
-                vec3 pos = u_VMatrix * vec3(a_Pisition.x * u_TexSize.x,a_Pisition.y * u_TexSize.y, 1.0);
+                float x = (u_Time + a_Index * u_Frequency) * u_Speedx;
+                float y = (u_Time + a_Index * u_Frequency) * u_Speedx;
+                vec3 pos = u_VMatrix * vec3(a_Pisition.x * u_TexSize.x + x,a_Pisition.y * u_TexSize.y + y, 1.0);
                 gl_Position = u_PMatrix*vec4(pos,1.0);
                 v_TexCoord = a_TexCoord;
                 v_Index = a_Index;
@@ -372,7 +383,8 @@ export class ParticleShaderTask extends leaf.Shader {
 
     private indiceData = [];
 
-    addTask(attributes: WebGLBuffer, count: number, texture: leaf.Texture, config: ParticleConfig, matrix: ecs.Matrix, blendMode: leaf.BlendMode, tint: number) {
+    addTask(time:number,attributes: WebGLBuffer, count: number, texture: leaf.Texture, config: ParticleConfig, matrix: ecs.Matrix, blendMode: leaf.BlendMode, tint: number) {
+        this.time.push(time);
         this.attributes.push(attributes);
         this.textures.push(texture.texture);
         this.configs.push(config);
