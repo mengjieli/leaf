@@ -236,13 +236,13 @@ var PixiScene = /** @class */ (function (_super) {
         p.resource = "gold";
         // p.texture = leaf.PointTexture.getTexture(0xffffff);
         p.config = {
-            lifeTime: 2,
+            lifeTime: 20,
             frequency: 0.001,
             allTime: 1,
             speedx: 100,
             speedy: 100 //y 方向的速度
         };
-        p.transform.scaleX = p.transform.scaleY = 0.3;
+        p.transform.scaleX = p.transform.scaleY = 0.02;
         p.transform.x = x;
         p.transform.y = y;
     };
@@ -460,7 +460,7 @@ var ParticleShaderTask = /** @class */ (function (_super) {
      */
     ParticleShaderTask.prototype.initProgram = function () {
         var gl = leaf.GLCore.gl;
-        var vertexSource = "\n            attribute float a_Index;\n            attribute vec2 a_Pisition;\n            attribute vec2 a_TexCoord;\n\n             uniform vec2 u_TexSize;\n             uniform mat4 u_PMatrix;\n             uniform mat3 u_VMatrix;\n             uniform float u_LifeTime;\n             uniform float u_Frequency;\n             uniform float u_AllTime;\n             uniform float u_Speedx;\n             uniform float u_Speedy;\n             uniform float u_Time;\n\n             varying vec2 v_TexCoord;\n             varying float v_Index;\n\n             void main(void)\n             {\n                float x = (u_Time + a_Index * u_Frequency) * u_Speedx;\n                float y = (u_Time + a_Index * u_Frequency) * u_Speedx;\n                vec3 pos = u_VMatrix * vec3(a_Pisition.x * u_TexSize.x + x,a_Pisition.y * u_TexSize.y + y, 1.0);\n                gl_Position = u_PMatrix*vec4(pos,1.0);\n                v_TexCoord = a_TexCoord;\n                v_Index = a_Index;\n             }\n             ";
+        var vertexSource = "\n            attribute float a_Index;\n            attribute vec2 a_Pisition;\n            attribute vec2 a_TexCoord;\n\n             uniform vec2 u_TexSize;\n             uniform mat4 u_PMatrix;\n             uniform mat3 u_VMatrix;\n             uniform float u_LifeTime;\n             uniform float u_Frequency;\n             uniform float u_AllTime;\n             uniform float u_Speedx;\n             uniform float u_Speedy;\n             uniform float u_Time;\n\n             varying vec2 v_TexCoord;\n             varying float v_Index;\n\n             void main(void)\n             {\n                float t = u_Time + a_Index * u_Frequency;\n                t = mod(t, u_AllTime);\n                float x = t * u_Speedx;\n                float y = t * u_Speedx;\n                vec3 pos = u_VMatrix * vec3(a_Pisition.x * u_TexSize.x + x,a_Pisition.y * u_TexSize.y + y, 1.0);\n                gl_Position = u_PMatrix*vec4(pos,1.0);\n                v_TexCoord = a_TexCoord;\n                v_Index = a_Index;\n             }\n             ";
         var fragmentSource = "\n             precision mediump float;\n             varying vec2 v_TexCoord;\n             varying float v_Index;\n\n             uniform sampler2D u_Sampler;\n\n             vec4 getTextureColor(vec2 coord);\n\n             void main(void)\n             {\n                gl_FragColor = getTextureColor(v_TexCoord);\n             }\n\n             vec4 getTextureColor(vec2 coord) {\n                return texture2D(u_Sampler,v_TexCoord);\n             }\n             ";
         var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
         var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);

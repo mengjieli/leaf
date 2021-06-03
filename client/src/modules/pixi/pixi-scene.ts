@@ -19,13 +19,13 @@ export class PixiScene extends ModuleScene {
         p.resource = "gold";
         // p.texture = leaf.PointTexture.getTexture(0xffffff);
         p.config = {
-            lifeTime: 2, //每个粒子的生命周期
+            lifeTime: 20, //每个粒子的生命周期
             frequency: 0.001, //发射频率
             allTime: 1, //粒子发射器发射时间
             speedx: 100, //x 方向的速度
             speedy: 100 //y 方向的速度
         }
-        p.transform.scaleX = p.transform.scaleY = 0.3;
+        p.transform.scaleX = p.transform.scaleY = 0.02;
         p.transform.x = x;
         p.transform.y = y;
     }
@@ -270,8 +270,10 @@ export class ParticleShaderTask extends leaf.Shader {
 
              void main(void)
              {
-                float x = (u_Time + a_Index * u_Frequency) * u_Speedx;
-                float y = (u_Time + a_Index * u_Frequency) * u_Speedx;
+                float t = u_Time + a_Index * u_Frequency;
+                t = mod(t, u_AllTime);
+                float x = t * u_Speedx;
+                float y = t * u_Speedx;
                 vec3 pos = u_VMatrix * vec3(a_Pisition.x * u_TexSize.x + x,a_Pisition.y * u_TexSize.y + y, 1.0);
                 gl_Position = u_PMatrix*vec4(pos,1.0);
                 v_TexCoord = a_TexCoord;
