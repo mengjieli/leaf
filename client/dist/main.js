@@ -223,7 +223,7 @@ var PixiScene = /** @class */ (function (_super) {
     function PixiScene() {
         var _this_1 = _super.call(this) || this;
         leaf.StateWin.show();
-        for (var i = 0; i < 10; i++) {
+        for (var i = 0; i < 5; i++) {
             _this_1.addParticle((i + 1) * 50, (i + 1) * 50);
         }
         return _this_1;
@@ -242,7 +242,7 @@ var PixiScene = /** @class */ (function (_super) {
             speedx: 100,
             speedy: 100 //y 方向的速度
         };
-        p.transform.scaleX = p.transform.scaleY = 0.02;
+        p.transform.scaleX = p.transform.scaleY = 0.03;
         p.transform.x = x;
         p.transform.y = y;
     };

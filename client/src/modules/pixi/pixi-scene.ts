@@ -8,7 +8,7 @@ export class PixiScene extends ModuleScene {
 
         leaf.StateWin.show();
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 5; i++) {
             this.addParticle((i + 1) * 50, (i + 1) * 50);
         }
     }
@@ -25,7 +25,7 @@ export class PixiScene extends ModuleScene {
             speedx: 100, //x 方向的速度
             speedy: 100 //y 方向的速度
         }
-        p.transform.scaleX = p.transform.scaleY = 0.02;
+        p.transform.scaleX = p.transform.scaleY = 0.03;
         p.transform.x = x;
         p.transform.y = y;
     }
