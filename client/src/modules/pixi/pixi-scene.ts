@@ -135,7 +135,7 @@ export class Particle extends leaf.Render {
             positionData[1 + index] = 0;
             positionData[2 + index] = 1;
             positionData[3 + index] = texture.startX;
-            positionData[4 + index] = texture.startX;
+            positionData[4 + index] = texture.endY;
 
             positionData[5 + index] = i;
             positionData[6 + index] = 0;
