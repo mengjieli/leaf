@@ -4564,6 +4564,11 @@
       "type": 1
     },
     {
+      "name": "snow_png",
+      "path": "assets/particle/snow.png",
+      "type": 1
+    },
+    {
       "name": "resource1_png",
       "path": "assets/resource-icon/resource1.png",
       "type": 1
