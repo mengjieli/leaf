@@ -223,7 +223,7 @@ var PixiScene = /** @class */ (function (_super) {
     function PixiScene() {
         var _this_1 = _super.call(this) || this;
         leaf.StateWin.show();
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < 3; i++) {
             _this_1.addParticle((i + 1) * 50, (i + 1) * 50);
         }
         return _this_1;
@@ -236,13 +236,13 @@ var PixiScene = /** @class */ (function (_super) {
         p.resource = "gold";
         // p.texture = leaf.PointTexture.getTexture(0xffffff);
         p.config = {
-            lifeTime: 20,
+            lifeTime: 30,
             frequency: 0.001,
             allTime: 1,
             speedx: 100,
             speedy: 100 //y 方向的速度
         };
-        p.transform.scaleX = p.transform.scaleY = 0.03;
+        p.transform.scaleX = p.transform.scaleY = 0.1;
         p.transform.x = x;
         p.transform.y = y;
     };
@@ -351,41 +351,21 @@ var Particle = /** @class */ (function (_super) {
         this.bufferDirty = false;
         this.buffer = leaf.GLCore.gl.createBuffer();
         var count = Math.ceil((1 / this.config.frequency) * this.config.lifeTime);
-        // attribute float a_Index;
-        //  attribute vec2 a_TexCoord;
         var positionData = [];
-        var texture = this._texture;
         for (var i = 0; i < count; i++) {
-            var index = i * 20;
-            positionData[0 + index] = i;
-            positionData[1 + index] = 0;
-            positionData[2 + index] = 1;
-            positionData[3 + index] = texture.startX;
-            positionData[4 + index] = texture.endY;
-            positionData[5 + index] = i;
-            positionData[6 + index] = 0;
-            positionData[7 + index] = 0;
-            positionData[8 + index] = texture.startX;
-            positionData[9 + index] = texture.startY;
-            positionData[10 + index] = i;
-            positionData[11 + index] = 1;
-            positionData[12 + index] = 1;
-            positionData[13 + index] = texture.endX;
-            positionData[14 + index] = texture.endY;
-            positionData[15 + index] = i;
-            positionData[16 + index] = 1;
-            positionData[17 + index] = 0;
-            positionData[18 + index] = texture.endX;
-            positionData[19 + index] = texture.startY;
+            var index = i * 4;
+            positionData[0 + index] = index + 0;
+            positionData[1 + index] = index + 1;
+            positionData[2 + index] = index + 2;
+            positionData[3 + index] = index + 3;
         }
+        var bufferData = new Float32Array(positionData);
         var gl = leaf.GLCore.gl;
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         //切换混合模式
         // BlendModeFunc.changeBlendMode(this.blendMode[i]);
-        gl.vertexAttribPointer(this.shader.a_Index, 1, gl.FLOAT, false, exports.$size * 5, 0);
-        gl.vertexAttribPointer(this.shader.a_Pisition, 2, gl.FLOAT, false, exports.$size * 5, exports.$size);
-        gl.vertexAttribPointer(this.shader.a_TexCoord, 2, gl.FLOAT, false, exports.$size * 5, exports.$size * 3);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positionData), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(this.shader.a_Index, 1, gl.FLOAT, false, exports.$size * 1, 0);
+        gl.bufferData(gl.ARRAY_BUFFER, bufferData, gl.STATIC_DRAW);
     };
     Particle.prototype.preRender = function () {
         if (this._texture && this.bufferDirty) {
@@ -436,6 +416,7 @@ var ParticleShaderTask = /** @class */ (function (_super) {
         _this_1.attributes = [];
         _this_1.textures = [];
         _this_1.sizes = [];
+        _this_1.ranges = [];
         _this_1.matrixs = [];
         _this_1.time = [];
         _this_1.configs = [];
@@ -460,8 +441,8 @@ var ParticleShaderTask = /** @class */ (function (_super) {
      */
     ParticleShaderTask.prototype.initProgram = function () {
         var gl = leaf.GLCore.gl;
-        var vertexSource = "\n            attribute float a_Index;\n            attribute vec2 a_Pisition;\n            attribute vec2 a_TexCoord;\n\n             uniform vec2 u_TexSize;\n             uniform mat4 u_PMatrix;\n             uniform mat3 u_VMatrix;\n             uniform float u_LifeTime;\n             uniform float u_Frequency;\n             uniform float u_AllTime;\n             uniform float u_Speedx;\n             uniform float u_Speedy;\n             uniform float u_Time;\n\n             varying vec2 v_TexCoord;\n             varying float v_Index;\n\n             void main(void)\n             {\n                float t = u_Time + a_Index * u_Frequency;\n                t = mod(t, u_AllTime);\n                float x = t * u_Speedx;\n                float y = t * u_Speedx;\n                vec3 pos = u_VMatrix * vec3(a_Pisition.x * u_TexSize.x + x,a_Pisition.y * u_TexSize.y + y, 1.0);\n                gl_Position = u_PMatrix*vec4(pos,1.0);\n                v_TexCoord = a_TexCoord;\n                v_Index = a_Index;\n             }\n             ";
-        var fragmentSource = "\n             precision mediump float;\n             varying vec2 v_TexCoord;\n             varying float v_Index;\n\n             uniform sampler2D u_Sampler;\n\n             vec4 getTextureColor(vec2 coord);\n\n             void main(void)\n             {\n                gl_FragColor = getTextureColor(v_TexCoord);\n             }\n\n             vec4 getTextureColor(vec2 coord) {\n                return texture2D(u_Sampler,v_TexCoord);\n             }\n             ";
+        var vertexSource = "\n            attribute float a_Index;\n\n             uniform vec2 u_TexSize;\n             uniform vec4 u_TexRange;\n             uniform mat4 u_PMatrix;\n             uniform mat3 u_VMatrix;\n             uniform float u_LifeTime;\n             uniform float u_Frequency;\n             uniform float u_AllTime;\n             uniform float u_Speedx;\n             uniform float u_Speedy;\n             uniform float u_Time;\n\n             varying vec2 v_TexCoord;\n\n             void main(void)\n             {\n                float type = mod(a_Index, 4.0);\n                float ind = (a_Index - type) / 4.0;\n                float t = u_Time + ind * u_Frequency;\n                t = mod(t, u_AllTime);\n                float x = t * u_Speedx;\n                float y = t * u_Speedx;\n                vec2 a_Pisition = vec2(0.0,0.0);\n                vec2 a_TexCoord = vec2(0.0,0.0);\n                if(type < 1.0) {\n                    a_Pisition.x = 0.0;\n                    a_Pisition.y = 1.0;\n                    a_TexCoord.x = u_TexRange.x;\n                    a_TexCoord.y = u_TexRange.w;\n                } else if(type < 2.0) {\n                    a_Pisition.x = 0.0;\n                    a_Pisition.y = 0.0;\n                    a_TexCoord.x = u_TexRange.x;\n                    a_TexCoord.y = u_TexRange.y;\n                } else if(type < 3.0) {\n                    a_Pisition.x = 1.0;\n                    a_Pisition.y = 1.0;\n                    a_TexCoord.x = u_TexRange.z;\n                    a_TexCoord.y = u_TexRange.w;\n                } else {\n                    a_Pisition.x = 1.0;\n                    a_Pisition.y = 0.0;\n                    a_TexCoord.x = u_TexRange.z;\n                    a_TexCoord.y = u_TexRange.y;\n                } \n                \n                vec3 pos = u_VMatrix * vec3(a_Pisition.x * u_TexSize.x + x,a_Pisition.y * u_TexSize.y + y, 1.0);\n                gl_Position = u_PMatrix*vec4(pos,1.0);\n                v_TexCoord = a_TexCoord;\n             }\n             ";
+        var fragmentSource = "\n             precision mediump float;\n             varying vec2 v_TexCoord;\n\n             uniform sampler2D u_Sampler;\n\n             vec4 getTextureColor(vec2 coord);\n\n             void main(void)\n             {\n                gl_FragColor = getTextureColor(v_TexCoord);\n             }\n\n             vec4 getTextureColor(vec2 coord) {\n                return texture2D(u_Sampler,v_TexCoord);\n             }\n             ";
         var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
         var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
         this.program = this.createWebGLProgram(vertexShader, fragmentShader);
@@ -503,11 +484,12 @@ var ParticleShaderTask = /** @class */ (function (_super) {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         this.a_Index = gl.getAttribLocation(program, "a_Index");
         gl.enableVertexAttribArray(this.a_Index);
-        this.a_Pisition = gl.getAttribLocation(program, "a_Pisition");
-        gl.enableVertexAttribArray(this.a_Pisition);
-        this.a_TexCoord = gl.getAttribLocation(program, "a_TexCoord");
-        gl.enableVertexAttribArray(this.a_TexCoord);
+        // this.a_Pisition = gl.getAttribLocation(program, "a_Pisition");
+        // gl.enableVertexAttribArray(this.a_Pisition);
+        // this.a_TexCoord = gl.getAttribLocation(program, "a_TexCoord");
+        // gl.enableVertexAttribArray(this.a_TexCoord);
         this.u_Sampler = gl.getUniformLocation(program, "u_Sampler");
+        this.u_TexRange = gl.getUniformLocation(program, "u_TexRange");
         this.u_TexSize = gl.getUniformLocation(program, "u_TexSize");
         this.u_PMatrix = gl.getUniformLocation(program, "u_PMatrix");
         this.u_VMatrix = gl.getUniformLocation(program, "u_VMatrix");
@@ -524,6 +506,7 @@ var ParticleShaderTask = /** @class */ (function (_super) {
         this.textures.push(texture.texture);
         this.configs.push(config);
         this.sizes.push({ width: texture.sourceWidth, height: texture.sourceHeight });
+        this.ranges.push([texture.startX, texture.startY, texture.endX, texture.endY]);
         this.matrixs.push(matrix);
         this.count.push(0);
         this.blendMode.push(blendMode);
@@ -548,11 +531,12 @@ var ParticleShaderTask = /** @class */ (function (_super) {
         //开始渲染任务
         for (var len = _this.textures.length; i < len && i < max; i++) {
             gl.uniform2f(this.u_TexSize, _this.sizes[i].width, _this.sizes[i].height);
+            gl.uniform4f(this.u_TexRange, _this.ranges[i][0], _this.ranges[i][1], _this.ranges[i][2], _this.ranges[i][3]);
             //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
             gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[i]);
-            gl.vertexAttribPointer(this.a_Index, 1, gl.FLOAT, false, exports.$size * 5, 0);
-            gl.vertexAttribPointer(this.a_Pisition, 2, gl.FLOAT, false, exports.$size * 5, exports.$size);
-            gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, exports.$size * 5, exports.$size * 3);
+            gl.vertexAttribPointer(this.a_Index, 1, gl.FLOAT, false, exports.$size * 1, 0);
+            // gl.vertexAttribPointer(this.a_Pisition, 2, gl.FLOAT, false, $size * 5, $size);
+            // gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, $size * 5, $size * 3);
             //切换混合模式
             // BlendModeFunc.changeBlendMode(this.blendMode[i]);
             // gl.vertexAttribPointer(_this.a_Index, 1, gl.FLOAT, false, $size * 3, 0);
@@ -589,6 +573,7 @@ var ParticleShaderTask = /** @class */ (function (_super) {
         this.attributes = [];
         this.textures = [];
         this.sizes = [];
+        this.ranges = [];
         this.matrixs = [];
         this.count = [];
         this.blendMode = [];

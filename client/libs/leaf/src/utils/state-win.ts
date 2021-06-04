@@ -4,7 +4,7 @@ namespace leaf {
 
     awake() {
       this.transform.alpha = 0.8;
-      this.addComponent(Label).fontSize = 16;
+      this.addComponent(Label).fontSize = 24;
       this.getComponent(Label).lineSpacing = 3;
       // this.transform.scaleX = this.transform.scaleY = 1 / GLCore.scale;
       this.addComponent(TouchComponent).touchChildrenEnabled = false;
@@ -20,7 +20,7 @@ namespace leaf {
       txt += `render      ${runInfo.framePreRenderTime}\n`;
       txt += `webgl       ${runInfo.frameGlRenderTime}\n`;
       this.getComponent(Label).text = txt;
-      this.transform.y = (GLCore.height - 127) / GLCore.scale;
+      this.transform.y = (GLCore.height - 200) / GLCore.scale;
     }
 
     private static ist: StateWin;

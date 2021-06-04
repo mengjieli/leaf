@@ -157,6 +157,22 @@ declare namespace leaf {
     }
 }
 declare namespace leaf {
+    class Particle extends Render {
+        shader: NormalShaderTask;
+        private _resource;
+        private _res;
+        texture: Texture;
+        resource: string;
+        private _tint;
+        tint: number;
+        readonly width: number;
+        readonly height: number;
+        preRender(): void;
+        preRender2(matrix: ecs.Matrix, alpha: number, shader?: Shader): void;
+        onDestroy(): void;
+    }
+}
+declare namespace leaf {
     class ScrollBitmap extends Render {
         shader: ScrollerShaderTask;
         private _resource;

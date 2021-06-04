@@ -8,7 +8,7 @@ export class PixiScene extends ModuleScene {
 
         leaf.StateWin.show();
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 3; i++) {
             this.addParticle((i + 1) * 50, (i + 1) * 50);
         }
     }
@@ -19,13 +19,13 @@ export class PixiScene extends ModuleScene {
         p.resource = "gold";
         // p.texture = leaf.PointTexture.getTexture(0xffffff);
         p.config = {
-            lifeTime: 20, //每个粒子的生命周期
+            lifeTime: 30, //每个粒子的生命周期
             frequency: 0.001, //发射频率
             allTime: 1, //粒子发射器发射时间
             speedx: 100, //x 方向的速度
             speedy: 100 //y 方向的速度
         }
-        p.transform.scaleX = p.transform.scaleY = 0.03;
+        p.transform.scaleX = p.transform.scaleY = 0.1;
         p.transform.x = x;
         p.transform.y = y;
     }
@@ -121,53 +121,29 @@ export class Particle extends leaf.Render {
         return this._texture ? this._texture.sourceHeight : 0;
     }
 
+
     private refreshBuffer() {
         this.bufferDirty = false;
 
-
         this.buffer = leaf.GLCore.gl.createBuffer();
         let count = Math.ceil((1 / this.config.frequency) * this.config.lifeTime);
-        // attribute float a_Index;
-        //  attribute vec2 a_TexCoord;
         let positionData = [];
 
-        let texture = this._texture;
-
         for (let i = 0; i < count; i++) {
-            let index = i * 20;
-            positionData[0 + index] = i;
-            positionData[1 + index] = 0;
-            positionData[2 + index] = 1;
-            positionData[3 + index] = texture.startX;
-            positionData[4 + index] = texture.endY;
-
-            positionData[5 + index] = i;
-            positionData[6 + index] = 0;
-            positionData[7 + index] = 0;
-            positionData[8 + index] = texture.startX;
-            positionData[9 + index] = texture.startY;
-
-            positionData[10 + index] = i;
-            positionData[11 + index] = 1;
-            positionData[12 + index] = 1;
-            positionData[13 + index] = texture.endX;
-            positionData[14 + index] = texture.endY;
-
-            positionData[15 + index] = i;
-            positionData[16 + index] = 1;
-            positionData[17 + index] = 0;
-            positionData[18 + index] = texture.endX;
-            positionData[19 + index] = texture.startY;
+            let index = i * 4;
+            positionData[0 + index] = index + 0;
+            positionData[1 + index] = index + 1;
+            positionData[2 + index] = index + 2;
+            positionData[3 + index] = index + 3;
         }
+        let bufferData = new Float32Array(positionData)
 
         let gl = leaf.GLCore.gl;
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         //切换混合模式
         // BlendModeFunc.changeBlendMode(this.blendMode[i]);
-        gl.vertexAttribPointer(this.shader.a_Index, 1, gl.FLOAT, false, $size * 5, 0);
-        gl.vertexAttribPointer(this.shader.a_Pisition, 2, gl.FLOAT, false, $size * 5, $size);
-        gl.vertexAttribPointer(this.shader.a_TexCoord, 2, gl.FLOAT, false, $size * 5, $size * 3);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positionData), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(this.shader.a_Index, 1, gl.FLOAT, false, $size * 1, 0);
+        gl.bufferData(gl.ARRAY_BUFFER, bufferData, gl.STATIC_DRAW);
     }
 
     preRender() {
@@ -176,7 +152,7 @@ export class Particle extends leaf.Render {
         }
         if (!this._texture || !this.config) return;
         let count = Math.ceil((1 / this.config.frequency) * this.config.lifeTime);
-        (this.shader).addTask(this.time * 0.001,this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
+        (this.shader).addTask(this.time * 0.001, this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
     }
 
     preRender2(matrix: ecs.Matrix, alpha: number, shader?: leaf.Shader) {
@@ -186,7 +162,7 @@ export class Particle extends leaf.Render {
         if (!this._texture || !this.config) return;
         matrix.reconcat(this.entity.transform.local);
         let count = Math.ceil((1 / this.config.frequency) * this.config.lifeTime);
-        (shader || this.shader).addTask(this.time * 0.001,this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
+        (shader || this.shader).addTask(this.time * 0.001, this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
     }
 
     update(dt) {
@@ -218,10 +194,11 @@ export var $size = (new Float32Array([0.0])).BYTES_PER_ELEMENT;
 export class ParticleShaderTask extends leaf.Shader {
 
     a_Index: any;
-    a_Pisition: any;
-    a_TexCoord: any;
+    // a_Pisition: any;
+    // a_TexCoord: any;
 
     private u_TexSize: any;
+    private u_TexRange: any;
     private u_Sampler: any;
     private u_PMatrix: any;
     private u_VMatrix: any;
@@ -252,10 +229,9 @@ export class ParticleShaderTask extends leaf.Shader {
         var gl = leaf.GLCore.gl;
         var vertexSource = `
             attribute float a_Index;
-            attribute vec2 a_Pisition;
-            attribute vec2 a_TexCoord;
 
              uniform vec2 u_TexSize;
+             uniform vec4 u_TexRange;
              uniform mat4 u_PMatrix;
              uniform mat3 u_VMatrix;
              uniform float u_LifeTime;
@@ -266,25 +242,48 @@ export class ParticleShaderTask extends leaf.Shader {
              uniform float u_Time;
 
              varying vec2 v_TexCoord;
-             varying float v_Index;
 
              void main(void)
              {
-                float t = u_Time + a_Index * u_Frequency;
+                float type = mod(a_Index, 4.0);
+                float ind = (a_Index - type) / 4.0;
+                float t = u_Time + ind * u_Frequency;
                 t = mod(t, u_AllTime);
                 float x = t * u_Speedx;
                 float y = t * u_Speedx;
+                vec2 a_Pisition = vec2(0.0,0.0);
+                vec2 a_TexCoord = vec2(0.0,0.0);
+                if(type < 1.0) {
+                    a_Pisition.x = 0.0;
+                    a_Pisition.y = 1.0;
+                    a_TexCoord.x = u_TexRange.x;
+                    a_TexCoord.y = u_TexRange.w;
+                } else if(type < 2.0) {
+                    a_Pisition.x = 0.0;
+                    a_Pisition.y = 0.0;
+                    a_TexCoord.x = u_TexRange.x;
+                    a_TexCoord.y = u_TexRange.y;
+                } else if(type < 3.0) {
+                    a_Pisition.x = 1.0;
+                    a_Pisition.y = 1.0;
+                    a_TexCoord.x = u_TexRange.z;
+                    a_TexCoord.y = u_TexRange.w;
+                } else {
+                    a_Pisition.x = 1.0;
+                    a_Pisition.y = 0.0;
+                    a_TexCoord.x = u_TexRange.z;
+                    a_TexCoord.y = u_TexRange.y;
+                } 
+                
                 vec3 pos = u_VMatrix * vec3(a_Pisition.x * u_TexSize.x + x,a_Pisition.y * u_TexSize.y + y, 1.0);
                 gl_Position = u_PMatrix*vec4(pos,1.0);
                 v_TexCoord = a_TexCoord;
-                v_Index = a_Index;
              }
              `;
 
         var fragmentSource = `
              precision mediump float;
              varying vec2 v_TexCoord;
-             varying float v_Index;
 
              uniform sampler2D u_Sampler;
 
@@ -354,14 +353,15 @@ export class ParticleShaderTask extends leaf.Shader {
         this.a_Index = gl.getAttribLocation(program, "a_Index");
         gl.enableVertexAttribArray(this.a_Index);
 
-        this.a_Pisition = gl.getAttribLocation(program, "a_Pisition");
-        gl.enableVertexAttribArray(this.a_Pisition);
+        // this.a_Pisition = gl.getAttribLocation(program, "a_Pisition");
+        // gl.enableVertexAttribArray(this.a_Pisition);
 
-        this.a_TexCoord = gl.getAttribLocation(program, "a_TexCoord");
-        gl.enableVertexAttribArray(this.a_TexCoord);
+        // this.a_TexCoord = gl.getAttribLocation(program, "a_TexCoord");
+        // gl.enableVertexAttribArray(this.a_TexCoord);
 
         this.u_Sampler = gl.getUniformLocation(program, "u_Sampler");
 
+        this.u_TexRange = gl.getUniformLocation(program, "u_TexRange");
         this.u_TexSize = gl.getUniformLocation(program, "u_TexSize");
         this.u_PMatrix = gl.getUniformLocation(program, "u_PMatrix");
         this.u_VMatrix = gl.getUniformLocation(program, "u_VMatrix");
@@ -377,6 +377,7 @@ export class ParticleShaderTask extends leaf.Shader {
     private attributes: WebGLBuffer[] = [];
     private textures: WebGLTexture[] = [];
     private sizes: { width: number, height: number }[] = [];
+    private ranges: number[][] = [];
     private matrixs: ecs.Matrix[] = [];
     private time: number[] = [];
     private configs: ParticleConfig[] = [];
@@ -385,12 +386,13 @@ export class ParticleShaderTask extends leaf.Shader {
 
     private indiceData = [];
 
-    addTask(time:number,attributes: WebGLBuffer, count: number, texture: leaf.Texture, config: ParticleConfig, matrix: ecs.Matrix, blendMode: leaf.BlendMode, tint: number) {
+    addTask(time: number, attributes: WebGLBuffer, count: number, texture: leaf.Texture, config: ParticleConfig, matrix: ecs.Matrix, blendMode: leaf.BlendMode, tint: number) {
         this.time.push(time);
         this.attributes.push(attributes);
         this.textures.push(texture.texture);
         this.configs.push(config);
         this.sizes.push({ width: texture.sourceWidth, height: texture.sourceHeight });
+        this.ranges.push([texture.startX, texture.startY, texture.endX, texture.endY]);
         this.matrixs.push(matrix);
         this.count.push(0);
         this.blendMode.push(blendMode);
@@ -424,12 +426,13 @@ export class ParticleShaderTask extends leaf.Shader {
         //开始渲染任务
         for (var len = _this.textures.length; i < len && i < max; i++) {
             gl.uniform2f(this.u_TexSize, _this.sizes[i].width, _this.sizes[i].height);
+            gl.uniform4f(this.u_TexRange, _this.ranges[i][0], _this.ranges[i][1], _this.ranges[i][2], _this.ranges[i][3]);
 
             //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
             gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[i]);
-            gl.vertexAttribPointer(this.a_Index, 1, gl.FLOAT, false, $size * 5, 0);
-            gl.vertexAttribPointer(this.a_Pisition, 2, gl.FLOAT, false, $size * 5, $size);
-            gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, $size * 5, $size * 3);
+            gl.vertexAttribPointer(this.a_Index, 1, gl.FLOAT, false, $size * 1, 0);
+            // gl.vertexAttribPointer(this.a_Pisition, 2, gl.FLOAT, false, $size * 5, $size);
+            // gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, $size * 5, $size * 3);
             //切换混合模式
             // BlendModeFunc.changeBlendMode(this.blendMode[i]);
             // gl.vertexAttribPointer(_this.a_Index, 1, gl.FLOAT, false, $size * 3, 0);
@@ -469,6 +472,7 @@ export class ParticleShaderTask extends leaf.Shader {
         this.attributes = [];
         this.textures = [];
         this.sizes = [];
+        this.ranges = [];
         this.matrixs = [];
         this.count = [];
         this.blendMode = [];

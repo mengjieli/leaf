@@ -1080,6 +1080,105 @@ var leaf;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {
+    var Particle = /** @class */ (function (_super) {
+        __extends(Particle, _super);
+        function Particle() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.shader = leaf.NormalShaderTask.shader;
+            _this._tint = 0xffffff;
+            return _this;
+        }
+        Object.defineProperty(Particle.prototype, "texture", {
+            get: function () {
+                return this._texture;
+            },
+            set: function (val) {
+                this._texture = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Particle.prototype, "resource", {
+            get: function () {
+                return this._resource;
+            },
+            set: function (val) {
+                var _this = this;
+                if (this._resource === val)
+                    return;
+                if (this._res)
+                    this._res.removeCount();
+                this._resource = val;
+                var res = this._res = leaf.Res.getRes(val);
+                if (!res) {
+                    this.texture = null;
+                    return;
+                }
+                if (res.data) {
+                    this.texture = res.data;
+                    res.addCount();
+                }
+                else {
+                    res.addCount();
+                    res.load().then(function () {
+                        if (_this._res !== res)
+                            return;
+                        _this.texture = res.data;
+                    });
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Particle.prototype, "tint", {
+            get: function () {
+                return this._tint;
+            },
+            set: function (val) {
+                this._tint = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Particle.prototype, "width", {
+            get: function () {
+                return this._texture ? this._texture.sourceWidth : 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Particle.prototype, "height", {
+            get: function () {
+                return this._texture ? this._texture.sourceHeight : 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Particle.prototype.preRender = function () {
+            if (!this._texture)
+                return;
+            (this.shader).addTask(this.texture, this.entity.transform.worldMatrix, this.entity.transform.worldAlpha, this.blendMode, this._tint);
+        };
+        Particle.prototype.preRender2 = function (matrix, alpha, shader) {
+            if (!this._texture)
+                return;
+            matrix.reconcat(this.entity.transform.local);
+            (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
+        };
+        Particle.prototype.onDestroy = function () {
+            this.texture = null;
+            if (this._res)
+                this._res.removeCount();
+            this._resource = this._res = null;
+            this._tint = 0xffffff;
+            _super.prototype.onDestroy.call(this);
+        };
+        return Particle;
+    }(leaf.Render));
+    leaf.Particle = Particle;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
     var ScrollBitmap = /** @class */ (function (_super) {
         __extends(ScrollBitmap, _super);
         function ScrollBitmap() {
@@ -4286,7 +4385,7 @@ var leaf;
         }
         StateWin.prototype.awake = function () {
             this.transform.alpha = 0.8;
-            this.addComponent(leaf.Label).fontSize = 16;
+            this.addComponent(leaf.Label).fontSize = 24;
             this.getComponent(leaf.Label).lineSpacing = 3;
             // this.transform.scaleX = this.transform.scaleY = 1 / GLCore.scale;
             this.addComponent(leaf.TouchComponent).touchChildrenEnabled = false;
@@ -4301,7 +4400,7 @@ var leaf;
             txt += "render      " + leaf.runInfo.framePreRenderTime + "\n";
             txt += "webgl       " + leaf.runInfo.frameGlRenderTime + "\n";
             this.getComponent(leaf.Label).text = txt;
-            this.transform.y = (leaf.GLCore.height - 127) / leaf.GLCore.scale;
+            this.transform.y = (leaf.GLCore.height - 200) / leaf.GLCore.scale;
         };
         StateWin.show = function () {
             if (this.ist)
