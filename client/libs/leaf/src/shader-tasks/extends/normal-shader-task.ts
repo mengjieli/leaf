@@ -8,9 +8,9 @@ namespace leaf {
         private a_TexCoord: any;
         private a_Alpha: any;
         private a_Sampler: any;
+        private a_Color:any;
         private u_PMatrix: any;
         private u_Samplers: any[];
-        private u_Color: any;
 
         constructor() {
             super();
@@ -30,29 +30,35 @@ namespace leaf {
         private initProgram(): void {
             var gl = GLCore.gl;
             var vertexSource = `
+            precision highp float;
              attribute vec2 a_TexCoord;
              attribute vec4 a_Position;
              attribute float a_Alpha;
              attribute float a_Sampler;
+             attribute float a_Color; 
+
              uniform mat4 u_PMatrix;
              varying vec2 v_TexCoord;
              varying float v_Alpha;
              varying float v_Sampler;
+             varying float v_Color;
              void main(void)
              {
                 gl_Position = u_PMatrix*a_Position;
                 v_TexCoord = a_TexCoord;
                 v_Alpha = a_Alpha;
                 v_Sampler = a_Sampler;
+                v_Color = a_Color;
              }
              `;
 
             var fragmentSource = `
-             precision mediump float;
+             precision highp float;
              varying vec2 v_TexCoord;
              varying float v_Alpha;
              varying float v_Sampler;
-             uniform vec4 u_Color;
+             varying float v_Color;
+
              uniform sampler2D u_Sampler0;
              uniform sampler2D u_Sampler1;
              uniform sampler2D u_Sampler2;
@@ -64,8 +70,10 @@ namespace leaf {
              vec4 getTextureColor(vec2 coord);
              void main(void)
              {
-                gl_FragColor = getTextureColor(v_TexCoord)*u_Color*v_Alpha;
+                vec4 color = vec4(float((v_Color/65536.0))/255.0,float(int(mod(v_Color,65536.0)/255.0))/255.0,mod(v_Color,256.0)/255.0,1.0);
+                gl_FragColor = getTextureColor(v_TexCoord)*color*v_Alpha;
              }
+
              vec4 getTextureColor(vec2 coord) {
                 if(v_Sampler == 0.0) {
                     return texture2D(u_Sampler0,v_TexCoord);
@@ -139,25 +147,26 @@ namespace leaf {
 
             this.a_Position = gl.getAttribLocation(program, "a_Position");
             gl.enableVertexAttribArray(this.a_Position);
-            gl.vertexAttribPointer(this.a_Position, 2, gl.FLOAT, false, $size * 6, 0);
+            gl.vertexAttribPointer(this.a_Position, 2, gl.FLOAT, false, $size * 7, 0);
 
             this.a_TexCoord = gl.getAttribLocation(program, "a_TexCoord");
             gl.enableVertexAttribArray(this.a_TexCoord);
-            gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, $size * 6, $size * 2);
+            gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, $size * 7, $size * 2);
 
             this.a_Alpha = gl.getAttribLocation(program, "a_Alpha");
             gl.enableVertexAttribArray(this.a_Alpha);
-            gl.vertexAttribPointer(this.a_Alpha, 1, gl.FLOAT, false, $size * 6, $size * 4);
+            gl.vertexAttribPointer(this.a_Alpha, 1, gl.FLOAT, false, $size * 7, $size * 4);
 
             this.a_Sampler = gl.getAttribLocation(program, "a_Sampler");
             gl.enableVertexAttribArray(this.a_Sampler);
-            gl.vertexAttribPointer(this.a_Sampler, 1, gl.FLOAT, false, $size * 6, $size * 5);
+            gl.vertexAttribPointer(this.a_Sampler, 1, gl.FLOAT, false, $size * 7, $size * 5);
+
+            this.a_Color = gl.getAttribLocation(program, "a_Color");
+            gl.enableVertexAttribArray(this.a_Color);
+            gl.vertexAttribPointer(this.a_Color, 1, gl.FLOAT, false, $size * 7, $size * 6);
 
             this.u_PMatrix = gl.getUniformLocation(program, "u_PMatrix");
             gl.uniformMatrix4fv(this.u_PMatrix, false, projectionMatrix);
-
-            this.u_Color = gl.getUniformLocation(program, "u_Color");
-            gl.uniform4f(this.u_Color, 1, 1, 1, 1);
 
             this.u_Samplers = [];
             for (let i = 0; i < 8; i++) {
@@ -170,7 +179,6 @@ namespace leaf {
         private positionData = [];
         private blendMode = [];
         private indiceData = [];
-        private tints = [];
         private newAddNew: boolean = true;
 
         addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode, tint: number) {
@@ -182,16 +190,14 @@ namespace leaf {
                 !this.textures.length ||
                 txtureIndex === -1 &&
                 this.textures[this.textures.length - 1].length >= 8 ||
-                this.count.length && this.count[this.count.length - 1] > 512 ||
-                this.blendMode[this.blendMode.length - 1] != blendMode ||
-                this.tints[this.tints.length - 1] != tint) {
+                this.count.length && this.count[this.count.length - 1] > 4096 ||
+                this.blendMode[this.blendMode.length - 1] != blendMode) {
                 this.newAddNew = false;
                 this.textures.push([texture.texture]);
                 txtureIndex = 0;
                 this.positionData.push([]);
                 this.count.push(0);
                 this.blendMode.push(blendMode);
-                this.tints.push(tint);
             } else {
                 if (txtureIndex === -1) {
                     txtureIndex = this.textures[this.textures.length - 1].length;
@@ -199,7 +205,7 @@ namespace leaf {
                 }
             }
 
-            var index = this.count[this.count.length - 1] * 24;
+            var index = this.count[this.count.length - 1] * 28;
             var positionData = this.positionData[this.positionData.length - 1];
             var width = texture.sourceWidth;
             var height = texture.sourceHeight;
@@ -210,27 +216,31 @@ namespace leaf {
             positionData[3 + index] = texture.endY;
             positionData[4 + index] = alpha;
             positionData[5 + index] = txtureIndex;
+            positionData[6 + index] = tint;
 
-            positionData[6 + index] = matrix.tx;
-            positionData[7 + index] = matrix.ty;
-            positionData[8 + index] = texture.startX;
-            positionData[9 + index] = texture.startY;
-            positionData[10 + index] = alpha;
-            positionData[11 + index] = txtureIndex;
+            positionData[7 + index] = matrix.tx;
+            positionData[8 + index] = matrix.ty;
+            positionData[9 + index] = texture.startX;
+            positionData[10 + index] = texture.startY;
+            positionData[11 + index] = alpha;
+            positionData[12 + index] = txtureIndex;
+            positionData[13 + index] = tint;
 
-            positionData[12 + index] = matrix.a * width + matrix.c * height + matrix.tx;
-            positionData[13 + index] = matrix.b * width + matrix.d * height + matrix.ty;
-            positionData[14 + index] = texture.endX;
-            positionData[15 + index] = texture.endY;
-            positionData[16 + index] = alpha;
-            positionData[17 + index] = txtureIndex;
+            positionData[14 + index] = matrix.a * width + matrix.c * height + matrix.tx;
+            positionData[15 + index] = matrix.b * width + matrix.d * height + matrix.ty;
+            positionData[16 + index] = texture.endX;
+            positionData[17 + index] = texture.endY;
+            positionData[18 + index] = alpha;
+            positionData[19 + index] = txtureIndex;
+            positionData[20 + index] = tint;
 
-            positionData[18 + index] = matrix.a * width + matrix.tx;
-            positionData[19 + index] = matrix.b * width + matrix.ty;
-            positionData[20 + index] = texture.endX;
-            positionData[21 + index] = texture.startY;
-            positionData[22 + index] = alpha;
-            positionData[23 + index] = txtureIndex;
+            positionData[21 + index] = matrix.a * width + matrix.tx;
+            positionData[22 + index] = matrix.b * width + matrix.ty;
+            positionData[23 + index] = texture.endX;
+            positionData[24 + index] = texture.startY;
+            positionData[25 + index] = alpha;
+            positionData[26 + index] = txtureIndex;
+            positionData[27 + index] = tint;
 
             this.count[this.count.length - 1]++;
         }
@@ -257,16 +267,16 @@ namespace leaf {
             gl.useProgram(_this.program);
             //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
             gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-            gl.vertexAttribPointer(_this.a_Position, 2, gl.FLOAT, false, $size * 6, 0);
-            gl.vertexAttribPointer(_this.a_TexCoord, 2, gl.FLOAT, false, $size * 6, $size * 2);
-            gl.vertexAttribPointer(_this.a_Alpha, 1, gl.FLOAT, false, $size * 6, $size * 4);
-            gl.vertexAttribPointer(_this.a_Sampler, 1, gl.FLOAT, false, $size * 6, $size * 5);
+            gl.vertexAttribPointer(_this.a_Position, 2, gl.FLOAT, false, $size * 7, 0);
+            gl.vertexAttribPointer(_this.a_TexCoord, 2, gl.FLOAT, false, $size * 7, $size * 2);
+            gl.vertexAttribPointer(_this.a_Alpha, 1, gl.FLOAT, false, $size * 7, $size * 4);
+            gl.vertexAttribPointer(_this.a_Sampler, 1, gl.FLOAT, false, $size * 7, $size * 5);
+            gl.vertexAttribPointer(_this.a_Color, 1, gl.FLOAT, false, $size * 7, $size * 6);
             var i = this.renderIndex;
             //开始渲染任务
             for (var len = _this.textures.length; i < len && i < max; i++) {
                 //切换混合模式
-                // BlendModeFunc.changeBlendMode(this.blendMode[i]);
-                gl.uniform4f(this.u_Color, (this.tints[i] >> 16) / 255.0, ((this.tints[i] >> 8) & 0xFF) / 255.0, (this.tints[i] & 0xFF) / 255.0, 1);
+                BlendModeFunc.changeBlendMode(this.blendMode[i]);
                 //绑定当前需要渲染的纹理
                 for (let t = 0; t < _this.textures[i].length; t++) {
                     gl.uniform1i(this.u_Samplers[t], t);
@@ -294,7 +304,6 @@ namespace leaf {
             _this.count = [];
             _this.positionData = [];
             _this.blendMode = [];
-            _this.tints = [];
             _this.renderCounts.length = 0;
             _this.lastRenderCount = 0;
             _this.renderIndex = 0;

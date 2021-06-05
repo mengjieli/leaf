@@ -221,49 +221,79 @@ var module_scene_1 = __webpack_require__(/*! ../../utils/ui/module-scene */ "../
 var PixiScene = /** @class */ (function (_super) {
     __extends(PixiScene, _super);
     function PixiScene() {
-        var _this_1 = _super.call(this) || this;
+        var _this = _super.call(this) || this;
+        var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
+        // bg.resource = "airbg_jpg";
+        bg.texture = leaf.PointTexture.getTexture(0);
+        bg.transform.scaleX = leaf.getStageWidth();
+        bg.transform.scaleY = leaf.getStageHeight();
+        bg.parent = _this.scene;
         leaf.StateWin.show();
-        for (var i = 0; i < 1; i++) {
-            _this_1.addParticle();
+        for (var i = 0; i < 0; i++) {
+            var bm = ecs.Entity.create().addComponent(leaf.Bitmap);
+            bm.resource = "snow_png";
+            bm.parent = _this.scene;
+            bm.transform.scaleX = bm.transform.scaleY = 0.01;
+            bm.transform.x = Math.random() * leaf.getStageWidth();
+            bm.transform.y = Math.random() * leaf.getStageHeight() - 300;
+            // bm.blendMode = leaf.BlendMode.ADD;
         }
-        return _this_1;
+        for (var i = 0; i < 2; i++) {
+            _this.addParticle(0, 0);
+        }
+        return _this;
     }
     PixiScene.prototype.addParticle = function (x, y) {
         if (x === void 0) { x = 0; }
         if (y === void 0) { y = 0; }
-        var p = ecs.Entity.create().addComponent(Particle);
+        var cfg = {
+            "alpha": {
+                "start": 1,
+                "end": 1
+            },
+            "scale": {
+                "start": 0.01,
+                "end": 0.01
+            },
+            "color": {
+                "start": "ff00ff",
+                "end": "00ff00"
+            },
+            "speed": {
+                "start": 100,
+                "end": 100
+            },
+            "startRotation": {
+                "min": 0,
+                "max": 90
+            },
+            "rotationSpeed": {
+                "min": 30,
+                "max": 30
+            },
+            "lifetime": {
+                "min": 10,
+                "max": 10
+            },
+            "frequency": 0.001,
+            "spawnType": "circle",
+            "spawnCircle": {
+                "x": 0,
+                "y": 0,
+                "r": 10
+            },
+            max: 30000
+        };
+        var p = ecs.Entity.create().addComponent(Particle, cfg);
+        // let p = ecs.Entity.create().addComponent(leaf.GpuParticle);
+        // p.config = cfg;
         p.entity.parent = this.scene;
         p.resource = "snow_png";
         // p.texture = leaf.PointTexture.getTexture(0xffffff);
-        p.config = {
-            lifeTime: 5,
-            frequency: 5,
-            allTime: 100,
-            alpha: [0.73, 0.46],
-            scale: [1, 1],
-            speed: {
-                start: 200,
-                end: 200
-            },
-            startRotation: {
-                min: 80,
-                max: 100
-            },
-            rotationSpeed: {
-                min: 0,
-                max: 200
-            },
-            spawnType: EMSpawnType.RECT,
-            spawnRect: {
-                x: 0,
-                y: 0,
-                w: 640,
-                h: -20
-            }
-        };
         // p.transform.scaleX = p.transform.scaleY = 0.1;
         p.transform.x = x;
         p.transform.y = y;
+        // p.transform.angle = 30 * Math.PI / 180;
     };
     PixiScene.prototype.close = function () {
         _super.prototype.close.call(this);
@@ -277,29 +307,46 @@ exports.PixiScene = PixiScene;
 var Particle = /** @class */ (function (_super) {
     __extends(Particle, _super);
     function Particle() {
-        var _this_1 = _super !== null && _super.apply(this, arguments) || this;
-        _this_1.shader = ParticleShaderTask.shader;
-        _this_1._tint = 0xffffff;
-        _this_1.time = 0;
-        return _this_1;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.shader = leaf.NormalShaderTask.shader;
+        return _this;
     }
     Object.defineProperty(Particle.prototype, "config", {
         get: function () {
             return this._config;
         },
-        set: function (val) {
-            this._config = val;
-            if (this.buffer) {
-                leaf.GLCore.gl.deleteBuffer(this.buffer);
-            }
-            this.buffer = null;
-            if (val) {
-                this.bufferDirty = true;
-            }
-        },
         enumerable: true,
         configurable: true
     });
+    Particle.prototype.init = function (config) {
+        this._config = config;
+        this.lastTime = 0;
+        this.nowTime = 0;
+        this.count = 0;
+        this.configExt = {
+            colors: []
+        };
+        if (config.color) {
+            if (config.color.start != null) {
+                var start = typeof config.color.start == "string" ? ~~("0x" + config.color.start) : config.color.start;
+                var end = typeof config.color.end == "string" ? ~~("0x" + config.color.end) : config.color.end;
+                this.configExt.colors = [{
+                        startR: (start >> 16), endR: (end >> 16),
+                        startG: (start >> 8 & 0xFF), endG: (end >> 8 & 0xFF),
+                        startB: (start & 0xFF), endB: (end & 0xFF),
+                        startTime: 0, endTime: config.lifetime.max
+                    }];
+            }
+            else {
+            }
+        }
+        else {
+            this.configExt.colors = [{ startR: 1, endR: 1, startG: 1, endG: 1, startB: 1, endB: 1, startTime: 0, endTime: config.lifetime.max }];
+        }
+        this.countLabel = ecs.Entity.create().addComponent(leaf.Label);
+        this.countLabel.fontColor = 0x00ff00;
+        // this.countLabel.parent = this.entity;
+    };
     Object.defineProperty(Particle.prototype, "texture", {
         get: function () {
             return this._texture;
@@ -315,7 +362,7 @@ var Particle = /** @class */ (function (_super) {
             return this._resource;
         },
         set: function (val) {
-            var _this_1 = this;
+            var _this = this;
             if (this._resource === val)
                 return;
             if (this._res)
@@ -333,311 +380,155 @@ var Particle = /** @class */ (function (_super) {
             else {
                 res.addCount();
                 res.load().then(function () {
-                    if (_this_1._res !== res)
+                    if (_this._res !== res)
                         return;
-                    _this_1.texture = res.data;
+                    _this.texture = res.data;
                 });
             }
         },
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(Particle.prototype, "tint", {
-        get: function () {
-            return this._tint;
-        },
-        set: function (val) {
-            this._tint = val;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Particle.prototype, "width", {
-        get: function () {
-            return this._texture ? this._texture.sourceWidth : 0;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Particle.prototype, "height", {
-        get: function () {
-            return this._texture ? this._texture.sourceHeight : 0;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Particle.prototype.refreshBuffer = function () {
-        this.bufferDirty = false;
-        this.buffer = leaf.GLCore.gl.createBuffer();
-        var count = Math.ceil((1 / this.config.frequency) * this.config.lifeTime);
-        var positionData = [];
-        for (var i = 0; i < count; i++) {
-            var index = i * 8;
-            var r = Math.random();
-            positionData[0 + index] = index + 0;
-            positionData[1 + index] = r;
-            positionData[2 + index] = index + 1;
-            positionData[3 + index] = r;
-            positionData[4 + index] = index + 2;
-            positionData[5 + index] = r;
-            positionData[6 + index] = index + 3;
-            positionData[7 + index] = r;
-        }
-        var bufferData = new Float32Array(positionData);
-        var gl = leaf.GLCore.gl;
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-        //切换混合模式
-        // BlendModeFunc.changeBlendMode(this.blendMode[i]);
-        gl.vertexAttribPointer(this.shader.a_Index, 1, gl.FLOAT, false, exports.$size * 2, 0);
-        gl.vertexAttribPointer(this.shader.a_Seed, 1, gl.FLOAT, false, exports.$size * 2, exports.$size * 1);
-        gl.bufferData(gl.ARRAY_BUFFER, bufferData, gl.STATIC_DRAW);
-    };
     Particle.prototype.preRender = function () {
-        if (this._texture && this.bufferDirty) {
-            this.refreshBuffer();
-        }
-        if (!this._texture || !this.config)
+        if (!this._texture)
             return;
-        var count = Math.ceil((1 / this.config.frequency) * this.config.lifeTime);
-        (this.shader).addTask(this.time * 0.001, this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
+        (this.shader).addTask(this.texture, this.entity.transform.worldMatrix, this.entity.transform.worldAlpha, this.blendMode, 0xffffff);
     };
     Particle.prototype.preRender2 = function (matrix, alpha, shader) {
-        if (this._texture && this.bufferDirty) {
-            this.refreshBuffer();
-        }
-        if (!this._texture || !this.config)
+        if (!this._texture)
             return;
         matrix.reconcat(this.entity.transform.local);
-        var count = Math.ceil((1 / this.config.frequency) * this.config.lifeTime);
-        (shader || this.shader).addTask(this.time * 0.001, this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
+        var allAlpha = alpha * this.entity.transform.alpha;
+        if (this.head) {
+            for (var node = this.head; node; node = node.next) {
+                if (!node.startMatrix) {
+                    node.startMatrix = ecs.Matrix.create();
+                    node.startMatrix.setTo(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
+                }
+                matrix = node.startMatrix;
+                matrix.save();
+                var local = node.matrix;
+                local.identity();
+                var tw = this.texture.sourceWidth;
+                var th = this.texture.sourceHeight;
+                matrix.translate(node.x, node.y);
+                local.translate(-tw * 0.5, -th * 0.5);
+                local.scale(node.scale, node.scale);
+                local.rotate(node.rotation);
+                matrix.reconcat(local);
+                (shader || this.shader).addTask(this.texture, matrix, allAlpha * node.alpha, this.blendMode, node.color);
+                matrix.restore();
+            }
+        }
+        // (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
     };
     Particle.prototype.update = function (dt) {
-        this.time += dt;
+        var lastTime = this.lastTime;
+        this.nowTime += dt;
+        var sendTimeGap = this.config.frequency * 1000;
+        var lastN = ~~(lastTime / sendTimeGap);
+        var nowN = ~~(this.nowTime / sendTimeGap);
+        var cfg = this._config;
+        var ext = this.configExt;
+        for (var i = lastN; lastN <= nowN && i <= nowN && this.count < cfg.max; i++) {
+            var startColor = typeof cfg.color.start == "string" ? ~~("0x" + cfg.color.start) : cfg.color.start;
+            var endColor = typeof cfg.color.end == "string" ? ~~("0x" + cfg.color.end) : cfg.color.end;
+            var lifeTime = cfg.lifetime.min + (cfg.lifetime.max - cfg.lifetime.min) * Math.random();
+            var p = {
+                lifeTime: lifeTime,
+                time: 0,
+                next: null,
+                startMatrix: null,
+                matrix: ecs.Matrix.create(),
+                x: 0,
+                y: 0,
+                rotation: 0,
+                startRotation: cfg.startRotation.min + (cfg.startRotation.max - cfg.startRotation.min) * Math.random() * Math.PI / 180.0,
+                rotationSpeed: cfg.rotationSpeed.min,
+                speedRotation: 0,
+                scale: 1,
+                color: 0xffffff,
+                colors: [{ r: startColor >> 16, g: startColor >> 8 & 0xFF, b: startColor & 0xFF, time: 0 },
+                    { r: endColor >> 16, g: endColor >> 8 & 0xFF, b: endColor & 0xFF, time: lifeTime }],
+                alpha: 0
+            };
+            // p.startRotation = 90 * Math.PI / 180;
+            if (!this.head)
+                this.head = p;
+            if (this.end)
+                this.end.next = p;
+            this.end = p;
+            this.count++;
+            this.lastTime = (i + 1) * sendTimeGap;
+        }
+        for (var node = this.head, last = null; node; node = node.next) {
+            var t = node.time = Math.min(node.time + dt * 0.001, node.lifeTime);
+            if (node.time >= node.lifeTime) {
+                if (node == this.head) {
+                    this.head = null;
+                }
+                if (node == this.end) {
+                    this.end = last;
+                }
+                if (last && last.next == node)
+                    last.next = null;
+                this.count--;
+                continue;
+            }
+            if (last && !last.next)
+                last.next = node;
+            last = node;
+            if (!this.head)
+                this.head = node;
+            var life = node.lifeTime;
+            var p = t / life;
+            var r = node.startRotation;
+            var len = cfg.speed.start * t + 0.5 * (cfg.speed.end - cfg.speed.start) * t * t / life;
+            var x = len * Math.cos(r) + 0.5 * (cfg.acceleration ? cfg.acceleration.x : 0) * t * t;
+            var y = len * Math.sin(r) + 0.5 * (cfg.acceleration ? cfg.acceleration.y : 0) * t * t;
+            node.rotation = (cfg.rotationSpeed.min * t + 0.5 * (cfg.rotationSpeed.max - cfg.rotationSpeed.min) * t * t / life) * Math.PI / 180.0;
+            node.x = x;
+            node.y = y;
+            node.scale = cfg.scale.start + (cfg.scale.end - cfg.scale.start) * p;
+            var speed = cfg.speed.start + (cfg.speed.end - cfg.speed.start) * p;
+            var speedX = speed * Math.cos(r) + (cfg.acceleration ? cfg.acceleration.x : 0) * t;
+            var speedY = speed * Math.sin(r) + (cfg.acceleration ? cfg.acceleration.y : 0) * t;
+            node.speedRotation = Math.atan2(speedY, speedX);
+            node.alpha = cfg.alpha.start + (cfg.alpha.end - cfg.alpha.start) * p;
+            for (var i = 0; i < ext.colors.length; i++) {
+                var c = ext.colors[i];
+                if (t >= c.startTime && t <= c.endTime) {
+                    node.color = (c.startR + (c.endR - c.startR) * (t - c.startTime) / (c.endTime - c.startTime)) << 16
+                        | (c.startG + (c.endG - c.startG) * (t - c.startTime) / (c.endTime - c.startTime)) << 8
+                        | (c.startB + (c.endB - c.startB) * (t - c.startTime) / (c.endTime - c.startTime));
+                }
+            }
+        }
+        this.countLabel.text = this.count + "";
     };
     Particle.prototype.onDestroy = function () {
-        this.texture = null;
-        if (this._res)
-            this._res.removeCount();
-        this._resource = this._res = null;
-        this._tint = 0xffffff;
-        this.config = null;
-        this.time = 0;
-        _super.prototype.onDestroy.call(this);
+        this._config = null;
+        if (this.head) {
+            for (var node = this.head; node; node = node.next) {
+                node.matrix && ecs.Matrix.release(node.matrix);
+                node.matrix = null;
+            }
+        }
+        this.head = null;
+        this.end = null;
     };
     return Particle;
 }(leaf.Render));
 exports.Particle = Particle;
-var EMSpawnType;
-(function (EMSpawnType) {
-    EMSpawnType[EMSpawnType["RECT"] = 0] = "RECT";
-})(EMSpawnType = exports.EMSpawnType || (exports.EMSpawnType = {}));
-exports.$size = (new Float32Array([0.0])).BYTES_PER_ELEMENT;
-var ParticleShaderTask = /** @class */ (function (_super) {
-    __extends(ParticleShaderTask, _super);
-    function ParticleShaderTask() {
-        var _this_1 = _super.call(this) || this;
-        _this_1.projectionMatrix = new Float32Array([
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            -1, 1, 0, 1
-        ]);
-        _this_1.attributes = [];
-        _this_1.textures = [];
-        _this_1.sizes = [];
-        _this_1.ranges = [];
-        _this_1.matrixs = [];
-        _this_1.time = [];
-        _this_1.configs = [];
-        _this_1.count = [];
-        _this_1.blendMode = [];
-        _this_1.indiceData = [];
-        _this_1.renderCounts = [];
-        _this_1.lastRenderCount = 0;
-        _this_1.renderIndex = 0;
-        //初始化作色器、program
-        _this_1.initProgram();
-        //初始化作色器固定变量 和 获取作色器中得变量
-        _this_1.initAttriLocation();
-        return _this_1;
-    }
-    /**
-     * 初始化作色器、program
-     * 1. 初始化 shader
-     * 2. 初始化 program
-     * 目前没有加 filter (滤镜) 的功能，后续可以继续扩展这两个 shader
-     * @param gl
-     */
-    ParticleShaderTask.prototype.initProgram = function () {
-        var gl = leaf.GLCore.gl;
-        var vertexSource = "\n            attribute float a_Index;\n            attribute float a_Seed;\n\n             uniform vec2 u_TexSize;\n             uniform vec4 u_TexRange;\n             uniform mat4 u_PMatrix;\n             uniform mat3 u_VMatrix;\n             uniform float u_LifeTime;\n             uniform float u_Frequency;\n             uniform float u_AllTime;\n             uniform float u_Time;\n             uniform vec2 u_Alpha;\n             uniform vec2 u_Scale;\n             uniform vec2 u_Speed;\n             uniform vec2 u_StartRotation;\n             uniform vec2 u_RotationSpeed;\n             uniform int u_SpawnType;\n             uniform vec4 u_SpawnRect;\n\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n\n             void main(void)\n             {\n                float type = mod(a_Index, 4.0);\n                float ind = (a_Index - type) / 4.0;\n                float t = u_Time + ind * u_Frequency;\n                float pi = 3.1415926535;\n                t = mod(t, u_LifeTime);\n                float scale = u_Scale.x + (u_Scale.y - u_Scale.x) *  t / u_LifeTime;\n                float speed = u_Speed.x;\n                float seed0 =  mod(a_Seed * (ind + t / u_LifeTime), 1.0);\n                float r = (u_StartRotation.x + (u_StartRotation.y - u_StartRotation.x) * mod(a_Seed * ind, 1.0) ) * pi / 180.0;\n                float x = t * speed * cos(r);\n                float y = t * speed * sin(r);\n                float offx = 0.0;\n                float offy = 0.0;\n                if(u_SpawnType == 0) {\n                    offx = u_SpawnRect.x + u_SpawnRect.z * a_Seed;\n                    offy = u_SpawnRect.y + u_SpawnRect.w * a_Seed;\n                }\n                vec2 a_Pisition = vec2(0.0,0.0);\n                vec2 a_TexCoord = vec2(0.0,0.0);\n                if(type < 1.0) {\n                    a_Pisition.x = 0.0;\n                    a_Pisition.y = 1.0;\n                    a_TexCoord.x = u_TexRange.x;\n                    a_TexCoord.y = u_TexRange.w;\n                } else if(type < 2.0) {\n                    a_Pisition.x = 0.0;\n                    a_Pisition.y = 0.0;\n                    a_TexCoord.x = u_TexRange.x;\n                    a_TexCoord.y = u_TexRange.y;\n                } else if(type < 3.0) {\n                    a_Pisition.x = 1.0;\n                    a_Pisition.y = 1.0;\n                    a_TexCoord.x = u_TexRange.z;\n                    a_TexCoord.y = u_TexRange.w;\n                } else {\n                    a_Pisition.x = 1.0;\n                    a_Pisition.y = 0.0;\n                    a_TexCoord.x = u_TexRange.z;\n                    a_TexCoord.y = u_TexRange.y;\n                } \n                float rot = 30.0 * pi / 180.0;\n                float sx = a_Pisition.x * u_TexSize.x;\n                float sy = a_Pisition.y * u_TexSize.y;\n                float len = sqrt(a_Pisition.x * a_Pisition.x + a_Pisition.y * a_Pisition.y);\n                vec3 pos = u_VMatrix * vec3(a_Pisition.x * u_TexSize.x * scale + x + offx,a_Pisition.y * u_TexSize.y * scale + y + offy, 1.0);\n                gl_Position = u_PMatrix*vec4(pos,1.0);\n                v_TexCoord = a_TexCoord;\n                v_Alpha = u_Alpha.x + (u_Alpha.y - u_Alpha.x) *  t / u_LifeTime;\n             }\n\n             ";
-        var fragmentSource = "\n             precision mediump float;\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n\n             uniform sampler2D u_Sampler;\n\n             vec4 getTextureColor(vec2 coord);\n\n             void main(void)\n             {\n                gl_FragColor = getTextureColor(v_TexCoord) * v_Alpha;\n             }\n\n             vec4 getTextureColor(vec2 coord) {\n                return texture2D(u_Sampler,v_TexCoord);\n             }\n             ";
-        var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
-        var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
-        this.program = this.createWebGLProgram(vertexShader, fragmentShader);
-    };
-    /**
-     * 初始化作色器固定变量 和 获取作色器中得变量
-     * 主要初始化投影矩阵，投影矩阵不用每次调用都初始化，只要设置一次即可，除非舞台 (Stage) 的大小改变 (glViewPort)
-     * 获取一些变量。
-     * @param gl
-     * @param width
-     * @param height
-     */
-    ParticleShaderTask.prototype.initAttriLocation = function () {
-        var gl = leaf.GLCore.gl;
-        var projectionMatrix = this.projectionMatrix;
-        projectionMatrix[0] = 2 / leaf.GLCore.width;
-        projectionMatrix[5] = -2 / leaf.GLCore.height;
-        var program = this.program;
-        program["name"] = "normal program";
-        gl.useProgram(this.program);
-        if (!this.buffer) {
-            this.buffer = gl.createBuffer();
-            this.indexBuffer = gl.createBuffer();
-            var indiceData = this.indiceData;
-            var count = 30000;
-            for (var i = 0; i < count; i++) {
-                var index2 = i * 6;
-                var index2_2 = i * 4;
-                indiceData[0 + index2] = 0 + index2_2;
-                indiceData[1 + index2] = 1 + index2_2;
-                indiceData[2 + index2] = 2 + index2_2;
-                indiceData[3 + index2] = 2 + index2_2;
-                indiceData[4 + index2] = 1 + index2_2;
-                indiceData[5 + index2] = 3 + index2_2;
-            }
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indiceData), gl.STATIC_DRAW);
-        }
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-        this.a_Index = gl.getAttribLocation(program, "a_Index");
-        gl.enableVertexAttribArray(this.a_Index);
-        this.a_Seed = gl.getAttribLocation(program, "a_Seed");
-        gl.enableVertexAttribArray(this.a_Seed);
-        // this.a_Pisition = gl.getAttribLocation(program, "a_Pisition");
-        // gl.enableVertexAttribArray(this.a_Pisition);
-        // this.a_TexCoord = gl.getAttribLocation(program, "a_TexCoord");
-        // gl.enableVertexAttribArray(this.a_TexCoord);
-        this.u_Sampler = gl.getUniformLocation(program, "u_Sampler");
-        this.u_TexRange = gl.getUniformLocation(program, "u_TexRange");
-        this.u_TexSize = gl.getUniformLocation(program, "u_TexSize");
-        this.u_PMatrix = gl.getUniformLocation(program, "u_PMatrix");
-        this.u_VMatrix = gl.getUniformLocation(program, "u_VMatrix");
-        this.u_LifeTime = gl.getUniformLocation(program, "u_LifeTime");
-        this.u_Frequency = gl.getUniformLocation(program, "u_Frequency");
-        this.u_AllTime = gl.getUniformLocation(program, "u_AllTime");
-        this.u_Alpha = gl.getUniformLocation(program, "u_Alpha");
-        this.u_Scale = gl.getUniformLocation(program, "u_Scale");
-        this.u_Speed = gl.getUniformLocation(program, "u_Speed");
-        this.u_StartRotation = gl.getUniformLocation(program, "u_StartRotation");
-        this.u_RotationSpeed = gl.getUniformLocation(program, "u_RotationSpeed");
-        this.u_SpawnType = gl.getUniformLocation(program, "u_SpawnType");
-        this.u_SpawnRect = gl.getUniformLocation(program, "u_SpawnRect");
-        this.u_Time = gl.getUniformLocation(program, "u_Time");
-    };
-    ParticleShaderTask.prototype.addTask = function (time, attributes, count, texture, config, matrix, blendMode, tint) {
-        this.time.push(time);
-        this.attributes.push(attributes);
-        this.textures.push(texture.texture);
-        this.configs.push(config);
-        this.sizes.push({ width: texture.sourceWidth, height: texture.sourceHeight });
-        this.ranges.push([texture.startX, texture.startY, texture.endX, texture.endY]);
-        this.matrixs.push(matrix);
-        this.count.push(0);
-        this.blendMode.push(blendMode);
-        this.count[this.count.length - 1] += count;
-    };
-    ParticleShaderTask.prototype.startNewTask = function () {
-        if (this.lastRenderCount != this.textures.length) {
-            this.renderCounts.push(this.textures.length);
-            this.lastRenderCount = this.textures.length;
-        }
-    };
-    /**
-     * 渲染
-     */
-    ParticleShaderTask.prototype.render = function () {
-        var _this = this;
-        var gl = leaf.GLCore.gl;
-        var max = this.renderCounts.shift();
-        gl.useProgram(_this.program);
-        gl.uniformMatrix4fv(this.u_PMatrix, false, this.projectionMatrix);
-        var i = this.renderIndex;
-        //开始渲染任务
-        for (var len = _this.textures.length; i < len && i < max; i++) {
-            gl.uniform2f(this.u_TexSize, _this.sizes[i].width, _this.sizes[i].height);
-            gl.uniform4f(this.u_TexRange, _this.ranges[i][0], _this.ranges[i][1], _this.ranges[i][2], _this.ranges[i][3]);
-            //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[i]);
-            gl.vertexAttribPointer(this.a_Index, 1, gl.FLOAT, false, exports.$size * 2, exports.$size * 0);
-            gl.vertexAttribPointer(this.a_Seed, 1, gl.FLOAT, false, exports.$size * 2, exports.$size * 1);
-            // gl.vertexAttribPointer(this.a_Pisition, 2, gl.FLOAT, false, $size * 5, $size);
-            // gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, $size * 5, $size * 3);
-            //切换混合模式
-            // BlendModeFunc.changeBlendMode(this.blendMode[i]);
-            // gl.vertexAttribPointer(_this.a_Index, 1, gl.FLOAT, false, $size * 3, 0);
-            // gl.vertexAttribPointer(_this.a_TexCoord, 2, gl.FLOAT, false, $size * 3, $size);
-            // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.positionData[i]), gl.STATIC_DRAW);
-            var cfg = this.configs[i];
-            gl.uniform1f(this.u_LifeTime, cfg.lifeTime);
-            gl.uniform1f(this.u_Frequency, cfg.frequency);
-            gl.uniform1f(this.u_AllTime, cfg.allTime);
-            gl.uniform1f(this.u_Time, this.time[i]);
-            gl.uniform2f(this.u_Alpha, cfg.alpha[0], cfg.alpha[1]);
-            gl.uniform2f(this.u_Scale, cfg.scale[0], cfg.scale[1]);
-            gl.uniform2f(this.u_Speed, cfg.speed.start, cfg.speed.end);
-            gl.uniform2f(this.u_StartRotation, cfg.startRotation.min, cfg.startRotation.max);
-            gl.uniform2f(this.u_RotationSpeed, cfg.rotationSpeed.min, cfg.rotationSpeed.max);
-            gl.uniform1i(this.u_SpawnType, cfg.spawnType);
-            gl.uniform4f(this.u_SpawnRect, cfg.spawnRect.x, cfg.spawnRect.y, cfg.spawnRect.w, cfg.spawnRect.h);
-            var m = this.matrixs[i];
-            gl.uniformMatrix3fv(this.u_VMatrix, false, [
-                m.a, m.b, 0,
-                m.c, m.d, 0,
-                m.tx, m.ty, 1
-            ]);
-            gl.uniform1i(this.u_Sampler, 0);
-            gl.activeTexture(gl["TEXTURE0"]);
-            gl.bindTexture(gl.TEXTURE_2D, _this.textures[i]);
-            //真正的绘制，之前测试 drawElements 并不比 drawArrays 快，其实也很正常，因为二维里面顶点数据共用并不多，
-            //一个矩形也就对角线的两个顶点各被共用两次(两个三角形共用)，远小于 3D 里面的立方体一个顶点被 6 个三角形共用。
-            gl.drawElements(gl.TRIANGLES, _this.count[i] * 6, gl.UNSIGNED_SHORT, 0); //利用drawElements画三角形
-            leaf.runInfo.drawCount += _this.count[i];
-            leaf.runInfo.drawCall++;
-        }
-        _this.renderIndex = i;
-        if (_this.renderIndex === _this.textures.length) {
-            _this.reset();
-        }
-    };
-    ParticleShaderTask.prototype.reset = function () {
-        this.attributes = [];
-        this.textures = [];
-        this.sizes = [];
-        this.ranges = [];
-        this.matrixs = [];
-        this.count = [];
-        this.blendMode = [];
-        this.configs = [];
-        this.time = [];
-        this.renderCounts.length = 0;
-        this.lastRenderCount = 0;
-        this.renderIndex = 0;
-    };
-    Object.defineProperty(ParticleShaderTask, "shader", {
-        get: function () {
-            if (!this._shader) {
-                this._shader = new ParticleShaderTask();
-            }
-            return this._shader;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return ParticleShaderTask;
-}(leaf.Shader));
-exports.ParticleShaderTask = ParticleShaderTask;
+var spawnTypes = {
+    "rect": 0,
+    "ring": 1,
+    "circle": 2
+};
+var cc = window.requestAnimationFrame;
+window.requestAnimationFrame = function () {
+    return cc.apply(null, arguments);
+};
 
 
 /***/ }),

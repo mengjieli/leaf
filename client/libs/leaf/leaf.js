@@ -844,6 +844,167 @@ var leaf;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {
+    var GpuParticle = /** @class */ (function (_super) {
+        __extends(GpuParticle, _super);
+        function GpuParticle() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.shader = leaf.GpuParticleShaderTask.shader;
+            _this._tint = 0xffffff;
+            _this.time = 0;
+            return _this;
+        }
+        Object.defineProperty(GpuParticle.prototype, "config", {
+            get: function () {
+                return this._config;
+            },
+            set: function (val) {
+                this._config = val;
+                if (this.buffer) {
+                    leaf.GLCore.gl.deleteBuffer(this.buffer);
+                }
+                this.buffer = null;
+                if (val) {
+                    this.bufferDirty = true;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GpuParticle.prototype, "texture", {
+            get: function () {
+                return this._texture;
+            },
+            set: function (val) {
+                this._texture = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GpuParticle.prototype, "resource", {
+            get: function () {
+                return this._resource;
+            },
+            set: function (val) {
+                var _this = this;
+                if (this._resource === val)
+                    return;
+                if (this._res)
+                    this._res.removeCount();
+                this._resource = val;
+                var res = this._res = leaf.Res.getRes(val);
+                if (!res) {
+                    this.texture = null;
+                    return;
+                }
+                if (res.data) {
+                    this.texture = res.data;
+                    res.addCount();
+                }
+                else {
+                    res.addCount();
+                    res.load().then(function () {
+                        if (_this._res !== res)
+                            return;
+                        _this.texture = res.data;
+                    });
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GpuParticle.prototype, "tint", {
+            get: function () {
+                return this._tint;
+            },
+            set: function (val) {
+                this._tint = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GpuParticle.prototype, "width", {
+            get: function () {
+                return this._texture ? this._texture.sourceWidth : 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GpuParticle.prototype, "height", {
+            get: function () {
+                return this._texture ? this._texture.sourceHeight : 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        GpuParticle.prototype.refreshBuffer = function () {
+            this.bufferDirty = false;
+            this.buffer = leaf.GLCore.gl.createBuffer();
+            var count = Math.ceil((1 / this.config.frequency) * this.config.lifetime.max);
+            var positionData = [];
+            for (var i = 0; i < count; i++) {
+                var index = i * 8;
+                var r = Math.random();
+                positionData[0 + index] = index + 0;
+                positionData[1 + index] = r;
+                positionData[2 + index] = index + 1;
+                positionData[3 + index] = r;
+                positionData[4 + index] = index + 2;
+                positionData[5 + index] = r;
+                positionData[6 + index] = index + 3;
+                positionData[7 + index] = r;
+            }
+            var bufferData = new Float32Array(positionData);
+            var gl = leaf.GLCore.gl;
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+            //切换混合模式
+            // BlendModeFunc.changeBlendMode(this.blendMode[i]);
+            gl.vertexAttribPointer(this.shader.a_Index, 1, gl.FLOAT, false, leaf.$size * 2, 0);
+            gl.vertexAttribPointer(this.shader.a_Seed, 1, gl.FLOAT, false, leaf.$size * 2, leaf.$size * 1);
+            gl.bufferData(gl.ARRAY_BUFFER, bufferData, gl.STATIC_DRAW);
+        };
+        GpuParticle.prototype.preRender = function () {
+            if (this._texture && this.bufferDirty) {
+                this.refreshBuffer();
+            }
+            if (!this._texture || !this.config)
+                return;
+            var count = Math.ceil((1 / this.config.frequency) * this.config.lifetime.max);
+            (this.shader).addTask(this.time * 0.001, this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
+        };
+        GpuParticle.prototype.preRender2 = function (matrix, alpha, shader) {
+            if (this._texture && this.bufferDirty) {
+                this.refreshBuffer();
+            }
+            if (!this._texture || !this.config)
+                return;
+            matrix.reconcat(this.entity.transform.local);
+            var count = Math.ceil((1 / this.config.frequency) * this.config.lifetime.max);
+            (shader || this.shader).addTask(this.time * 0.001, this.buffer, count, this.texture, this.config, this.entity.transform.worldMatrix, this.blendMode, this._tint);
+        };
+        GpuParticle.prototype.update = function (dt) {
+            this.time += dt;
+        };
+        GpuParticle.prototype.onDestroy = function () {
+            this.texture = null;
+            if (this._res)
+                this._res.removeCount();
+            this._resource = this._res = null;
+            this._tint = 0xffffff;
+            this.config = null;
+            this.time = 0;
+            _super.prototype.onDestroy.call(this);
+        };
+        return GpuParticle;
+    }(leaf.Render));
+    leaf.GpuParticle = GpuParticle;
+    leaf.spawnTypes = {
+        "rect": 0,
+        "ring": 1,
+        "circle": 2
+    };
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
     var Label = /** @class */ (function (_super) {
         __extends(Label, _super);
         function Label() {
@@ -2165,7 +2326,7 @@ var leaf;
     function startClearResource() {
         if (hasStart)
             return;
-        hasStart = false;
+        hasStart = true;
         var f = function () {
             requestAnimationFrame(f);
             while (clearList.length) {
@@ -2758,6 +2919,231 @@ var leaf;
 })(leaf || (leaf = {}));
 var leaf;
 (function (leaf) {
+    var GpuParticleShaderTask = /** @class */ (function (_super) {
+        __extends(GpuParticleShaderTask, _super);
+        function GpuParticleShaderTask() {
+            var _this_1 = _super.call(this) || this;
+            _this_1.projectionMatrix = new Float32Array([
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                -1, 1, 0, 1
+            ]);
+            _this_1.attributes = [];
+            _this_1.textures = [];
+            _this_1.sizes = [];
+            _this_1.ranges = [];
+            _this_1.matrixs = [];
+            _this_1.time = [];
+            _this_1.configs = [];
+            _this_1.count = [];
+            _this_1.blendMode = [];
+            _this_1.indiceData = [];
+            _this_1.renderCounts = [];
+            _this_1.lastRenderCount = 0;
+            _this_1.renderIndex = 0;
+            //初始化作色器、program
+            _this_1.initProgram();
+            //初始化作色器固定变量 和 获取作色器中得变量
+            _this_1.initAttriLocation();
+            return _this_1;
+        }
+        /**
+         * 初始化作色器、program
+         * 1. 初始化 shader
+         * 2. 初始化 program
+         * 目前没有加 filter (滤镜) 的功能，后续可以继续扩展这两个 shader
+         * @param gl
+         */
+        GpuParticleShaderTask.prototype.initProgram = function () {
+            var gl = leaf.GLCore.gl;
+            var vertexSource = "\n            attribute float a_Index;\n            attribute float a_Seed;\n\n             uniform vec2 u_TexSize;\n             uniform vec4 u_TexRange;\n             uniform mat4 u_PMatrix;\n             uniform mat3 u_VMatrix;\n             uniform vec2 u_LifeTime;\n             uniform float u_Frequency;\n             uniform float u_Time;\n             uniform vec2 u_Alpha;\n             uniform vec2 u_Scale;\n             uniform vec2 u_Speed;\n             uniform vec2 u_Acceleration;\n             uniform vec2 u_StartRotation;\n             uniform vec2 u_RotationSpeed;\n             uniform int u_SpawnType;\n             uniform vec4 u_SpawnRect;\n             uniform vec3 u_StartColor;\n             uniform vec3 u_EndColor;\n\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n             varying vec4 v_Coord;\n\n             void main(void)\n             {\n                float type = mod(a_Index, 4.0);\n                float ind = (a_Index - type) / 4.0;\n                float t = u_Time + ind * u_Frequency;\n                float pi = 3.1415926535;\n                float life = u_LifeTime.x + (u_LifeTime.y - u_LifeTime.x) * a_Seed;\n                t = mod(t, life);\n                float startTime = u_Time - t;\n                float sx = 0.0;\n                float sy = 0.0;\n                float p = t / life; \n                float scale = u_Scale.x + (u_Scale.y - u_Scale.x) *  t / life;\n                float seed0 =  mod(a_Seed * (ind + t / life), 1.0);\n                float r = (u_StartRotation.x + (u_StartRotation.y - u_StartRotation.x) * mod(a_Seed * ind, 1.0) ) * pi / 180.0;\n                float x = sx + (u_Speed.x * t + 0.5 * (u_Speed.y - u_Speed.x) * t * t / life ) * cos(r) + 0.5 * u_Acceleration.x * t * t;\n                float y = sy + (u_Speed.x * t + 0.5 * (u_Speed.y - u_Speed.x) * t * t / life ) * sin(r) + 0.5 * u_Acceleration.y * t * t;\n                float offx = 0.0;\n                float offy = 0.0;\n                float rot = (u_RotationSpeed.x + (u_RotationSpeed.y - u_RotationSpeed.x) * mod(a_Seed * ind, 1.0)) * t * pi / 180.0;\n                if(u_SpawnType == 0) {\n                    offx = u_SpawnRect.x + u_SpawnRect.z * a_Seed;\n                    offy = u_SpawnRect.y + u_SpawnRect.w * a_Seed;\n                } else if(u_SpawnType == 2) {\n                    rot += r;\n                }\n                vec2 a_Pisition = vec2(0.0,0.0);\n                vec2 a_TexCoord = vec2(0.0,0.0);\n                if(type < 1.0) {\n                    a_Pisition.x = 0.0;\n                    a_Pisition.y = 1.0;\n                    a_TexCoord.x = u_TexRange.x;\n                    a_TexCoord.y = u_TexRange.w;\n                } else if(type < 2.0) {\n                    a_Pisition.x = 0.0;\n                    a_Pisition.y = 0.0;\n                    a_TexCoord.x = u_TexRange.x;\n                    a_TexCoord.y = u_TexRange.y;\n                } else if(type < 3.0) {\n                    a_Pisition.x = 1.0;\n                    a_Pisition.y = 1.0;\n                    a_TexCoord.x = u_TexRange.z;\n                    a_TexCoord.y = u_TexRange.w;\n                } else {\n                    a_Pisition.x = 1.0;\n                    a_Pisition.y = 0.0;\n                    a_TexCoord.x = u_TexRange.z;\n                    a_TexCoord.y = u_TexRange.y;\n                }\n                mat3 rm = mat3(cos(rot),sin(rot),0.0,  -sin(rot),cos(rot),0.0, 0.0,0.0,1.0);\n                float tw = a_Pisition.x * u_TexSize.x;\n                float th = a_Pisition.y * u_TexSize.y;\n                vec3 pos = u_VMatrix * mat3(scale,0.0,0.0, 0.0,scale,0.0, x + offx ,y + offy,1.0) * rm * mat3(u_TexSize.x,0.0,0.0, 0.0,u_TexSize.y,0.0, 0.0,0.0,1.0) * vec3(a_Pisition.x - 0.5, a_Pisition.y - 0.5, 1.0);\n                gl_Position = u_PMatrix*vec4(pos,1.0);\n                v_TexCoord = a_TexCoord;\n                v_Alpha = u_Alpha.x + (u_Alpha.y - u_Alpha.x) * p;\n                v_Coord = vec4(u_StartColor.x + (u_EndColor.x - u_StartColor.x)*p, u_StartColor.y + (u_EndColor.y - u_StartColor.y)*p,u_StartColor.z + (u_EndColor.z - u_StartColor.z)*p,1.0);\n             }\n\n             ";
+            var fragmentSource = "\n             precision mediump float;\n             varying vec2 v_TexCoord;\n             varying vec4 v_Coord;\n             varying float v_Alpha;\n\n             uniform sampler2D u_Sampler;\n\n             vec4 getTextureColor(vec2 coord);\n\n             void main(void)\n             {\n                gl_FragColor = getTextureColor(v_TexCoord) * v_Coord;\n                gl_FragColor.w *= v_Alpha;\n             }\n\n             vec4 getTextureColor(vec2 coord) {\n                return texture2D(u_Sampler,v_TexCoord);\n             }\n             ";
+            var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
+            var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
+            this.program = this.createWebGLProgram(vertexShader, fragmentShader);
+        };
+        /**
+         * 初始化作色器固定变量 和 获取作色器中得变量
+         * 主要初始化投影矩阵，投影矩阵不用每次调用都初始化，只要设置一次即可，除非舞台 (Stage) 的大小改变 (glViewPort)
+         * 获取一些变量。
+         * @param gl
+         * @param width
+         * @param height
+         */
+        GpuParticleShaderTask.prototype.initAttriLocation = function () {
+            var gl = leaf.GLCore.gl;
+            var projectionMatrix = this.projectionMatrix;
+            projectionMatrix[0] = 2 / leaf.GLCore.width;
+            projectionMatrix[5] = -2 / leaf.GLCore.height;
+            var program = this.program;
+            program["name"] = "normal program";
+            gl.useProgram(this.program);
+            if (!this.buffer) {
+                this.buffer = gl.createBuffer();
+                this.indexBuffer = gl.createBuffer();
+                var indiceData = this.indiceData;
+                var count = 30000;
+                for (var i = 0; i < count; i++) {
+                    var index2 = i * 6;
+                    var index2_2 = i * 4;
+                    indiceData[0 + index2] = 0 + index2_2;
+                    indiceData[1 + index2] = 1 + index2_2;
+                    indiceData[2 + index2] = 2 + index2_2;
+                    indiceData[3 + index2] = 2 + index2_2;
+                    indiceData[4 + index2] = 1 + index2_2;
+                    indiceData[5 + index2] = 3 + index2_2;
+                }
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indiceData), gl.STATIC_DRAW);
+            }
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+            this.a_Index = gl.getAttribLocation(program, "a_Index");
+            gl.enableVertexAttribArray(this.a_Index);
+            this.a_Seed = gl.getAttribLocation(program, "a_Seed");
+            gl.enableVertexAttribArray(this.a_Seed);
+            // this.a_Pisition = gl.getAttribLocation(program, "a_Pisition");
+            // gl.enableVertexAttribArray(this.a_Pisition);
+            // this.a_TexCoord = gl.getAttribLocation(program, "a_TexCoord");
+            // gl.enableVertexAttribArray(this.a_TexCoord);
+            this.u_Sampler = gl.getUniformLocation(program, "u_Sampler");
+            this.u_TexRange = gl.getUniformLocation(program, "u_TexRange");
+            this.u_TexSize = gl.getUniformLocation(program, "u_TexSize");
+            this.u_PMatrix = gl.getUniformLocation(program, "u_PMatrix");
+            this.u_VMatrix = gl.getUniformLocation(program, "u_VMatrix");
+            this.u_LifeTime = gl.getUniformLocation(program, "u_LifeTime");
+            this.u_Frequency = gl.getUniformLocation(program, "u_Frequency");
+            this.u_Alpha = gl.getUniformLocation(program, "u_Alpha");
+            this.u_Scale = gl.getUniformLocation(program, "u_Scale");
+            this.u_Speed = gl.getUniformLocation(program, "u_Speed");
+            this.u_Acceleration = gl.getUniformLocation(program, "u_Acceleration");
+            this.u_StartRotation = gl.getUniformLocation(program, "u_StartRotation");
+            this.u_RotationSpeed = gl.getUniformLocation(program, "u_RotationSpeed");
+            this.u_SpawnType = gl.getUniformLocation(program, "u_SpawnType");
+            this.u_SpawnRect = gl.getUniformLocation(program, "u_SpawnRect");
+            this.u_StartColor = gl.getUniformLocation(program, "u_StartColor");
+            this.u_EndColor = gl.getUniformLocation(program, "u_EndColor");
+            this.u_Time = gl.getUniformLocation(program, "u_Time");
+        };
+        GpuParticleShaderTask.prototype.addTask = function (time, attributes, count, texture, config, matrix, blendMode, tint) {
+            this.time.push(time);
+            this.attributes.push(attributes);
+            this.textures.push(texture.texture);
+            this.configs.push(config);
+            this.sizes.push({ width: texture.sourceWidth, height: texture.sourceHeight });
+            this.ranges.push([texture.startX, texture.startY, texture.endX, texture.endY]);
+            this.matrixs.push(matrix);
+            this.count.push(0);
+            this.blendMode.push(blendMode);
+            this.count[this.count.length - 1] += count;
+        };
+        GpuParticleShaderTask.prototype.startNewTask = function () {
+            if (this.lastRenderCount != this.textures.length) {
+                this.renderCounts.push(this.textures.length);
+                this.lastRenderCount = this.textures.length;
+            }
+        };
+        /**
+         * 渲染
+         */
+        GpuParticleShaderTask.prototype.render = function () {
+            var _this = this;
+            var gl = leaf.GLCore.gl;
+            var max = this.renderCounts.shift();
+            gl.useProgram(_this.program);
+            gl.uniformMatrix4fv(this.u_PMatrix, false, this.projectionMatrix);
+            var i = this.renderIndex;
+            //开始渲染任务
+            for (var len = _this.textures.length; i < len && i < max; i++) {
+                gl.uniform2f(this.u_TexSize, _this.sizes[i].width, _this.sizes[i].height);
+                gl.uniform4f(this.u_TexRange, _this.ranges[i][0], _this.ranges[i][1], _this.ranges[i][2], _this.ranges[i][3]);
+                //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[i]);
+                gl.vertexAttribPointer(this.a_Index, 1, gl.FLOAT, false, leaf.$size * 2, leaf.$size * 0);
+                gl.vertexAttribPointer(this.a_Seed, 1, gl.FLOAT, false, leaf.$size * 2, leaf.$size * 1);
+                // gl.vertexAttribPointer(this.a_Pisition, 2, gl.FLOAT, false, $size * 5, $size);
+                // gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, $size * 5, $size * 3);
+                //切换混合模式
+                leaf.BlendModeFunc.changeBlendMode(this.blendMode[i]);
+                // gl.vertexAttribPointer(_this.a_Index, 1, gl.FLOAT, false, $size * 3, 0);
+                // gl.vertexAttribPointer(_this.a_TexCoord, 2, gl.FLOAT, false, $size * 3, $size);
+                // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_this.positionData[i]), gl.STATIC_DRAW);
+                var cfg = this.configs[i];
+                gl.uniform2f(this.u_LifeTime, cfg.lifetime.min, cfg.lifetime.max);
+                gl.uniform1f(this.u_Frequency, cfg.frequency);
+                gl.uniform1f(this.u_Time, this.time[i]);
+                gl.uniform2f(this.u_Alpha, cfg.alpha.start, cfg.alpha.end);
+                gl.uniform2f(this.u_Scale, cfg.scale.start, cfg.scale.end);
+                gl.uniform2f(this.u_Speed, cfg.speed.start, cfg.speed.end);
+                cfg.acceleration && gl.uniform2f(this.u_Acceleration, cfg.acceleration.x, cfg.acceleration.y);
+                gl.uniform2f(this.u_StartRotation, cfg.startRotation.min, cfg.startRotation.max);
+                gl.uniform2f(this.u_RotationSpeed, cfg.rotationSpeed.min, cfg.rotationSpeed.max);
+                gl.uniform1i(this.u_SpawnType, leaf.spawnTypes[cfg.spawnType]);
+                cfg.spawnRect && gl.uniform4f(this.u_SpawnRect, cfg.spawnRect.x, cfg.spawnRect.y, cfg.spawnRect.w, cfg.spawnRect.h);
+                var color = void 0;
+                if (typeof cfg.color.start === "string")
+                    color = +("0x" + cfg.color.start);
+                else
+                    color = cfg.color.start;
+                gl.uniform3f(this.u_StartColor, (color >> 16) / 0xFF, (color >> 8 & 0xFF) / 0xFF, (color & 0xFF) / 0xFF);
+                if (typeof cfg.color.end === "string")
+                    color = +("0x" + cfg.color.end);
+                else
+                    color = cfg.color.end;
+                gl.uniform3f(this.u_EndColor, (color >> 16) / 0xFF, (color >> 8 & 0xFF) / 0xFF, (color & 0xFF) / 0xFF);
+                var m = this.matrixs[i];
+                // let rot = 0.0 * Math.PI / 180.0;
+                // let cos = Math.cos(rot);
+                // let sin = Math.sin(rot);
+                gl.uniformMatrix3fv(this.u_VMatrix, false, [
+                    m.a, m.b, 0,
+                    m.c, m.d, 0,
+                    m.tx, m.ty, 1
+                ]);
+                gl.uniform1i(this.u_Sampler, 0);
+                gl.activeTexture(gl["TEXTURE0"]);
+                gl.bindTexture(gl.TEXTURE_2D, _this.textures[i]);
+                //真正的绘制，之前测试 drawElements 并不比 drawArrays 快，其实也很正常，因为二维里面顶点数据共用并不多，
+                //一个矩形也就对角线的两个顶点各被共用两次(两个三角形共用)，远小于 3D 里面的立方体一个顶点被 6 个三角形共用。
+                gl.drawElements(gl.TRIANGLES, _this.count[i] * 6, gl.UNSIGNED_SHORT, 0); //利用drawElements画三角形
+                leaf.runInfo.drawCount += _this.count[i];
+                leaf.runInfo.drawCall++;
+            }
+            _this.renderIndex = i;
+            if (_this.renderIndex === _this.textures.length) {
+                _this.reset();
+            }
+        };
+        GpuParticleShaderTask.prototype.reset = function () {
+            this.attributes = [];
+            this.textures = [];
+            this.sizes = [];
+            this.ranges = [];
+            this.matrixs = [];
+            this.count = [];
+            this.blendMode = [];
+            this.configs = [];
+            this.time = [];
+            this.renderCounts.length = 0;
+            this.lastRenderCount = 0;
+            this.renderIndex = 0;
+        };
+        Object.defineProperty(GpuParticleShaderTask, "shader", {
+            get: function () {
+                if (!this._shader) {
+                    this._shader = new GpuParticleShaderTask();
+                }
+                return this._shader;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return GpuParticleShaderTask;
+    }(leaf.Shader));
+    leaf.GpuParticleShaderTask = GpuParticleShaderTask;
+})(leaf || (leaf = {}));
+var leaf;
+(function (leaf) {
     leaf.$size = (new Float32Array([0.0])).BYTES_PER_ELEMENT;
     var NormalShaderTask = /** @class */ (function (_super) {
         __extends(NormalShaderTask, _super);
@@ -2774,7 +3160,6 @@ var leaf;
             _this_1.positionData = [];
             _this_1.blendMode = [];
             _this_1.indiceData = [];
-            _this_1.tints = [];
             _this_1.newAddNew = true;
             _this_1.renderCounts = [];
             _this_1.lastRenderCount = 0;
@@ -2794,8 +3179,8 @@ var leaf;
          */
         NormalShaderTask.prototype.initProgram = function () {
             var gl = leaf.GLCore.gl;
-            var vertexSource = "\n             attribute vec2 a_TexCoord;\n             attribute vec4 a_Position;\n             attribute float a_Alpha;\n             attribute float a_Sampler;\n             uniform mat4 u_PMatrix;\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n             varying float v_Sampler;\n             void main(void)\n             {\n                gl_Position = u_PMatrix*a_Position;\n                v_TexCoord = a_TexCoord;\n                v_Alpha = a_Alpha;\n                v_Sampler = a_Sampler;\n             }\n             ";
-            var fragmentSource = "\n             precision mediump float;\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n             varying float v_Sampler;\n             uniform vec4 u_Color;\n             uniform sampler2D u_Sampler0;\n             uniform sampler2D u_Sampler1;\n             uniform sampler2D u_Sampler2;\n             uniform sampler2D u_Sampler3;\n             uniform sampler2D u_Sampler4;\n             uniform sampler2D u_Sampler5;\n             uniform sampler2D u_Sampler6;\n             uniform sampler2D u_Sampler7;\n             vec4 getTextureColor(vec2 coord);\n             void main(void)\n             {\n                gl_FragColor = getTextureColor(v_TexCoord)*u_Color*v_Alpha;\n             }\n             vec4 getTextureColor(vec2 coord) {\n                if(v_Sampler == 0.0) {\n                    return texture2D(u_Sampler0,v_TexCoord);\n                } else if(v_Sampler == 1.0) {\n                    return texture2D(u_Sampler1,v_TexCoord);\n                } else if(v_Sampler == 2.0) {\n                    return texture2D(u_Sampler2,v_TexCoord);\n                } else if(v_Sampler == 3.0) {\n                    return texture2D(u_Sampler3,v_TexCoord);\n                } else if(v_Sampler == 4.0) {\n                    return texture2D(u_Sampler4,v_TexCoord);\n                } else if(v_Sampler == 5.0) {\n                    return texture2D(u_Sampler5,v_TexCoord);\n                } else if(v_Sampler == 6.0) {\n                    return texture2D(u_Sampler6,v_TexCoord);\n                } else if(v_Sampler == 7.0) {\n                    return texture2D(u_Sampler7,v_TexCoord);\n                }\n             }\n             ";
+            var vertexSource = "\n            precision highp float;\n             attribute vec2 a_TexCoord;\n             attribute vec4 a_Position;\n             attribute float a_Alpha;\n             attribute float a_Sampler;\n             attribute float a_Color; \n\n             uniform mat4 u_PMatrix;\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n             varying float v_Sampler;\n             varying float v_Color;\n             void main(void)\n             {\n                gl_Position = u_PMatrix*a_Position;\n                v_TexCoord = a_TexCoord;\n                v_Alpha = a_Alpha;\n                v_Sampler = a_Sampler;\n                v_Color = a_Color;\n             }\n             ";
+            var fragmentSource = "\n             precision highp float;\n             varying vec2 v_TexCoord;\n             varying float v_Alpha;\n             varying float v_Sampler;\n             varying float v_Color;\n\n             uniform sampler2D u_Sampler0;\n             uniform sampler2D u_Sampler1;\n             uniform sampler2D u_Sampler2;\n             uniform sampler2D u_Sampler3;\n             uniform sampler2D u_Sampler4;\n             uniform sampler2D u_Sampler5;\n             uniform sampler2D u_Sampler6;\n             uniform sampler2D u_Sampler7;\n             vec4 getTextureColor(vec2 coord);\n             void main(void)\n             {\n                vec4 color = vec4(float((v_Color/65536.0))/255.0,float(int(mod(v_Color,65536.0)/255.0))/255.0,mod(v_Color,256.0)/255.0,1.0);\n                gl_FragColor = getTextureColor(v_TexCoord)*color*v_Alpha;\n             }\n\n             vec4 getTextureColor(vec2 coord) {\n                if(v_Sampler == 0.0) {\n                    return texture2D(u_Sampler0,v_TexCoord);\n                } else if(v_Sampler == 1.0) {\n                    return texture2D(u_Sampler1,v_TexCoord);\n                } else if(v_Sampler == 2.0) {\n                    return texture2D(u_Sampler2,v_TexCoord);\n                } else if(v_Sampler == 3.0) {\n                    return texture2D(u_Sampler3,v_TexCoord);\n                } else if(v_Sampler == 4.0) {\n                    return texture2D(u_Sampler4,v_TexCoord);\n                } else if(v_Sampler == 5.0) {\n                    return texture2D(u_Sampler5,v_TexCoord);\n                } else if(v_Sampler == 6.0) {\n                    return texture2D(u_Sampler6,v_TexCoord);\n                } else if(v_Sampler == 7.0) {\n                    return texture2D(u_Sampler7,v_TexCoord);\n                }\n             }\n             ";
             var vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
             var fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
             this.program = this.createWebGLProgram(vertexShader, fragmentShader);
@@ -2837,20 +3222,21 @@ var leaf;
             gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
             this.a_Position = gl.getAttribLocation(program, "a_Position");
             gl.enableVertexAttribArray(this.a_Position);
-            gl.vertexAttribPointer(this.a_Position, 2, gl.FLOAT, false, leaf.$size * 6, 0);
+            gl.vertexAttribPointer(this.a_Position, 2, gl.FLOAT, false, leaf.$size * 7, 0);
             this.a_TexCoord = gl.getAttribLocation(program, "a_TexCoord");
             gl.enableVertexAttribArray(this.a_TexCoord);
-            gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 2);
+            gl.vertexAttribPointer(this.a_TexCoord, 2, gl.FLOAT, false, leaf.$size * 7, leaf.$size * 2);
             this.a_Alpha = gl.getAttribLocation(program, "a_Alpha");
             gl.enableVertexAttribArray(this.a_Alpha);
-            gl.vertexAttribPointer(this.a_Alpha, 1, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 4);
+            gl.vertexAttribPointer(this.a_Alpha, 1, gl.FLOAT, false, leaf.$size * 7, leaf.$size * 4);
             this.a_Sampler = gl.getAttribLocation(program, "a_Sampler");
             gl.enableVertexAttribArray(this.a_Sampler);
-            gl.vertexAttribPointer(this.a_Sampler, 1, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 5);
+            gl.vertexAttribPointer(this.a_Sampler, 1, gl.FLOAT, false, leaf.$size * 7, leaf.$size * 5);
+            this.a_Color = gl.getAttribLocation(program, "a_Color");
+            gl.enableVertexAttribArray(this.a_Color);
+            gl.vertexAttribPointer(this.a_Color, 1, gl.FLOAT, false, leaf.$size * 7, leaf.$size * 6);
             this.u_PMatrix = gl.getUniformLocation(program, "u_PMatrix");
             gl.uniformMatrix4fv(this.u_PMatrix, false, projectionMatrix);
-            this.u_Color = gl.getUniformLocation(program, "u_Color");
-            gl.uniform4f(this.u_Color, 1, 1, 1, 1);
             this.u_Samplers = [];
             for (var i = 0; i < 8; i++) {
                 this.u_Samplers[i] = gl.getUniformLocation(program, "u_Sampler" + i);
@@ -2865,16 +3251,14 @@ var leaf;
                 !this.textures.length ||
                 txtureIndex === -1 &&
                     this.textures[this.textures.length - 1].length >= 8 ||
-                this.count.length && this.count[this.count.length - 1] > 512 ||
-                this.blendMode[this.blendMode.length - 1] != blendMode ||
-                this.tints[this.tints.length - 1] != tint) {
+                this.count.length && this.count[this.count.length - 1] > 4096 ||
+                this.blendMode[this.blendMode.length - 1] != blendMode) {
                 this.newAddNew = false;
                 this.textures.push([texture.texture]);
                 txtureIndex = 0;
                 this.positionData.push([]);
                 this.count.push(0);
                 this.blendMode.push(blendMode);
-                this.tints.push(tint);
             }
             else {
                 if (txtureIndex === -1) {
@@ -2882,7 +3266,7 @@ var leaf;
                     this.textures[this.textures.length - 1].push(texture.texture);
                 }
             }
-            var index = this.count[this.count.length - 1] * 24;
+            var index = this.count[this.count.length - 1] * 28;
             var positionData = this.positionData[this.positionData.length - 1];
             var width = texture.sourceWidth;
             var height = texture.sourceHeight;
@@ -2892,24 +3276,28 @@ var leaf;
             positionData[3 + index] = texture.endY;
             positionData[4 + index] = alpha;
             positionData[5 + index] = txtureIndex;
-            positionData[6 + index] = matrix.tx;
-            positionData[7 + index] = matrix.ty;
-            positionData[8 + index] = texture.startX;
-            positionData[9 + index] = texture.startY;
-            positionData[10 + index] = alpha;
-            positionData[11 + index] = txtureIndex;
-            positionData[12 + index] = matrix.a * width + matrix.c * height + matrix.tx;
-            positionData[13 + index] = matrix.b * width + matrix.d * height + matrix.ty;
-            positionData[14 + index] = texture.endX;
-            positionData[15 + index] = texture.endY;
-            positionData[16 + index] = alpha;
-            positionData[17 + index] = txtureIndex;
-            positionData[18 + index] = matrix.a * width + matrix.tx;
-            positionData[19 + index] = matrix.b * width + matrix.ty;
-            positionData[20 + index] = texture.endX;
-            positionData[21 + index] = texture.startY;
-            positionData[22 + index] = alpha;
-            positionData[23 + index] = txtureIndex;
+            positionData[6 + index] = tint;
+            positionData[7 + index] = matrix.tx;
+            positionData[8 + index] = matrix.ty;
+            positionData[9 + index] = texture.startX;
+            positionData[10 + index] = texture.startY;
+            positionData[11 + index] = alpha;
+            positionData[12 + index] = txtureIndex;
+            positionData[13 + index] = tint;
+            positionData[14 + index] = matrix.a * width + matrix.c * height + matrix.tx;
+            positionData[15 + index] = matrix.b * width + matrix.d * height + matrix.ty;
+            positionData[16 + index] = texture.endX;
+            positionData[17 + index] = texture.endY;
+            positionData[18 + index] = alpha;
+            positionData[19 + index] = txtureIndex;
+            positionData[20 + index] = tint;
+            positionData[21 + index] = matrix.a * width + matrix.tx;
+            positionData[22 + index] = matrix.b * width + matrix.ty;
+            positionData[23 + index] = texture.endX;
+            positionData[24 + index] = texture.startY;
+            positionData[25 + index] = alpha;
+            positionData[26 + index] = txtureIndex;
+            positionData[27 + index] = tint;
             this.count[this.count.length - 1]++;
         };
         NormalShaderTask.prototype.startNewTask = function () {
@@ -2929,16 +3317,16 @@ var leaf;
             gl.useProgram(_this.program);
             //必须绑定 buffer 并且制定 buffer 的内容分配，之前测试的时候如果没有重新绑定 buffer 是不能正确设置 buffer 里面的值的。
             gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-            gl.vertexAttribPointer(_this.a_Position, 2, gl.FLOAT, false, leaf.$size * 6, 0);
-            gl.vertexAttribPointer(_this.a_TexCoord, 2, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 2);
-            gl.vertexAttribPointer(_this.a_Alpha, 1, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 4);
-            gl.vertexAttribPointer(_this.a_Sampler, 1, gl.FLOAT, false, leaf.$size * 6, leaf.$size * 5);
+            gl.vertexAttribPointer(_this.a_Position, 2, gl.FLOAT, false, leaf.$size * 7, 0);
+            gl.vertexAttribPointer(_this.a_TexCoord, 2, gl.FLOAT, false, leaf.$size * 7, leaf.$size * 2);
+            gl.vertexAttribPointer(_this.a_Alpha, 1, gl.FLOAT, false, leaf.$size * 7, leaf.$size * 4);
+            gl.vertexAttribPointer(_this.a_Sampler, 1, gl.FLOAT, false, leaf.$size * 7, leaf.$size * 5);
+            gl.vertexAttribPointer(_this.a_Color, 1, gl.FLOAT, false, leaf.$size * 7, leaf.$size * 6);
             var i = this.renderIndex;
             //开始渲染任务
             for (var len = _this.textures.length; i < len && i < max; i++) {
                 //切换混合模式
-                // BlendModeFunc.changeBlendMode(this.blendMode[i]);
-                gl.uniform4f(this.u_Color, (this.tints[i] >> 16) / 255.0, ((this.tints[i] >> 8) & 0xFF) / 255.0, (this.tints[i] & 0xFF) / 255.0, 1);
+                leaf.BlendModeFunc.changeBlendMode(this.blendMode[i]);
                 //绑定当前需要渲染的纹理
                 for (var t = 0; t < _this.textures[i].length; t++) {
                     gl.uniform1i(this.u_Samplers[t], t);
@@ -2964,7 +3352,6 @@ var leaf;
             _this.count = [];
             _this.positionData = [];
             _this.blendMode = [];
-            _this.tints = [];
             _this.renderCounts.length = 0;
             _this.lastRenderCount = 0;
             _this.renderIndex = 0;

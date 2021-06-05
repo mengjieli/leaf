@@ -127,6 +127,82 @@ declare namespace leaf {
     }
 }
 declare namespace leaf {
+    class GpuParticle extends leaf.Render {
+        shader: GpuParticleShaderTask;
+        private _resource;
+        private _res;
+        private _config;
+        config: ParticleConfig;
+        private buffer;
+        private bufferDirty;
+        texture: leaf.Texture;
+        resource: string;
+        private _tint;
+        tint: number;
+        time: number;
+        readonly width: number;
+        readonly height: number;
+        private refreshBuffer;
+        preRender(): void;
+        preRender2(matrix: ecs.Matrix, alpha: number, shader?: leaf.Shader): void;
+        update(dt: any): void;
+        onDestroy(): void;
+    }
+    var spawnTypes: {
+        "rect": number;
+        "ring": number;
+        "circle": number;
+    };
+    interface ParticleConfig {
+        lifetime: {
+            min: number;
+            max: number;
+        };
+        frequency: number;
+        alpha: {
+            start: number;
+            end: number;
+        };
+        scale: {
+            start: number;
+            end: number;
+        };
+        speed: {
+            start: number;
+            end: number;
+        };
+        acceleration?: {
+            x: number;
+            y: number;
+        };
+        startRotation: {
+            min: number;
+            max: number;
+        };
+        rotationSpeed: {
+            min: number;
+            max: number;
+        };
+        spawnType: string;
+        spawnRect?: {
+            x: number;
+            y: number;
+            w: number;
+            h: number;
+        };
+        spawnCircle?: {
+            x: number;
+            y: number;
+            r: number;
+            minR?: number;
+        };
+        color?: {
+            start: number | string;
+            end: number | string;
+        };
+    }
+}
+declare namespace leaf {
     class Label extends Render {
         shader: NormalShaderTask;
         private _text;
@@ -460,15 +536,80 @@ declare namespace leaf {
     }
 }
 declare namespace leaf {
+    class GpuParticleShaderTask extends leaf.Shader {
+        a_Index: any;
+        a_Seed: any;
+        private u_TexSize;
+        private u_TexRange;
+        private u_Sampler;
+        private u_PMatrix;
+        private u_VMatrix;
+        private u_LifeTime;
+        private u_Alpha;
+        private u_Scale;
+        private u_Frequency;
+        private u_Speed;
+        private u_Acceleration;
+        private u_StartRotation;
+        private u_RotationSpeed;
+        private u_SpawnType;
+        private u_SpawnRect;
+        private u_Time;
+        private u_StartColor;
+        private u_EndColor;
+        constructor();
+        /**
+         * 初始化作色器、program
+         * 1. 初始化 shader
+         * 2. 初始化 program
+         * 目前没有加 filter (滤镜) 的功能，后续可以继续扩展这两个 shader
+         * @param gl
+         */
+        private initProgram;
+        private projectionMatrix;
+        /**
+         * 初始化作色器固定变量 和 获取作色器中得变量
+         * 主要初始化投影矩阵，投影矩阵不用每次调用都初始化，只要设置一次即可，除非舞台 (Stage) 的大小改变 (glViewPort)
+         * 获取一些变量。
+         * @param gl
+         * @param width
+         * @param height
+         */
+        private initAttriLocation;
+        private attributes;
+        private textures;
+        private sizes;
+        private ranges;
+        private matrixs;
+        private time;
+        private configs;
+        private count;
+        private blendMode;
+        private indiceData;
+        addTask(time: number, attributes: WebGLBuffer, count: number, texture: leaf.Texture, config: ParticleConfig, matrix: ecs.Matrix, blendMode: leaf.BlendMode, tint: number): void;
+        renderCounts: number[];
+        lastRenderCount: number;
+        renderIndex: number;
+        startNewTask(): void;
+        /**
+         * 渲染
+         */
+        render(): void;
+        reset(): void;
+        private static _shader;
+        static readonly shader: GpuParticleShaderTask;
+    }
+}
+declare namespace leaf {
     var $size: number;
     class NormalShaderTask extends Shader {
         private a_Position;
         private a_TexCoord;
         private a_Alpha;
         private a_Sampler;
+        private a_Color;
         private u_PMatrix;
         private u_Samplers;
-        private u_Color;
         constructor();
         /**
          * 初始化作色器、program
@@ -493,7 +634,6 @@ declare namespace leaf {
         private positionData;
         private blendMode;
         private indiceData;
-        private tints;
         private newAddNew;
         addTask(texture: Texture, matrix: ecs.Matrix, alpha: number, blendMode: BlendMode, tint: number): void;
         renderCounts: number[];

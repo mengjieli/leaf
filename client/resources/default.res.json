@@ -4564,8 +4564,38 @@
       "type": 1
     },
     {
+      "name": "airbg_jpg",
+      "path": "assets/particle/airbg.jpg",
+      "type": 1
+    },
+    {
+      "name": "ball_png",
+      "path": "assets/particle/ball.png",
+      "type": 1
+    },
+    {
+      "name": "fire_png",
+      "path": "assets/particle/fire.png",
+      "type": 1
+    },
+    {
+      "name": "particle_png",
+      "path": "assets/particle/particle.png",
+      "type": 1
+    },
+    {
+      "name": "rain_png",
+      "path": "assets/particle/rain.png",
+      "type": 1
+    },
+    {
       "name": "snow_png",
       "path": "assets/particle/snow.png",
+      "type": 1
+    },
+    {
+      "name": "water_png",
+      "path": "assets/particle/water.png",
       "type": 1
     },
     {

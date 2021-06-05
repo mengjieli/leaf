@@ -419,7 +419,7 @@ namespace leaf {
   let clearList = [];
   function startClearResource() {
     if (hasStart) return;
-    hasStart = false;
+    hasStart = true;
     let f = () => {
       requestAnimationFrame(f);
       while (clearList.length) {
