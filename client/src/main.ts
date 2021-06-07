@@ -44,7 +44,8 @@ export class Main {
                     // new MainScene();
                     // new BubbleScene();
                     // new SquareManScene();
-                    new PixiScene();
+                    // new PixiScene();
+                    new WaterScene();
                 }
             )
         })

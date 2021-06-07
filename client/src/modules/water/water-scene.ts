@@ -1,10 +1,14 @@
 import { ModuleScene } from "../../utils/ui/module-scene";
+import { WaterGame } from "./water-game";
 
 @orange.autoload("WaterScene")
 export class WaterScene extends ModuleScene {
 
     constructor() {
         super();
+
+        ecs.Entity.create().addComponent(WaterGame).parent = this.scene;
+        return;
         let bg = ecs.Entity.create().addComponent(leaf.Bitmap);
         bg.parent = this.scene;
         bg.texture = leaf.PointTexture.getTexture(0xffffff);

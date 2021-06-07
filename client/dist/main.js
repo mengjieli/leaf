@@ -132,7 +132,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var pixi_scene_1 = __webpack_require__(/*! ./modules/pixi/pixi-scene */ "../src/modules/pixi/pixi-scene.ts");
+var water_scene_1 = __webpack_require__(/*! ./modules/water/water-scene */ "../src/modules/water/water-scene.ts");
 var Main = /** @class */ (function () {
     function Main() {
         this.init();
@@ -172,7 +172,8 @@ var Main = /** @class */ (function () {
                                 // new MainScene();
                                 // new BubbleScene();
                                 // new SquareManScene();
-                                new pixi_scene_1.PixiScene();
+                                // new PixiScene();
+                                new water_scene_1.WaterScene();
                             });
                         });
                         return [2 /*return*/];
@@ -188,10 +189,70 @@ window["Main"] = Main;
 
 /***/ }),
 
-/***/ "../src/modules/pixi/pixi-scene.ts":
-/*!*****************************************!*\
-  !*** ../src/modules/pixi/pixi-scene.ts ***!
-  \*****************************************/
+/***/ "../src/modules/water/water-game.ts":
+/*!******************************************!*\
+  !*** ../src/modules/water/water-game.ts ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var WaterGame = /** @class */ (function (_super) {
+    __extends(WaterGame, _super);
+    function WaterGame() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return WaterGame;
+}(ecs.Component));
+exports.WaterGame = WaterGame;
+var EMGridType;
+(function (EMGridType) {
+    EMGridType[EMGridType["NONE"] = 0] = "NONE";
+    EMGridType[EMGridType["EARTH"] = 1] = "EARTH";
+    EMGridType[EMGridType["WATER"] = 2] = "WATER";
+})(EMGridType = exports.EMGridType || (exports.EMGridType = {}));
+var WaterGroup = /** @class */ (function () {
+    function WaterGroup() {
+    }
+    return WaterGroup;
+}());
+exports.WaterGroup = WaterGroup;
+var WaterColumn = /** @class */ (function () {
+    function WaterColumn() {
+    }
+    Object.defineProperty(WaterColumn.prototype, "surface", {
+        get: function () {
+            return this.list[0].surface;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return WaterColumn;
+}());
+exports.WaterColumn = WaterColumn;
+
+
+/***/ }),
+
+/***/ "../src/modules/water/water-scene.ts":
+/*!*******************************************!*\
+  !*** ../src/modules/water/water-scene.ts ***!
+  \*******************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -218,483 +279,244 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var module_scene_1 = __webpack_require__(/*! ../../utils/ui/module-scene */ "../src/utils/ui/module-scene.ts");
-var PixiScene = /** @class */ (function (_super) {
-    __extends(PixiScene, _super);
-    function PixiScene() {
+var water_game_1 = __webpack_require__(/*! ./water-game */ "../src/modules/water/water-game.ts");
+var WaterScene = /** @class */ (function (_super) {
+    __extends(WaterScene, _super);
+    function WaterScene() {
         var _this = _super.call(this) || this;
+        ecs.Entity.create().addComponent(water_game_1.WaterGame).parent = _this.scene;
+        return _this;
         var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
-        // bg.resource = "airbg_jpg";
-        bg.texture = leaf.PointTexture.getTexture(0x000000);
+        bg.parent = _this.scene;
+        bg.texture = leaf.PointTexture.getTexture(0xffffff);
         bg.transform.scaleX = leaf.getStageWidth();
         bg.transform.scaleY = leaf.getStageHeight();
-        bg.parent = _this.scene;
-        leaf.StateWin.show();
-        for (var i = 0; i < 0; i++) {
-            var bm = ecs.Entity.create().addComponent(leaf.Bitmap);
-            bm.resource = "snow_png";
-            bm.parent = _this.scene;
-            bm.transform.scaleX = bm.transform.scaleY = 0.01;
-            bm.transform.x = Math.random() * leaf.getStageWidth();
-            bm.transform.y = Math.random() * leaf.getStageHeight() - 300;
-            // bm.blendMode = leaf.BlendMode.ADD;
-        }
-        _this.addSkyStar();
-        // for (let i = 0; i < 1; i++) {
-        //     this.addParticle(0, 0);
-        //     // this.addParticle1(0, 0);
+        _this.scene.world.addSystem(LiquidFlowSystem, [Water, Liquidity]);
+        var map = ecs.Entity.create().addComponent(Map, 300, 500);
+        map.parent = _this.scene;
+        var offx = 5;
+        var offy = 20;
+        var maxx = 30;
+        var maxy = 30;
+        // for (let y = 0; y < maxy; y++) {
+        //     map.addGround(offx, offy + y);
+        //     map.addGround(offx + maxx, offy + y);
         // }
-        ecs.Entity.create().addComponent(FallStar).parent = _this.scene;
+        for (var x = 0; x <= maxx; x++) {
+            map.addGround(offx + x, offy + maxy);
+        }
+        map.addWater(offx + 10, offy);
         return _this;
     }
-    PixiScene.prototype.addSkyStar = function () {
-        var sc = 0.1 + 0.1 * Math.random();
-        var alpha = 0.1 + 0.5 * Math.random();
-        var cfg = {
-            "alpha": {
-                "start": alpha,
-                "end": 0
-            },
-            "scale": {
-                "start": sc,
-                "end": sc
-            },
-            "color": {
-                "start": "ffffff",
-                "end": "ffffff"
-            },
-            "speed": {
-                "start": 0,
-                "end": 0
-            },
-            "startRotation": {
-                "min": 0,
-                "max": 0
-            },
-            "rotationSpeed": {
-                "min": 0,
-                "max": 0
-            },
-            "lifetime": {
-                "min": 100,
-                "max": 100
-            },
-            "frequency": 1,
-            "spawnType": "rect",
-            "spawnRect": {
-                "x": 0,
-                "y": 0,
-                "w": leaf.getStageWidth(),
-                "h": leaf.getStageHeight()
-            },
-            max: 30000
-        };
-        var p = ecs.Entity.create().addComponent(leaf.GpuParticle);
-        p.config = cfg;
-        p.resource = "particle_png";
-        p.entity.parent = this.scene;
-    };
-    PixiScene.prototype.addParticle1 = function (x, y) {
-        if (x === void 0) { x = 0; }
-        if (y === void 0) { y = 0; }
-        var cfg = {
-            "alpha": {
-                "start": 1,
-                "end": 0.3
-            },
-            "scale": {
-                "start": 0.5,
-                "end": 0.1
-            },
-            "color": {
-                "start": "8888aa",
-                "end": "ff0000"
-            },
-            "speed": {
-                "start": -200,
-                "end": 0
-            },
-            "startRotation": {
-                "min": 160,
-                "max": 200
-            },
-            "rotationSpeed": {
-                "min": 0,
-                "max": 0
-            },
-            "lifetime": {
-                "min": 0.3,
-                "max": 0.75
-            },
-            "frequency": 0.1,
-            "spawnType": "circle",
-            "spawnCircle": {
-                "x": 0,
-                "y": 0,
-                "r": 10
-            },
-            max: 30000
-        };
-        var p = ecs.Entity.create().addComponent(Particle, cfg);
-        // let p = ecs.Entity.create().addComponent(leaf.GpuParticle);
-        // p.config = cfg;
-        p.entity.parent = this.scene;
-        p.resource = "rain_png";
-        p.transform.x = 600;
-        p.transform.y = 600;
-        p.transform.angle = 45 * Math.PI / 180;
-        p.addComponent(tween.Tween, p.transform, 3000, {
-            alpha: 0.3,
-            bezierPlugin: [
-                {
-                    x: 100, y: 0
-                },
-                {
-                    x: 0, y: 0
-                }
-            ]
-        }, tween.EaseFunction.SineEaseIn);
-        // p.blendMode = leaf.BlendMode.ADD;
-    };
-    PixiScene.prototype.close = function () {
+    WaterScene.prototype.close = function () {
+        this.scene.world.removeSystem(LiquidFlowSystem);
         _super.prototype.close.call(this);
     };
-    PixiScene = __decorate([
-        orange.autoload("PixiScene")
-    ], PixiScene);
-    return PixiScene;
+    WaterScene = __decorate([
+        orange.autoload("WaterScene")
+    ], WaterScene);
+    return WaterScene;
 }(module_scene_1.ModuleScene));
-exports.PixiScene = PixiScene;
-var FallStar = /** @class */ (function (_super) {
-    __extends(FallStar, _super);
-    function FallStar() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    FallStar.prototype.init = function () {
-    };
-    FallStar.prototype.update = function () {
-        if (Math.random() < 0.01) {
-            this.addParticle(320 + 320 * Math.random(), 150 * Math.random());
-        }
-    };
-    FallStar.prototype.addParticle = function (x, y) {
-        if (x === void 0) { x = 0; }
-        if (y === void 0) { y = 0; }
-        var time = 2000 + 4000 * Math.random();
-        var color = (100 + ~~(156 * Math.random())) << 16 | (100 + ~~(156 * Math.random())) << 8 | (100 + ~~(156 * Math.random()));
-        var cfg = {
-            "alpha": {
-                "start": 0.2 + 0.1 * Math.random(),
-                "end": 0.1 + 0.1 * Math.random()
-            },
-            "scale": {
-                "start": 0.5 + 0.5 * Math.random(),
-                "end": 0
-            },
-            "color": {
-                "start": color,
-                "end": color
-            },
-            "speed": {
-                "start": 0,
-                "end": 0
-            },
-            "startRotation": {
-                "min": 180,
-                "max": 180
-            },
-            "rotationSpeed": {
-                "min": 0,
-                "max": 0
-            },
-            "lifetime": {
-                "min": 2,
-                "max": 3
-            },
-            "frequency": 0.01 - 0.005 * Math.random(),
-            "spawnType": "circle",
-            "emmitLife": time,
-            "spawnCircle": {
-                "x": 0,
-                "y": 0,
-                "r": 10
-            },
-            max: 30000
-        };
-        var p = ecs.Entity.create().addComponent(Particle, cfg);
-        // let p = ecs.Entity.create().addComponent(leaf.GpuParticle);
-        // p.config = cfg;
-        p.entity.parent = this.entity;
-        p.resource = "rain_png";
-        p.transform.x = x;
-        p.transform.y = y;
-        var vx = -0.1 - 0.2 * Math.random();
-        var vy = 0.05 + 0.015 * Math.random();
-        var g = 0.00001 + 0.00001 * Math.random();
-        p.transform.angle = Math.atan2(vy, vx);
-        p.blendMode = leaf.BlendMode.ADD;
-        var lastX = p.transform.x;
-        var lastY = p.transform.y;
-        var t = p.addComponent(tween.Tween, p.transform, time, {
-            alpha: 0.3,
-            scaleX: 0.5,
-            scaleY: 0.5,
-            vPlugin: {
-                vx: vx,
-                vy: vy,
-                ay: g
-            }
-        });
-        t.onUpdate = function () {
-            var x = p.transform.x;
-            var y = p.transform.y;
-            p.transform.angle = Math.atan2(y - lastY, x - lastX);
-            lastX = x;
-            lastY = y;
-        };
-    };
-    return FallStar;
-}(ecs.Component));
-exports.FallStar = FallStar;
-var Particle = /** @class */ (function (_super) {
-    __extends(Particle, _super);
-    function Particle() {
+exports.WaterScene = WaterScene;
+var Map = /** @class */ (function (_super) {
+    __extends(Map, _super);
+    function Map() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.shader = leaf.NormalShaderTask.shader;
+        _this.gridWidth = 16;
+        _this.gridHeight = 16;
         return _this;
     }
-    Object.defineProperty(Particle.prototype, "config", {
+    Map.prototype.init = function (width, height) {
+        this.width = width;
+        this.height = height;
+        this.grids = [];
+        for (var y = 0; y < height; y++) {
+            this.grids[y] = [];
+            for (var x = 0; x < width; x++) {
+                this.grids[y][x] = new Grid();
+                this.grids[y][x].x = x;
+                this.grids[y][x].y = y;
+                this.grids[y][x].map = this;
+            }
+        }
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                this.grids[y][x].top = y > 0 ? this.grids[y - 1][x] : null;
+                this.grids[y][x].bottom = y < height - 1 ? this.grids[y + 1][x] : null;
+                this.grids[y][x].left = x > 0 ? this.grids[y][x - 1] : null;
+                this.grids[y][x].right = x < width - 1 ? this.grids[y][x + 1] : null;
+            }
+        }
+    };
+    Map.prototype.addWater = function (x, y, value) {
+        if (value === void 0) { value = 1; }
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height)
+            return;
+        var grid = this.grids[y][x];
+        if (grid.type != EMItemType.NONE)
+            return;
+        var water = ecs.Entity.create().addComponent(Water, grid, value);
+        water.entity.parent = this.entity;
+    };
+    Map.prototype.addGround = function (x, y) {
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height)
+            return;
+        var grid = this.grids[y][x];
+        if (grid.type != EMItemType.NONE)
+            return;
+        var ground = ecs.Entity.create().addComponent(Ground, grid);
+        ground.entity.parent = this.entity;
+    };
+    return Map;
+}(ecs.Component));
+exports.Map = Map;
+var Grid = /** @class */ (function () {
+    function Grid() {
+        this.type = EMItemType.NONE;
+    }
+    return Grid;
+}());
+exports.Grid = Grid;
+var Item = /** @class */ (function (_super) {
+    __extends(Item, _super);
+    function Item() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Item.prototype.init = function (grid) {
+        this.grid = grid;
+    };
+    return Item;
+}(ecs.Component));
+exports.Item = Item;
+var WaterUnit = /** @class */ (function (_super) {
+    __extends(WaterUnit, _super);
+    function WaterUnit() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.surface = [];
+        _this.water = [];
+        return _this;
+    }
+    WaterUnit.prototype.merge = function (unit) {
+    };
+    return WaterUnit;
+}(ecs.Component));
+exports.WaterUnit = WaterUnit;
+var Water = /** @class */ (function (_super) {
+    __extends(Water, _super);
+    function Water() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.type = EMItemType.WATER;
+        return _this;
+    }
+    Water.prototype.init = function (grid, value) {
+        if (value === void 0) { value = 1; }
+        this.grid = grid;
+        grid.item = this;
+        grid.type = this.type;
+        var bm = this.show = ecs.Entity.create().addComponent(leaf.Bitmap);
+        bm.texture = leaf.PointTexture.getTexture(0x67abea);
+        bm.transform.scaleX = grid.map.gridWidth;
+        bm.transform.scaleY = grid.map.gridHeight;
+        bm.entity.parent = this.entity;
+        this.transform.x = grid.x * grid.map.gridWidth;
+        this.transform.y = grid.y * grid.map.gridWidth;
+        this.value = value;
+        if (grid.top && grid.top.type === EMItemType.WATER) {
+            this.unit = grid.top.item.unit;
+        }
+        if (grid.left && grid.left.type === EMItemType.WATER) {
+            var unit = grid.top.item.unit;
+            if (this.unit) {
+                if (this.unit != unit) {
+                    unit.merge(this.unit);
+                }
+            }
+            else {
+                this.unit = unit;
+            }
+        }
+    };
+    Object.defineProperty(Water.prototype, "value", {
         get: function () {
-            return this._config;
+            return this._value;
+        },
+        set: function (v) {
+            if (this._value === v)
+                return;
+            this._value = v;
+            this.show.transform.scaleY = this.grid.map.gridHeight * v;
+            this.show.transform.y = (1 - v) * this.grid.map.gridHeight;
         },
         enumerable: true,
         configurable: true
     });
-    Particle.prototype.init = function (config) {
-        this._config = config;
-        this.lastTime = 0;
-        this.nowTime = 0;
-        this.count = 0;
-        this.configExt = {
-            colors: []
-        };
-        if (config.color) {
-            if (config.color.start != null) {
-                var start = typeof config.color.start == "string" ? ~~("0x" + config.color.start) : config.color.start;
-                var end = typeof config.color.end == "string" ? ~~("0x" + config.color.end) : config.color.end;
-                this.configExt.colors = [{
-                        startR: (start >> 16), endR: (end >> 16),
-                        startG: (start >> 8 & 0xFF), endG: (end >> 8 & 0xFF),
-                        startB: (start & 0xFF), endB: (end & 0xFF),
-                        startTime: 0, endTime: config.lifetime.max
-                    }];
+    return Water;
+}(Item));
+exports.Water = Water;
+var Liquidity = /** @class */ (function (_super) {
+    __extends(Liquidity, _super);
+    function Liquidity() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Liquidity.prototype.init = function (liquidtySpeed) {
+        if (liquidtySpeed === void 0) { liquidtySpeed = 0.01; }
+        this.liquidtySpeed = liquidtySpeed;
+    };
+    return Liquidity;
+}(ecs.Component));
+exports.Liquidity = Liquidity;
+var LiquidFlowSystem = /** @class */ (function (_super) {
+    __extends(LiquidFlowSystem, _super);
+    function LiquidFlowSystem() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    LiquidFlowSystem.prototype.update = function (dt) {
+        for (var node = this.query.head; node; node = node.next) {
+            var water = node.value.getComponent(Water);
+            var liquidity = node.value.getComponent(Liquidity);
+            if (water.grid.bottom) {
+                if (water.grid.bottom.type === EMItemType.NONE) {
+                    water.grid.map.addWater(water.grid.x, water.grid.y + 1, 0);
+                }
+                if (water.grid.bottom.type === EMItemType.WATER) {
+                    var item = water.grid.bottom.type;
+                }
             }
             else {
             }
         }
-        else {
-            this.configExt.colors = [{ startR: 1, endR: 1, startG: 1, endG: 1, startB: 1, endB: 1, startTime: 0, endTime: config.lifetime.max }];
-        }
-        this.countLabel = ecs.Entity.create().addComponent(leaf.Label);
-        this.countLabel.fontColor = 0x00ff00;
-        // this.countLabel.parent = this.entity;
     };
-    Object.defineProperty(Particle.prototype, "texture", {
-        get: function () {
-            return this._texture;
-        },
-        set: function (val) {
-            this._texture = val;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Particle.prototype, "resource", {
-        get: function () {
-            return this._resource;
-        },
-        set: function (val) {
-            var _this = this;
-            if (this._resource === val)
-                return;
-            if (this._res)
-                this._res.removeCount();
-            this._resource = val;
-            var res = this._res = leaf.Res.getRes(val);
-            if (!res) {
-                this.texture = null;
-                return;
-            }
-            if (res.data) {
-                this.texture = res.data;
-                res.addCount();
-            }
-            else {
-                res.addCount();
-                res.load().then(function () {
-                    if (_this._res !== res)
-                        return;
-                    _this.texture = res.data;
-                });
-            }
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Particle.prototype.preRender = function () {
-        if (!this._texture)
-            return;
-        (this.shader).addTask(this.texture, this.entity.transform.worldMatrix, this.entity.transform.worldAlpha, this.blendMode, 0xffffff);
+    return LiquidFlowSystem;
+}(ecs.EntitySystem));
+exports.LiquidFlowSystem = LiquidFlowSystem;
+var Ground = /** @class */ (function (_super) {
+    __extends(Ground, _super);
+    function Ground() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.type = EMItemType.WATER;
+        return _this;
+    }
+    Ground.prototype.init = function (grid) {
+        this.grid = grid;
+        var bm = ecs.Entity.create().addComponent(leaf.Bitmap);
+        bm.texture = leaf.PointTexture.getTexture(0xbc7b47);
+        bm.transform.scaleX = grid.map.gridWidth;
+        bm.transform.scaleY = grid.map.gridHeight;
+        bm.entity.parent = this.entity;
+        this.transform.x = grid.x * grid.map.gridWidth;
+        this.transform.y = grid.y * grid.map.gridWidth;
     };
-    Particle.prototype.preRender2 = function (matrix, alpha, shader) {
-        if (!this._texture)
-            return;
-        matrix.reconcat(this.entity.transform.local);
-        var allAlpha = alpha * this.entity.transform.alpha;
-        var cfg = this.config;
-        if (this.head) {
-            for (var node = this.head; node; node = node.next) {
-                if (!node.startMatrix) {
-                    node.startAlpha = allAlpha;
-                    node.startMatrix = ecs.Matrix.create();
-                    node.startMatrix.setTo(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
-                }
-                var startMatrix = node.startMatrix;
-                startMatrix.save();
-                var local = node.matrix;
-                local.identity();
-                var tw = this.texture.sourceWidth;
-                var th = this.texture.sourceHeight;
-                local.translate(-tw * 0.5, -th * 0.5);
-                local.scale(node.scale, node.scale);
-                var r = node.rotation;
-                if (cfg.spawnType === EMSpawnType.CIRCLE) {
-                    r += node.speedRotation;
-                }
-                local.rotate(r);
-                local.translate(node.x, node.y);
-                startMatrix.reconcat(local);
-                (shader || this.shader).addTask(this.texture, startMatrix, node.startAlpha * node.alpha, this.blendMode, node.color);
-                startMatrix.restore();
-            }
-        }
-        // (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
-    };
-    Particle.prototype.update = function (dt) {
-        var lastTime = this.lastTime;
-        this.nowTime += dt;
-        var sendTimeGap = this.config.frequency * 1000;
-        var lastN = ~~(lastTime / sendTimeGap);
-        var nowN = ~~(this.nowTime / sendTimeGap);
-        var cfg = this._config;
-        var ext = this.configExt;
-        var pool = Particle.pool;
-        for (var i = lastN; (!cfg.emmitLife || cfg.emmitLife >= this.nowTime) && lastN <= nowN && i <= nowN && this.count < cfg.max; i++) {
-            var startColor = typeof cfg.color.start == "string" ? ~~("0x" + cfg.color.start) : cfg.color.start;
-            var endColor = typeof cfg.color.end == "string" ? ~~("0x" + cfg.color.end) : cfg.color.end;
-            var lifeTime = cfg.lifetime.min + (cfg.lifetime.max - cfg.lifetime.min) * Math.random();
-            var p = pool.length ? pool.pop() : {};
-            p.lifeTime = lifeTime;
-            p.time = 0;
-            p.next = null;
-            p.startMatrix = null;
-            p.matrix = ecs.Matrix.create();
-            p.x = 0;
-            p.y = 0;
-            p.rotation = 0;
-            p.startAlpha = 1;
-            p.startRotation = (cfg.startRotation.min + (cfg.startRotation.max - cfg.startRotation.min) * Math.random()) * Math.PI / 180.0;
-            p.rotationSpeed = cfg.rotationSpeed.min;
-            p.speedRotation = 0;
-            p.scale = 1;
-            p.color = 0xffffff;
-            p.colors = [{ r: startColor >> 16, g: startColor >> 8 & 0xFF, b: startColor & 0xFF, time: 0 },
-                { r: endColor >> 16, g: endColor >> 8 & 0xFF, b: endColor & 0xFF, time: lifeTime }];
-            p.alpha = 0;
-            // p.startRotation = 90 * Math.PI / 180;
-            if (!this.head)
-                this.head = p;
-            if (this.end)
-                this.end.next = p;
-            this.end = p;
-            this.count++;
-            this.lastTime = (i + 1) * sendTimeGap;
-        }
-        for (var node = this.head, last = null; node; node = node.next) {
-            var t = node.time = Math.min(node.time + dt * 0.001, node.lifeTime);
-            if (node.time >= node.lifeTime) {
-                if (node == this.head) {
-                    this.head = null;
-                }
-                if (node == this.end) {
-                    this.end = last;
-                }
-                if (last && last.next == node)
-                    last.next = null;
-                this.count--;
-                // pool.push(node);
-                continue;
-            }
-            if (last && !last.next)
-                last.next = node;
-            last = node;
-            if (!this.head)
-                this.head = node;
-            var life = node.lifeTime;
-            var p = t / life;
-            var r = node.startRotation;
-            var len = cfg.speed.start * t + 0.5 * (cfg.speed.end - cfg.speed.start) * t * t / life;
-            var x = len * Math.cos(r) + 0.5 * (cfg.acceleration ? cfg.acceleration.x : 0) * t * t;
-            var y = len * Math.sin(r) + 0.5 * (cfg.acceleration ? cfg.acceleration.y : 0) * t * t;
-            node.rotation = (cfg.rotationSpeed.min * t + 0.5 * (cfg.rotationSpeed.max - cfg.rotationSpeed.min) * t * t / life) * Math.PI / 180.0;
-            node.x = x;
-            node.y = y;
-            node.scale = cfg.scale.start + (cfg.scale.end - cfg.scale.start) * p;
-            var speed = cfg.speed.start + (cfg.speed.end - cfg.speed.start) * p;
-            var speedX = speed * Math.cos(r) + (cfg.acceleration ? cfg.acceleration.x : 0) * t;
-            var speedY = speed * Math.sin(r) + (cfg.acceleration ? cfg.acceleration.y : 0) * t;
-            node.speedRotation = Math.atan2(speedY, speedX);
-            node.alpha = cfg.alpha.start + (cfg.alpha.end - cfg.alpha.start) * p;
-            for (var i = 0; i < ext.colors.length; i++) {
-                var c = ext.colors[i];
-                if (t >= c.startTime && t <= c.endTime) {
-                    node.color = (c.startR + (c.endR - c.startR) * (t - c.startTime) / (c.endTime - c.startTime)) << 16
-                        | (c.startG + (c.endG - c.startG) * (t - c.startTime) / (c.endTime - c.startTime)) << 8
-                        | (c.startB + (c.endB - c.startB) * (t - c.startTime) / (c.endTime - c.startTime));
-                }
-            }
-        }
-        this.countLabel.text = this.count + "";
-    };
-    Particle.prototype.onDestroy = function () {
-        this._config = null;
-        if (this.head) {
-            for (var node = this.head; node; node = node.next) {
-                node.matrix && ecs.Matrix.release(node.matrix);
-                node.matrix = null;
-            }
-        }
-        this.head = null;
-        this.end = null;
-    };
-    Particle.pool = [];
-    return Particle;
-}(leaf.Render));
-exports.Particle = Particle;
-var spawnTypes = {
-    "rect": 0,
-    "ring": 1,
-    "circle": 2
-};
-var EMSpawnType;
-(function (EMSpawnType) {
-    EMSpawnType["RECT"] = "rect";
-    EMSpawnType["RING"] = "ring";
-    EMSpawnType["CIRCLE"] = "circle";
-})(EMSpawnType = exports.EMSpawnType || (exports.EMSpawnType = {}));
-var cc = window.requestAnimationFrame;
-window.requestAnimationFrame = function () {
-    return cc.apply(null, arguments);
-};
+    return Ground;
+}(Item));
+exports.Ground = Ground;
+var EMItemType;
+(function (EMItemType) {
+    EMItemType[EMItemType["NONE"] = 0] = "NONE";
+    EMItemType[EMItemType["WATER"] = 1] = "WATER";
+    EMItemType[EMItemType["GROUND"] = 2] = "GROUND";
+})(EMItemType = exports.EMItemType || (exports.EMItemType = {}));
+exports.WaterGround = {};
+exports.WaterGround[EMItemType.GROUND] = true;
 
 
 /***/ }),

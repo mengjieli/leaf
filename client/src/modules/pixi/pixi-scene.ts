@@ -77,7 +77,7 @@ export class PixiScene extends ModuleScene {
                 "h": leaf.getStageHeight()
             },
             max: 30000
-        };
+        };                  
         let p = ecs.Entity.create().addComponent(leaf.GpuParticle);
         p.config = cfg;
         p.resource = "particle_png";
