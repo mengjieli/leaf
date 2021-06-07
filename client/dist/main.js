@@ -224,7 +224,7 @@ var PixiScene = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
         // bg.resource = "airbg_jpg";
-        bg.texture = leaf.PointTexture.getTexture(0);
+        bg.texture = leaf.PointTexture.getTexture(0x000000);
         bg.transform.scaleX = leaf.getStageWidth();
         bg.transform.scaleY = leaf.getStageHeight();
         bg.parent = _this.scene;
@@ -238,44 +238,94 @@ var PixiScene = /** @class */ (function (_super) {
             bm.transform.y = Math.random() * leaf.getStageHeight() - 300;
             // bm.blendMode = leaf.BlendMode.ADD;
         }
-        for (var i = 0; i < 2; i++) {
-            _this.addParticle(0, 0);
-        }
+        _this.addSkyStar();
+        // for (let i = 0; i < 1; i++) {
+        //     this.addParticle(0, 0);
+        //     // this.addParticle1(0, 0);
+        // }
+        ecs.Entity.create().addComponent(FallStar).parent = _this.scene;
         return _this;
     }
-    PixiScene.prototype.addParticle = function (x, y) {
+    PixiScene.prototype.addSkyStar = function () {
+        var sc = 0.1 + 0.1 * Math.random();
+        var alpha = 0.1 + 0.5 * Math.random();
+        var cfg = {
+            "alpha": {
+                "start": alpha,
+                "end": 0
+            },
+            "scale": {
+                "start": sc,
+                "end": sc
+            },
+            "color": {
+                "start": "ffffff",
+                "end": "ffffff"
+            },
+            "speed": {
+                "start": 0,
+                "end": 0
+            },
+            "startRotation": {
+                "min": 0,
+                "max": 0
+            },
+            "rotationSpeed": {
+                "min": 0,
+                "max": 0
+            },
+            "lifetime": {
+                "min": 100,
+                "max": 100
+            },
+            "frequency": 1,
+            "spawnType": "rect",
+            "spawnRect": {
+                "x": 0,
+                "y": 0,
+                "w": leaf.getStageWidth(),
+                "h": leaf.getStageHeight()
+            },
+            max: 30000
+        };
+        var p = ecs.Entity.create().addComponent(leaf.GpuParticle);
+        p.config = cfg;
+        p.resource = "particle_png";
+        p.entity.parent = this.scene;
+    };
+    PixiScene.prototype.addParticle1 = function (x, y) {
         if (x === void 0) { x = 0; }
         if (y === void 0) { y = 0; }
         var cfg = {
             "alpha": {
                 "start": 1,
-                "end": 1
+                "end": 0.3
             },
             "scale": {
-                "start": 0.01,
-                "end": 0.01
+                "start": 0.5,
+                "end": 0.1
             },
             "color": {
-                "start": "ff00ff",
-                "end": "00ff00"
+                "start": "8888aa",
+                "end": "ff0000"
             },
             "speed": {
-                "start": 100,
-                "end": 100
+                "start": -200,
+                "end": 0
             },
             "startRotation": {
-                "min": 0,
-                "max": 90
+                "min": 160,
+                "max": 200
             },
             "rotationSpeed": {
-                "min": 30,
-                "max": 30
+                "min": 0,
+                "max": 0
             },
             "lifetime": {
-                "min": 10,
-                "max": 10
+                "min": 0.3,
+                "max": 0.75
             },
-            "frequency": 0.001,
+            "frequency": 0.1,
             "spawnType": "circle",
             "spawnCircle": {
                 "x": 0,
@@ -288,12 +338,22 @@ var PixiScene = /** @class */ (function (_super) {
         // let p = ecs.Entity.create().addComponent(leaf.GpuParticle);
         // p.config = cfg;
         p.entity.parent = this.scene;
-        p.resource = "snow_png";
-        // p.texture = leaf.PointTexture.getTexture(0xffffff);
-        // p.transform.scaleX = p.transform.scaleY = 0.1;
-        p.transform.x = x;
-        p.transform.y = y;
-        // p.transform.angle = 30 * Math.PI / 180;
+        p.resource = "rain_png";
+        p.transform.x = 600;
+        p.transform.y = 600;
+        p.transform.angle = 45 * Math.PI / 180;
+        p.addComponent(tween.Tween, p.transform, 3000, {
+            alpha: 0.3,
+            bezierPlugin: [
+                {
+                    x: 100, y: 0
+                },
+                {
+                    x: 0, y: 0
+                }
+            ]
+        }, tween.EaseFunction.SineEaseIn);
+        // p.blendMode = leaf.BlendMode.ADD;
     };
     PixiScene.prototype.close = function () {
         _super.prototype.close.call(this);
@@ -304,6 +364,97 @@ var PixiScene = /** @class */ (function (_super) {
     return PixiScene;
 }(module_scene_1.ModuleScene));
 exports.PixiScene = PixiScene;
+var FallStar = /** @class */ (function (_super) {
+    __extends(FallStar, _super);
+    function FallStar() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    FallStar.prototype.init = function () {
+    };
+    FallStar.prototype.update = function () {
+        if (Math.random() < 0.01) {
+            this.addParticle(320 + 320 * Math.random(), 150 * Math.random());
+        }
+    };
+    FallStar.prototype.addParticle = function (x, y) {
+        if (x === void 0) { x = 0; }
+        if (y === void 0) { y = 0; }
+        var time = 2000 + 4000 * Math.random();
+        var color = (100 + ~~(156 * Math.random())) << 16 | (100 + ~~(156 * Math.random())) << 8 | (100 + ~~(156 * Math.random()));
+        var cfg = {
+            "alpha": {
+                "start": 0.2 + 0.1 * Math.random(),
+                "end": 0.1 + 0.1 * Math.random()
+            },
+            "scale": {
+                "start": 0.5 + 0.5 * Math.random(),
+                "end": 0
+            },
+            "color": {
+                "start": color,
+                "end": color
+            },
+            "speed": {
+                "start": 0,
+                "end": 0
+            },
+            "startRotation": {
+                "min": 180,
+                "max": 180
+            },
+            "rotationSpeed": {
+                "min": 0,
+                "max": 0
+            },
+            "lifetime": {
+                "min": 2,
+                "max": 3
+            },
+            "frequency": 0.01 - 0.005 * Math.random(),
+            "spawnType": "circle",
+            "emmitLife": time,
+            "spawnCircle": {
+                "x": 0,
+                "y": 0,
+                "r": 10
+            },
+            max: 30000
+        };
+        var p = ecs.Entity.create().addComponent(Particle, cfg);
+        // let p = ecs.Entity.create().addComponent(leaf.GpuParticle);
+        // p.config = cfg;
+        p.entity.parent = this.entity;
+        p.resource = "rain_png";
+        p.transform.x = x;
+        p.transform.y = y;
+        var vx = -0.1 - 0.2 * Math.random();
+        var vy = 0.05 + 0.015 * Math.random();
+        var g = 0.00001 + 0.00001 * Math.random();
+        p.transform.angle = Math.atan2(vy, vx);
+        p.blendMode = leaf.BlendMode.ADD;
+        var lastX = p.transform.x;
+        var lastY = p.transform.y;
+        var t = p.addComponent(tween.Tween, p.transform, time, {
+            alpha: 0.3,
+            scaleX: 0.5,
+            scaleY: 0.5,
+            vPlugin: {
+                vx: vx,
+                vy: vy,
+                ay: g
+            }
+        });
+        t.onUpdate = function () {
+            var x = p.transform.x;
+            var y = p.transform.y;
+            p.transform.angle = Math.atan2(y - lastY, x - lastX);
+            lastX = x;
+            lastY = y;
+        };
+    };
+    return FallStar;
+}(ecs.Component));
+exports.FallStar = FallStar;
 var Particle = /** @class */ (function (_super) {
     __extends(Particle, _super);
     function Particle() {
@@ -399,25 +550,31 @@ var Particle = /** @class */ (function (_super) {
             return;
         matrix.reconcat(this.entity.transform.local);
         var allAlpha = alpha * this.entity.transform.alpha;
+        var cfg = this.config;
         if (this.head) {
             for (var node = this.head; node; node = node.next) {
                 if (!node.startMatrix) {
+                    node.startAlpha = allAlpha;
                     node.startMatrix = ecs.Matrix.create();
                     node.startMatrix.setTo(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
                 }
-                matrix = node.startMatrix;
-                matrix.save();
+                var startMatrix = node.startMatrix;
+                startMatrix.save();
                 var local = node.matrix;
                 local.identity();
                 var tw = this.texture.sourceWidth;
                 var th = this.texture.sourceHeight;
-                matrix.translate(node.x, node.y);
                 local.translate(-tw * 0.5, -th * 0.5);
                 local.scale(node.scale, node.scale);
-                local.rotate(node.rotation);
-                matrix.reconcat(local);
-                (shader || this.shader).addTask(this.texture, matrix, allAlpha * node.alpha, this.blendMode, node.color);
-                matrix.restore();
+                var r = node.rotation;
+                if (cfg.spawnType === EMSpawnType.CIRCLE) {
+                    r += node.speedRotation;
+                }
+                local.rotate(r);
+                local.translate(node.x, node.y);
+                startMatrix.reconcat(local);
+                (shader || this.shader).addTask(this.texture, startMatrix, node.startAlpha * node.alpha, this.blendMode, node.color);
+                startMatrix.restore();
             }
         }
         // (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
@@ -430,28 +587,29 @@ var Particle = /** @class */ (function (_super) {
         var nowN = ~~(this.nowTime / sendTimeGap);
         var cfg = this._config;
         var ext = this.configExt;
-        for (var i = lastN; lastN <= nowN && i <= nowN && this.count < cfg.max; i++) {
+        var pool = Particle.pool;
+        for (var i = lastN; (!cfg.emmitLife || cfg.emmitLife >= this.nowTime) && lastN <= nowN && i <= nowN && this.count < cfg.max; i++) {
             var startColor = typeof cfg.color.start == "string" ? ~~("0x" + cfg.color.start) : cfg.color.start;
             var endColor = typeof cfg.color.end == "string" ? ~~("0x" + cfg.color.end) : cfg.color.end;
             var lifeTime = cfg.lifetime.min + (cfg.lifetime.max - cfg.lifetime.min) * Math.random();
-            var p = {
-                lifeTime: lifeTime,
-                time: 0,
-                next: null,
-                startMatrix: null,
-                matrix: ecs.Matrix.create(),
-                x: 0,
-                y: 0,
-                rotation: 0,
-                startRotation: cfg.startRotation.min + (cfg.startRotation.max - cfg.startRotation.min) * Math.random() * Math.PI / 180.0,
-                rotationSpeed: cfg.rotationSpeed.min,
-                speedRotation: 0,
-                scale: 1,
-                color: 0xffffff,
-                colors: [{ r: startColor >> 16, g: startColor >> 8 & 0xFF, b: startColor & 0xFF, time: 0 },
-                    { r: endColor >> 16, g: endColor >> 8 & 0xFF, b: endColor & 0xFF, time: lifeTime }],
-                alpha: 0
-            };
+            var p = pool.length ? pool.pop() : {};
+            p.lifeTime = lifeTime;
+            p.time = 0;
+            p.next = null;
+            p.startMatrix = null;
+            p.matrix = ecs.Matrix.create();
+            p.x = 0;
+            p.y = 0;
+            p.rotation = 0;
+            p.startAlpha = 1;
+            p.startRotation = (cfg.startRotation.min + (cfg.startRotation.max - cfg.startRotation.min) * Math.random()) * Math.PI / 180.0;
+            p.rotationSpeed = cfg.rotationSpeed.min;
+            p.speedRotation = 0;
+            p.scale = 1;
+            p.color = 0xffffff;
+            p.colors = [{ r: startColor >> 16, g: startColor >> 8 & 0xFF, b: startColor & 0xFF, time: 0 },
+                { r: endColor >> 16, g: endColor >> 8 & 0xFF, b: endColor & 0xFF, time: lifeTime }];
+            p.alpha = 0;
             // p.startRotation = 90 * Math.PI / 180;
             if (!this.head)
                 this.head = p;
@@ -473,6 +631,7 @@ var Particle = /** @class */ (function (_super) {
                 if (last && last.next == node)
                     last.next = null;
                 this.count--;
+                // pool.push(node);
                 continue;
             }
             if (last && !last.next)
@@ -517,6 +676,7 @@ var Particle = /** @class */ (function (_super) {
         this.head = null;
         this.end = null;
     };
+    Particle.pool = [];
     return Particle;
 }(leaf.Render));
 exports.Particle = Particle;
@@ -525,6 +685,12 @@ var spawnTypes = {
     "ring": 1,
     "circle": 2
 };
+var EMSpawnType;
+(function (EMSpawnType) {
+    EMSpawnType["RECT"] = "rect";
+    EMSpawnType["RING"] = "ring";
+    EMSpawnType["CIRCLE"] = "circle";
+})(EMSpawnType = exports.EMSpawnType || (exports.EMSpawnType = {}));
 var cc = window.requestAnimationFrame;
 window.requestAnimationFrame = function () {
     return cc.apply(null, arguments);

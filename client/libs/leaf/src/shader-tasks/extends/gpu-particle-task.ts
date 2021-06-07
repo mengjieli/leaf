@@ -83,16 +83,15 @@ namespace leaf {
                 float sy = 0.0;
                 float p = t / life; 
                 float scale = u_Scale.x + (u_Scale.y - u_Scale.x) *  t / life;
-                float seed0 =  mod(a_Seed * (ind + t / life), 1.0);
-                float r = (u_StartRotation.x + (u_StartRotation.y - u_StartRotation.x) * mod(a_Seed * ind, 1.0) ) * pi / 180.0;
+                float r = (u_StartRotation.x + (u_StartRotation.y - u_StartRotation.x) * a_Seed ) * pi / 180.0;
                 float x = sx + (u_Speed.x * t + 0.5 * (u_Speed.y - u_Speed.x) * t * t / life ) * cos(r) + 0.5 * u_Acceleration.x * t * t;
                 float y = sy + (u_Speed.x * t + 0.5 * (u_Speed.y - u_Speed.x) * t * t / life ) * sin(r) + 0.5 * u_Acceleration.y * t * t;
                 float offx = 0.0;
                 float offy = 0.0;
-                float rot = (u_RotationSpeed.x + (u_RotationSpeed.y - u_RotationSpeed.x) * mod(a_Seed * ind, 1.0)) * t * pi / 180.0;
+                float rot = (u_RotationSpeed.x + (u_RotationSpeed.y - u_RotationSpeed.x) * a_Seed) * t * pi / 180.0;
                 if(u_SpawnType == 0) {
-                    offx = u_SpawnRect.x + u_SpawnRect.z * a_Seed;
-                    offy = u_SpawnRect.y + u_SpawnRect.w * a_Seed;
+                    offx += u_SpawnRect.x + u_SpawnRect.z * a_Seed;
+                    offy += u_SpawnRect.y + u_SpawnRect.w * mod(a_Seed *ind, 1.0);
                 } else if(u_SpawnType == 2) {
                     rot += r;
                 }

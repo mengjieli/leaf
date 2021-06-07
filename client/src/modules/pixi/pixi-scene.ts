@@ -8,11 +8,10 @@ export class PixiScene extends ModuleScene {
 
         let bg = ecs.Entity.create().addComponent(leaf.Bitmap);
         // bg.resource = "airbg_jpg";
-        bg.texture = leaf.PointTexture.getTexture(0);
+        bg.texture = leaf.PointTexture.getTexture(0x000000);
         bg.transform.scaleX = leaf.getStageWidth();
         bg.transform.scaleY = leaf.getStageHeight();
         bg.parent = this.scene;
-
 
         leaf.StateWin.show();
 
@@ -21,48 +20,103 @@ export class PixiScene extends ModuleScene {
             bm.resource = "snow_png";
             bm.parent = this.scene;
             bm.transform.scaleX = bm.transform.scaleY = 0.01;
-            bm.transform.x = Math.random()*leaf.getStageWidth();
-            bm.transform.y = Math.random()*leaf.getStageHeight() - 300;
+            bm.transform.x = Math.random() * leaf.getStageWidth();
+            bm.transform.y = Math.random() * leaf.getStageHeight() - 300;
             // bm.blendMode = leaf.BlendMode.ADD;
         }
 
+        this.addSkyStar();
 
-        for (let i = 0; i < 2; i++) {
-            this.addParticle(0, 0);
-        }
+
+        // for (let i = 0; i < 1; i++) {
+        //     this.addParticle(0, 0);
+        //     // this.addParticle1(0, 0);
+        // }
+        ecs.Entity.create().addComponent(FallStar).parent = this.scene;
+
     }
 
-    addParticle(x = 0, y = 0) {
+    addSkyStar() {
+        let sc = 0.1 + 0.1 * Math.random();
+        let alpha = 0.1 + 0.5 * Math.random();
         let cfg = {
             "alpha": {
-                "start": 1,
-                "end": 1
+                "start": alpha,
+                "end": 0
             },
             "scale": {
-                "start": 0.01,
-                "end": 0.01
+                "start": sc,
+                "end": sc
             },
             "color": {
-                "start": "ff00ff",
-                "end": "00ff00"
+                "start": "ffffff",
+                "end": "ffffff"
             },
             "speed": {
-                "start": 100,
-                "end": 100
+                "start": 0,
+                "end": 0
             },
             "startRotation": {
                 "min": 0,
-                "max": 90
+                "max": 0
             },
             "rotationSpeed": {
-                "min": 30,
-                "max": 30
+                "min": 0,
+                "max": 0
             },
             "lifetime": {
-                "min": 10,
-                "max": 10
+                "min": 100,
+                "max": 100
             },
-            "frequency": 0.001,
+            "frequency": 1,
+            "spawnType": "rect",
+            "spawnRect": {
+                "x": 0,
+                "y": 0,
+                "w": leaf.getStageWidth(),
+                "h": leaf.getStageHeight()
+            },
+            max: 30000
+        };
+        let p = ecs.Entity.create().addComponent(leaf.GpuParticle);
+        p.config = cfg;
+        p.resource = "particle_png";
+        p.entity.parent = this.scene;
+    }
+
+
+
+    addParticle1(x = 0, y = 0) {
+        let cfg = {
+            "alpha": {
+                "start": 1,
+                "end": 0.3
+            },
+            "scale": {
+                "start": 0.5,
+                "end": 0.1
+            },
+            "color": {
+                "start": "8888aa",
+                "end": "ff0000"
+            },
+            "speed": {
+                "start": -200,
+                "end": 0
+            },
+            "startRotation": {
+                "min": 160,
+                "max": 200
+            },
+            "rotationSpeed": {
+                "min": 0,
+                "max": 0
+            },
+            "lifetime": {
+                "min": 0.3,
+                "max": 0.75
+            },
+            "frequency": 0.1,
             "spawnType": "circle",
             "spawnCircle": {
                 "x": 0,
@@ -75,17 +129,117 @@ export class PixiScene extends ModuleScene {
         // let p = ecs.Entity.create().addComponent(leaf.GpuParticle);
         // p.config = cfg;
         p.entity.parent = this.scene;
-        p.resource = "snow_png";
-        // p.texture = leaf.PointTexture.getTexture(0xffffff);
-        // p.transform.scaleX = p.transform.scaleY = 0.1;
-        p.transform.x = x;
-        p.transform.y = y;
-
-        // p.transform.angle = 30 * Math.PI / 180;
+        p.resource = "rain_png";
+        p.transform.x = 600;
+        p.transform.y = 600;
+        p.transform.angle = 45 * Math.PI / 180;
+        p.addComponent(tween.Tween, p.transform, 3000, {
+            alpha: 0.3,
+            bezierPlugin:
+                [
+                    {
+                        x: 100, y: 0
+                    },
+                    {
+                        x: 0, y: 0
+                    }
+                ]
+        }, tween.EaseFunction.SineEaseIn);
+        // p.blendMode = leaf.BlendMode.ADD;
     }
+
 
     close() {
         super.close();
+    }
+
+}
+
+export class FallStar extends ecs.Component {
+
+    init() {
+    }
+
+    update() {
+        if (Math.random() < 0.01) {
+            this.addParticle(320 + 320 * Math.random(), 150 * Math.random());
+        }
+    }
+
+    addParticle(x = 0, y = 0) {
+        let time = 2000 + 4000 * Math.random();
+        let color = (100 + ~~(156 * Math.random())) << 16 | (100 + ~~(156 * Math.random())) << 8 | (100 + ~~(156 * Math.random()));
+        let cfg = {
+            "alpha": {
+                "start": 0.2 + 0.1 * Math.random(),
+                "end": 0.1 + 0.1 * Math.random()
+            },
+            "scale": {
+                "start": 0.5 + 0.5 * Math.random(),
+                "end": 0
+            },
+            "color": {
+                "start": color,
+                "end": color
+            },
+            "speed": {
+                "start": 0,
+                "end": 0
+            },
+            "startRotation": {
+                "min": 180,
+                "max": 180
+            },
+            "rotationSpeed": {
+                "min": 0,
+                "max": 0
+            },
+            "lifetime": {
+                "min": 2,
+                "max": 3
+            },
+            "frequency": 0.01 - 0.005 * Math.random(),
+            "spawnType": "circle",
+            "emmitLife": time,
+            "spawnCircle": {
+                "x": 0,
+                "y": 0,
+                "r": 10
+            },
+            max: 30000
+        };
+        let p = ecs.Entity.create().addComponent(Particle, cfg);
+        // let p = ecs.Entity.create().addComponent(leaf.GpuParticle);
+        // p.config = cfg;
+        p.entity.parent = this.entity;
+        p.resource = "rain_png";
+        p.transform.x = x;
+        p.transform.y = y;
+        let vx = -0.1 - 0.2 * Math.random();
+        let vy = 0.05 + 0.015 * Math.random();
+        let g = 0.00001 + 0.00001 * Math.random();
+        p.transform.angle = Math.atan2(vy, vx);
+        p.blendMode = leaf.BlendMode.ADD;
+        let lastX = p.transform.x;
+        let lastY = p.transform.y;
+        let t = p.addComponent(tween.Tween, p.transform, time, {
+            alpha: 0.3,
+            scaleX: 0.5,
+            scaleY: 0.5,
+            vPlugin: {
+                vx: vx,
+                vy: vy,
+                ay: g
+            }
+
+        });
+        t.onUpdate = () => {
+            let x = p.transform.x;
+            let y = p.transform.y;
+            p.transform.angle = Math.atan2(y - lastY, x - lastX);
+            lastX = x;
+            lastY = y;
+        };
     }
 
 }
@@ -190,25 +344,31 @@ export class Particle extends leaf.Render {
         if (!this._texture) return;
         matrix.reconcat(this.entity.transform.local);
         let allAlpha = alpha * this.entity.transform.alpha;
+        let cfg = this.config;
         if (this.head) {
             for (let node = this.head; node; node = node.next) {
                 if (!node.startMatrix) {
+                    node.startAlpha = allAlpha;
                     node.startMatrix = ecs.Matrix.create();
                     node.startMatrix.setTo(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
                 }
-                matrix = node.startMatrix;
-                matrix.save();
+                let startMatrix = node.startMatrix;
+                startMatrix.save();
                 let local = node.matrix;
                 local.identity();
                 let tw = this.texture.sourceWidth;
                 let th = this.texture.sourceHeight;
-                matrix.translate(node.x, node.y);
                 local.translate(-tw * 0.5, -th * 0.5);
                 local.scale(node.scale, node.scale);
-                local.rotate(node.rotation);
-                matrix.reconcat(local);
-                (shader || this.shader).addTask(this.texture, matrix, allAlpha * node.alpha, this.blendMode, node.color);
-                matrix.restore();
+                let r = node.rotation;
+                if (cfg.spawnType === EMSpawnType.CIRCLE) {
+                    r += node.speedRotation;
+                }
+                local.rotate(r);
+                local.translate(node.x, node.y);
+                startMatrix.reconcat(local);
+                (shader || this.shader).addTask(this.texture, startMatrix, node.startAlpha * node.alpha, this.blendMode, node.color);
+                startMatrix.restore();
             }
         }
         // (shader || this.shader).addTask(this.texture, matrix, alpha * this.entity.transform.alpha, this.blendMode, this._tint);
@@ -222,28 +382,29 @@ export class Particle extends leaf.Render {
         let nowN = ~~(this.nowTime / sendTimeGap);
         let cfg = this._config;
         let ext = this.configExt;
-        for (let i = lastN; lastN <= nowN && i <= nowN && this.count < cfg.max; i++) {
+        let pool = Particle.pool;
+        for (let i = lastN; (!cfg.emmitLife || cfg.emmitLife >= this.nowTime) && lastN <= nowN && i <= nowN && this.count < cfg.max; i++) {
             let startColor = typeof cfg.color.start == "string" ? ~~("0x" + cfg.color.start) : cfg.color.start;
             let endColor = typeof cfg.color.end == "string" ? ~~("0x" + cfg.color.end) : cfg.color.end;
             let lifeTime = cfg.lifetime.min + (cfg.lifetime.max - cfg.lifetime.min) * Math.random();
-            let p = {
-                lifeTime: lifeTime,
-                time: 0,
-                next: null,
-                startMatrix: null,
-                matrix: ecs.Matrix.create(),
-                x: 0,
-                y: 0,
-                rotation: 0,
-                startRotation: cfg.startRotation.min + (cfg.startRotation.max - cfg.startRotation.min) * Math.random() * Math.PI / 180.0,
-                rotationSpeed: cfg.rotationSpeed.min,
-                speedRotation: 0,
-                scale: 1,
-                color: 0xffffff,
-                colors: [{ r: startColor >> 16, g: startColor >> 8 & 0xFF, b: startColor & 0xFF, time: 0 },
-                { r: endColor >> 16, g: endColor >> 8 & 0xFF, b: endColor & 0xFF, time: lifeTime }],
-                alpha: 0
-            }
+            let p = pool.length ? pool.pop() : {} as any;
+            p.lifeTime = lifeTime;
+            p.time = 0;
+            p.next = null;
+            p.startMatrix = null;
+            p.matrix = ecs.Matrix.create();
+            p.x = 0;
+            p.y = 0;
+            p.rotation = 0;
+            p.startAlpha = 1;
+            p.startRotation = (cfg.startRotation.min + (cfg.startRotation.max - cfg.startRotation.min) * Math.random()) * Math.PI / 180.0;
+            p.rotationSpeed = cfg.rotationSpeed.min;
+            p.speedRotation = 0;
+            p.scale = 1;
+            p.color = 0xffffff;
+            p.colors = [{ r: startColor >> 16, g: startColor >> 8 & 0xFF, b: startColor & 0xFF, time: 0 },
+            { r: endColor >> 16, g: endColor >> 8 & 0xFF, b: endColor & 0xFF, time: lifeTime }];
+            p.alpha = 0;
             // p.startRotation = 90 * Math.PI / 180;
             if (!this.head) this.head = p;
             if (this.end) this.end.next = p;
@@ -262,6 +423,7 @@ export class Particle extends leaf.Render {
                 }
                 if (last && last.next == node) last.next = null;
                 this.count--;
+                // pool.push(node);
                 continue;
             }
             if (last && !last.next) last.next = node;
@@ -306,6 +468,7 @@ export class Particle extends leaf.Render {
         this.end = null;
     }
 
+    static pool: ParticleItem[] = [];
 }
 
 export interface ParticleItem {
@@ -322,6 +485,7 @@ export interface ParticleItem {
     color: number;
     alpha: number;
     rotationSpeed: number;
+    startAlpha: number;
     startRotation: number;
 }
 
@@ -331,7 +495,14 @@ var spawnTypes = {
     "circle": 2
 }
 
+export enum EMSpawnType {
+    RECT = "rect",
+    RING = "ring",
+    CIRCLE = "circle"
+}
+
 export interface ParticleConfig {
+    emmitLife: number; //发射器生命
     lifetime: {
         min: number,
         max: number

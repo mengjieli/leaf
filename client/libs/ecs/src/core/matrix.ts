@@ -227,7 +227,7 @@ namespace ecs {
             if (!matrix) {
                 return;
             }
-            matrix._storeList.length = 0;
+            if (matrix._storeList.length) matrix._storeList.length = 0;
             Matrix.matrixPool.push(matrix);
         }
 
