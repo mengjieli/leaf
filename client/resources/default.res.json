@@ -4609,6 +4609,11 @@
       "type": 1
     },
     {
+      "name": "bunny_png",
+      "path": "assets/test/bunny.png",
+      "type": 1
+    },
+    {
       "name": "top_info_bg_png",
       "path": "assets/textures/top_info_bg.png",
       "type": 1

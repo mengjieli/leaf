@@ -132,7 +132,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var water_scene_1 = __webpack_require__(/*! ./modules/water/water-scene */ "../src/modules/water/water-scene.ts");
+var test_scene_1 = __webpack_require__(/*! ./modules/test/test-scene */ "../src/modules/test/test-scene.ts");
 var Main = /** @class */ (function () {
     function Main() {
         this.init();
@@ -173,7 +173,8 @@ var Main = /** @class */ (function () {
                                 // new BubbleScene();
                                 // new SquareManScene();
                                 // new PixiScene();
-                                new water_scene_1.WaterScene();
+                                // new WaterScene();
+                                new test_scene_1.TestScene();
                             });
                         });
                         return [2 /*return*/];
@@ -189,70 +190,10 @@ window["Main"] = Main;
 
 /***/ }),
 
-/***/ "../src/modules/water/water-game.ts":
-/*!******************************************!*\
-  !*** ../src/modules/water/water-game.ts ***!
-  \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var WaterGame = /** @class */ (function (_super) {
-    __extends(WaterGame, _super);
-    function WaterGame() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return WaterGame;
-}(ecs.Component));
-exports.WaterGame = WaterGame;
-var EMGridType;
-(function (EMGridType) {
-    EMGridType[EMGridType["NONE"] = 0] = "NONE";
-    EMGridType[EMGridType["EARTH"] = 1] = "EARTH";
-    EMGridType[EMGridType["WATER"] = 2] = "WATER";
-})(EMGridType = exports.EMGridType || (exports.EMGridType = {}));
-var WaterGroup = /** @class */ (function () {
-    function WaterGroup() {
-    }
-    return WaterGroup;
-}());
-exports.WaterGroup = WaterGroup;
-var WaterColumn = /** @class */ (function () {
-    function WaterColumn() {
-    }
-    Object.defineProperty(WaterColumn.prototype, "surface", {
-        get: function () {
-            return this.list[0].surface;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return WaterColumn;
-}());
-exports.WaterColumn = WaterColumn;
-
-
-/***/ }),
-
-/***/ "../src/modules/water/water-scene.ts":
-/*!*******************************************!*\
-  !*** ../src/modules/water/water-scene.ts ***!
-  \*******************************************/
+/***/ "../src/modules/test/test-scene.ts":
+/*!*****************************************!*\
+  !*** ../src/modules/test/test-scene.ts ***!
+  \*****************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -279,244 +220,47 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var module_scene_1 = __webpack_require__(/*! ../../utils/ui/module-scene */ "../src/utils/ui/module-scene.ts");
-var water_game_1 = __webpack_require__(/*! ./water-game */ "../src/modules/water/water-game.ts");
-var WaterScene = /** @class */ (function (_super) {
-    __extends(WaterScene, _super);
-    function WaterScene() {
+var TestScene = /** @class */ (function (_super) {
+    __extends(TestScene, _super);
+    function TestScene() {
         var _this = _super.call(this) || this;
-        ecs.Entity.create().addComponent(water_game_1.WaterGame).parent = _this.scene;
-        return _this;
-        var bg = ecs.Entity.create().addComponent(leaf.Bitmap);
-        bg.parent = _this.scene;
-        bg.texture = leaf.PointTexture.getTexture(0xffffff);
-        bg.transform.scaleX = leaf.getStageWidth();
-        bg.transform.scaleY = leaf.getStageHeight();
-        _this.scene.world.addSystem(LiquidFlowSystem, [Water, Liquidity]);
-        var map = ecs.Entity.create().addComponent(Map, 300, 500);
-        map.parent = _this.scene;
-        var offx = 5;
-        var offy = 20;
-        var maxx = 30;
-        var maxy = 30;
-        // for (let y = 0; y < maxy; y++) {
-        //     map.addGround(offx, offy + y);
-        //     map.addGround(offx + maxx, offy + y);
-        // }
-        for (var x = 0; x <= maxx; x++) {
-            map.addGround(offx + x, offy + maxy);
+        leaf.StateWin.show();
+        var list = [];
+        for (var i = 0; i < 10000; i++) {
+            var bm = ecs.Entity.create().addComponent(leaf.Bitmap);
+            bm.parent = _this.scene;
+            bm.resource = "bunny_png";
+            bm.transform.x = leaf.getStageWidth() * Math.random();
+            bm.transform.y = (leaf.getStageHeight() - 200) * Math.random();
         }
-        map.addWater(offx + 10, offy);
+        _this.scene.addComponent(TC, _this.scene.children);
         return _this;
     }
-    WaterScene.prototype.close = function () {
-        this.scene.world.removeSystem(LiquidFlowSystem);
-        _super.prototype.close.call(this);
-    };
-    WaterScene = __decorate([
-        orange.autoload("WaterScene")
-    ], WaterScene);
-    return WaterScene;
+    TestScene = __decorate([
+        orange.autoload("TestScene")
+    ], TestScene);
+    return TestScene;
 }(module_scene_1.ModuleScene));
-exports.WaterScene = WaterScene;
-var Map = /** @class */ (function (_super) {
-    __extends(Map, _super);
-    function Map() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.gridWidth = 16;
-        _this.gridHeight = 16;
-        return _this;
-    }
-    Map.prototype.init = function (width, height) {
-        this.width = width;
-        this.height = height;
-        this.grids = [];
-        for (var y = 0; y < height; y++) {
-            this.grids[y] = [];
-            for (var x = 0; x < width; x++) {
-                this.grids[y][x] = new Grid();
-                this.grids[y][x].x = x;
-                this.grids[y][x].y = y;
-                this.grids[y][x].map = this;
-            }
-        }
-        for (var y = 0; y < height; y++) {
-            for (var x = 0; x < width; x++) {
-                this.grids[y][x].top = y > 0 ? this.grids[y - 1][x] : null;
-                this.grids[y][x].bottom = y < height - 1 ? this.grids[y + 1][x] : null;
-                this.grids[y][x].left = x > 0 ? this.grids[y][x - 1] : null;
-                this.grids[y][x].right = x < width - 1 ? this.grids[y][x + 1] : null;
-            }
-        }
-    };
-    Map.prototype.addWater = function (x, y, value) {
-        if (value === void 0) { value = 1; }
-        if (x < 0 || x >= this.width || y < 0 || y >= this.height)
-            return;
-        var grid = this.grids[y][x];
-        if (grid.type != EMItemType.NONE)
-            return;
-        var water = ecs.Entity.create().addComponent(Water, grid, value);
-        water.entity.parent = this.entity;
-    };
-    Map.prototype.addGround = function (x, y) {
-        if (x < 0 || x >= this.width || y < 0 || y >= this.height)
-            return;
-        var grid = this.grids[y][x];
-        if (grid.type != EMItemType.NONE)
-            return;
-        var ground = ecs.Entity.create().addComponent(Ground, grid);
-        ground.entity.parent = this.entity;
-    };
-    return Map;
-}(ecs.Component));
-exports.Map = Map;
-var Grid = /** @class */ (function () {
-    function Grid() {
-        this.type = EMItemType.NONE;
-    }
-    return Grid;
-}());
-exports.Grid = Grid;
-var Item = /** @class */ (function (_super) {
-    __extends(Item, _super);
-    function Item() {
+exports.TestScene = TestScene;
+var TC = /** @class */ (function (_super) {
+    __extends(TC, _super);
+    function TC() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    Item.prototype.init = function (grid) {
-        this.grid = grid;
+    TC.prototype.init = function (list) {
+        this.list = list;
     };
-    return Item;
+    TC.prototype.update = function () {
+        this.list.sort(function (a, b) { return a.transform.y - b.transform.y; });
+        // for (let i = 0; i < this.list.length; i++) {
+        //     this.list[i].x += (-0.5 + Math.random()) * 0.1;
+        //     this.list[i].y += (-0.5 + Math.random()) * 0.1;
+        //     this.list[i].angle += 0.2;
+        // }
+    };
+    return TC;
 }(ecs.Component));
-exports.Item = Item;
-var WaterUnit = /** @class */ (function (_super) {
-    __extends(WaterUnit, _super);
-    function WaterUnit() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.surface = [];
-        _this.water = [];
-        return _this;
-    }
-    WaterUnit.prototype.merge = function (unit) {
-    };
-    return WaterUnit;
-}(ecs.Component));
-exports.WaterUnit = WaterUnit;
-var Water = /** @class */ (function (_super) {
-    __extends(Water, _super);
-    function Water() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.type = EMItemType.WATER;
-        return _this;
-    }
-    Water.prototype.init = function (grid, value) {
-        if (value === void 0) { value = 1; }
-        this.grid = grid;
-        grid.item = this;
-        grid.type = this.type;
-        var bm = this.show = ecs.Entity.create().addComponent(leaf.Bitmap);
-        bm.texture = leaf.PointTexture.getTexture(0x67abea);
-        bm.transform.scaleX = grid.map.gridWidth;
-        bm.transform.scaleY = grid.map.gridHeight;
-        bm.entity.parent = this.entity;
-        this.transform.x = grid.x * grid.map.gridWidth;
-        this.transform.y = grid.y * grid.map.gridWidth;
-        this.value = value;
-        if (grid.top && grid.top.type === EMItemType.WATER) {
-            this.unit = grid.top.item.unit;
-        }
-        if (grid.left && grid.left.type === EMItemType.WATER) {
-            var unit = grid.top.item.unit;
-            if (this.unit) {
-                if (this.unit != unit) {
-                    unit.merge(this.unit);
-                }
-            }
-            else {
-                this.unit = unit;
-            }
-        }
-    };
-    Object.defineProperty(Water.prototype, "value", {
-        get: function () {
-            return this._value;
-        },
-        set: function (v) {
-            if (this._value === v)
-                return;
-            this._value = v;
-            this.show.transform.scaleY = this.grid.map.gridHeight * v;
-            this.show.transform.y = (1 - v) * this.grid.map.gridHeight;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return Water;
-}(Item));
-exports.Water = Water;
-var Liquidity = /** @class */ (function (_super) {
-    __extends(Liquidity, _super);
-    function Liquidity() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Liquidity.prototype.init = function (liquidtySpeed) {
-        if (liquidtySpeed === void 0) { liquidtySpeed = 0.01; }
-        this.liquidtySpeed = liquidtySpeed;
-    };
-    return Liquidity;
-}(ecs.Component));
-exports.Liquidity = Liquidity;
-var LiquidFlowSystem = /** @class */ (function (_super) {
-    __extends(LiquidFlowSystem, _super);
-    function LiquidFlowSystem() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    LiquidFlowSystem.prototype.update = function (dt) {
-        for (var node = this.query.head; node; node = node.next) {
-            var water = node.value.getComponent(Water);
-            var liquidity = node.value.getComponent(Liquidity);
-            if (water.grid.bottom) {
-                if (water.grid.bottom.type === EMItemType.NONE) {
-                    water.grid.map.addWater(water.grid.x, water.grid.y + 1, 0);
-                }
-                if (water.grid.bottom.type === EMItemType.WATER) {
-                    var item = water.grid.bottom.type;
-                }
-            }
-            else {
-            }
-        }
-    };
-    return LiquidFlowSystem;
-}(ecs.EntitySystem));
-exports.LiquidFlowSystem = LiquidFlowSystem;
-var Ground = /** @class */ (function (_super) {
-    __extends(Ground, _super);
-    function Ground() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.type = EMItemType.WATER;
-        return _this;
-    }
-    Ground.prototype.init = function (grid) {
-        this.grid = grid;
-        var bm = ecs.Entity.create().addComponent(leaf.Bitmap);
-        bm.texture = leaf.PointTexture.getTexture(0xbc7b47);
-        bm.transform.scaleX = grid.map.gridWidth;
-        bm.transform.scaleY = grid.map.gridHeight;
-        bm.entity.parent = this.entity;
-        this.transform.x = grid.x * grid.map.gridWidth;
-        this.transform.y = grid.y * grid.map.gridWidth;
-    };
-    return Ground;
-}(Item));
-exports.Ground = Ground;
-var EMItemType;
-(function (EMItemType) {
-    EMItemType[EMItemType["NONE"] = 0] = "NONE";
-    EMItemType[EMItemType["WATER"] = 1] = "WATER";
-    EMItemType[EMItemType["GROUND"] = 2] = "GROUND";
-})(EMItemType = exports.EMItemType || (exports.EMItemType = {}));
-exports.WaterGround = {};
-exports.WaterGround[EMItemType.GROUND] = true;
+exports.TC = TC;
 
 
 /***/ }),

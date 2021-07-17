@@ -9,6 +9,7 @@ import { BubbleScene } from "./modules/bubble/bubble-scene";
 import { SquareManScene } from "./modules/square-man/square-man-scene";
 import { WaterScene } from "./modules/water/water-scene";
 import { PixiScene } from "./modules/pixi/pixi-scene";
+import { TestScene } from "./modules/test/test-scene";
 
 export class Main {
 
@@ -45,7 +46,8 @@ export class Main {
                     // new BubbleScene();
                     // new SquareManScene();
                     // new PixiScene();
-                    new WaterScene();
+                    // new WaterScene();
+                    new TestScene();
                 }
             )
         })
